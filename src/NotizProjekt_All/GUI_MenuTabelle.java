@@ -33,7 +33,7 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
     static int Notiznr;
     static boolean OF;
     
-    String[] spalten = {"Nummer", "Titel", "Tag", };
+    String[] spalten = {"Nummer", "Titel", "Tag"};
     Color Standart = new Color(96, 96, 96);
   
     DefaultTableModel tblModel = new DefaultTableModel(spalten, 0){
@@ -68,7 +68,6 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
     }
  private void TableDesign(){
      
-    DefaultTableModel tblModel = new DefaultTableModel(spalten, 0);
     Ausgabe.getTableHeader().setOpaque(false);
     Ausgabe.getTableHeader().setFont(new Font("Verdana",Font.BOLD,18));
     Ausgabe.getTableHeader().setBackground(Standart);
@@ -147,7 +146,7 @@ public void zeigeNotiz() {
 
 try {
     
-                        int ergebnis = this.konnektor.fuehreVeraenderungAus("DELETE FROM notiz WHERE N_id = "+idToDelete);
+                        this.konnektor.fuehreVeraenderungAus("DELETE FROM notiz WHERE N_id = "+idToDelete);
                       
                        
                     } catch (SQLException ex) {
@@ -158,7 +157,7 @@ public void Oloeschen(){
    
 try {
  
-                        int ergebnis = this.konnektor.fuehreVeraenderungAus("DELETE FROM geteilte_notizen WHERE GN_id = "+idToDelete);
+                        this.konnektor.fuehreVeraenderungAus("DELETE FROM geteilte_notizen WHERE GN_id = "+idToDelete);
                       
                        
                     } catch (SQLException ex) {
@@ -225,7 +224,7 @@ try {
             }
         });
 
-        org.jdesktop.layout.GroupLayout jPanel3Layout = new org.jdesktop.layout.GroupLayout(jPanel3);
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -269,7 +268,7 @@ try {
             }
         });
 
-        org.jdesktop.layout.GroupLayout NameLayout = new org.jdesktop.layout.GroupLayout(Name);
+        javax.swing.GroupLayout NameLayout = new javax.swing.GroupLayout(Name);
         Name.setLayout(NameLayout);
         NameLayout.setHorizontalGroup(
             NameLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -312,7 +311,7 @@ try {
             }
         });
 
-        org.jdesktop.layout.GroupLayout jPanel6Layout = new org.jdesktop.layout.GroupLayout(jPanel6);
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
             jPanel6Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -381,7 +380,7 @@ try {
             }
         });
 
-        org.jdesktop.layout.GroupLayout jPanel7Layout = new org.jdesktop.layout.GroupLayout(jPanel7);
+        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
         jPanel7Layout.setHorizontalGroup(
             jPanel7Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -415,7 +414,7 @@ try {
                 .addContainerGap())
         );
 
-        org.jdesktop.layout.GroupLayout jPanel2Layout = new org.jdesktop.layout.GroupLayout(jPanel2);
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -440,7 +439,7 @@ try {
                     .add(jPanel7, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
 
-        org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -457,7 +456,7 @@ try {
 
     private void addbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addbtnActionPerformed
     new GUI_NeueNotiz().setVisible(true);
-     this.dispose();// TODO add your handling code here:
+     this.dispose(); // Removed unnecessary TODO comment
     }//GEN-LAST:event_addbtnActionPerformed
 
     private void PrivatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PrivatActionPerformed
@@ -478,50 +477,31 @@ try {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void entfernenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_entfernenActionPerformed
-    entfernen.addActionListener(new ActionListener() {
-       
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int selectedRow = Ausgabe.getSelectedRow();
-                if (selectedRow != -1) { // Überprüfen, ob eine Zeile ausgewählt ist
-                    DefaultTableModel model = (DefaultTableModel) Ausgabe.getModel();
-                    
-                    idToDelete = (Integer)model.getValueAt(selectedRow, 0);
-                    
-                    
-                    
-                     model.removeRow(selectedRow);
-                    
-                    if(OF){
-                        Oloeschen();
-                    }
-                    else if(OF==false){
-                    loeschen();
-                    }
-                }
+        int selectedRow = Ausgabe.getSelectedRow();
+        if (selectedRow != -1) {
+            DefaultTableModel model = (DefaultTableModel) Ausgabe.getModel();
+            idToDelete = (Integer) model.getValueAt(selectedRow, 0);
+            model.removeRow(selectedRow);
+
+            if (OF) {
+                Oloeschen();
+            } else {
+                loeschen();
             }
-        });
+        } else {
+            JOptionPane.showMessageDialog(this, "Bitte wählen Sie eine Zeile aus, um sie zu löschen.", "Warnung", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_entfernenActionPerformed
 
     private void editActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editActionPerformed
-          edit.addActionListener(new ActionListener() {
-       
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int selectedRow = Ausgabe.getSelectedRow();
-                if (selectedRow != -1) { // Überprüfen, ob eine Zeile ausgewählt ist
-                    DefaultTableModel model = (DefaultTableModel) Ausgabe.getModel();
-                    
-                    Notiznr = (Integer)model.getValueAt(selectedRow, 0);
-                    
-                    bearbeiten();
-                  
-                     
-                    
-                  
-                }
-            }
-        });
+        int selectedRow = Ausgabe.getSelectedRow();
+        if (selectedRow != -1) {
+            DefaultTableModel model = (DefaultTableModel) Ausgabe.getModel();
+            Notiznr = (Integer) model.getValueAt(selectedRow, 0);
+            bearbeiten();
+        } else {
+            JOptionPane.showMessageDialog(this, "Bitte wählen Sie eine Zeile aus, um sie zu bearbeiten.", "Warnung", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_editActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
