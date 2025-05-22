@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import javax.swing.JTable;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.GroupLayout;
 
 /**
  *
@@ -34,7 +35,7 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
     static boolean OF;
     
     String[] spalten = {"Nummer", "Titel", "Tag"};
-    Color Standart = new Color(96, 96, 96);
+    Color Standard = new Color(96, 96, 96);
   
     DefaultTableModel tblModel = new DefaultTableModel(spalten, 0){
         @Override
@@ -70,9 +71,9 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
      
     Ausgabe.getTableHeader().setOpaque(false);
     Ausgabe.getTableHeader().setFont(new Font("Verdana",Font.BOLD,18));
-    Ausgabe.getTableHeader().setBackground(Standart);
+    Ausgabe.getTableHeader().setBackground(Standard);
     Ausgabe.getTableHeader().setForeground(Color.white);
-    Ausgabe.setBackground(Standart);
+    Ausgabe.setBackground(Standard);
  }
  
  
@@ -186,7 +187,7 @@ try {
         jButton1 = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
         Privat = new javax.swing.JToggleButton();
-        Öffentlich = new javax.swing.JButton();
+        Oeffentlich = new javax.swing.JButton();
         jPanel7 = new javax.swing.JPanel();
         addbtn = new javax.swing.JButton();
         jScrollPane5 = new javax.swing.JScrollPane();
@@ -302,12 +303,12 @@ try {
             }
         });
 
-        Öffentlich.setBackground(new java.awt.Color(96, 96, 96));
-        Öffentlich.setForeground(new java.awt.Color(255, 255, 255));
-        Öffentlich.setText("Öffentlich");
-        Öffentlich.addActionListener(new java.awt.event.ActionListener() {
+        Oeffentlich.setBackground(new java.awt.Color(96, 96, 96));
+        Oeffentlich.setForeground(new java.awt.Color(255, 255, 255));
+        Oeffentlich.setText("Öffentlich");
+        Oeffentlich.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ÖffentlichActionPerformed(evt);
+                OeffentlichActionPerformed(evt);
             }
         });
 
@@ -319,7 +320,7 @@ try {
                 .addContainerGap()
                 .add(jPanel6Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(Privat)
-                    .add(Öffentlich))
+                    .add(Oeffentlich))
                 .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel6Layout.setVerticalGroup(
@@ -328,7 +329,7 @@ try {
                 .add(94, 94, 94)
                 .add(Privat)
                 .add(18, 18, 18)
-                .add(Öffentlich)
+                .add(Oeffentlich)
                 .addContainerGap(280, Short.MAX_VALUE))
         );
 
@@ -465,11 +466,11 @@ try {
     zeigeNotiz();
     }//GEN-LAST:event_PrivatActionPerformed
 
-    private void ÖffentlichActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ÖffentlichActionPerformed
+    private void OeffentlichActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OeffentlichActionPerformed
     OF=true;
     getOeffentlicheNotiz();
     zeigeOeffentlicheNotiz();
-    }//GEN-LAST:event_ÖffentlichActionPerformed
+    }//GEN-LAST:event_OeffentlichActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         new GUI_Anmelden().setVisible(true);
@@ -568,7 +569,7 @@ try {
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JLabel name;
-    private javax.swing.JButton Öffentlich;
+    private javax.swing.JButton Oeffentlich;
     // End of variables declaration//GEN-END:variables
 
 }
