@@ -18,6 +18,10 @@ import java.util.ArrayList;
 import javax.swing.JTable;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.LayoutStyle;
+import javax.swing.LayoutStyle.ComponentPlacement;
 
 /**
  *
@@ -33,8 +37,8 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
     static int Notiznr;
     static boolean OF;
     
-    String[] spalten = {"Nummer", "Titel", "Tag", };
-    Color Standart = new Color(96, 96, 96);
+    String[] spalten = {"Nummer", "Titel", "Tag"};
+    Color Standard = new Color(96, 96, 96);
   
     DefaultTableModel tblModel = new DefaultTableModel(spalten, 0){
         @Override
@@ -68,12 +72,11 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
     }
  private void TableDesign(){
      
-    DefaultTableModel tblModel = new DefaultTableModel(spalten, 0);
     Ausgabe.getTableHeader().setOpaque(false);
     Ausgabe.getTableHeader().setFont(new Font("Verdana",Font.BOLD,18));
-    Ausgabe.getTableHeader().setBackground(Standart);
+    Ausgabe.getTableHeader().setBackground(Standard);
     Ausgabe.getTableHeader().setForeground(Color.white);
-    Ausgabe.setBackground(Standart);
+    Ausgabe.setBackground(Standard);
  }
  
  
@@ -147,7 +150,7 @@ public void zeigeNotiz() {
 
 try {
     
-                        int ergebnis = this.konnektor.fuehreVeraenderungAus("DELETE FROM notiz WHERE N_id = "+idToDelete);
+                        this.konnektor.fuehreVeraenderungAus("DELETE FROM notiz WHERE N_id = "+idToDelete);
                       
                        
                     } catch (SQLException ex) {
@@ -158,7 +161,7 @@ public void Oloeschen(){
    
 try {
  
-                        int ergebnis = this.konnektor.fuehreVeraenderungAus("DELETE FROM geteilte_notizen WHERE GN_id = "+idToDelete);
+                        this.konnektor.fuehreVeraenderungAus("DELETE FROM geteilte_notizen WHERE GN_id = "+idToDelete);
                       
                        
                     } catch (SQLException ex) {
@@ -187,7 +190,7 @@ try {
         jButton1 = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
         Privat = new javax.swing.JToggleButton();
-        Öffentlich = new javax.swing.JButton();
+        Oeffentlich = new javax.swing.JButton();
         jPanel7 = new javax.swing.JPanel();
         addbtn = new javax.swing.JButton();
         jScrollPane5 = new javax.swing.JScrollPane();
@@ -225,28 +228,28 @@ try {
             }
         });
 
-        org.jdesktop.layout.GroupLayout jPanel3Layout = new org.jdesktop.layout.GroupLayout(jPanel3);
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel3Layout.createSequentialGroup()
+            jPanel3Layout.createParallelGroup(Alignment.LEADING)
+            .add(Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                 .addContainerGap(284, Short.MAX_VALUE)
-                .add(jPanel3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                    .add(jLabel2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .add(jSeparator1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 136, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .add(jPanel3Layout.createParallelGroup(Alignment.LEADING, false)
+                    .add(jLabel2, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .add(jSeparator1, GroupLayout.PREFERRED_SIZE, 136, GroupLayout.PREFERRED_SIZE))
                 .add(203, 203, 203))
             .add(jPanel3Layout.createSequentialGroup()
-                .add(jButton2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 10, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(jButton2, GroupLayout.PREFERRED_SIZE, 10, GroupLayout.PREFERRED_SIZE)
                 .add(0, 0, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel3Layout.createSequentialGroup()
+            jPanel3Layout.createParallelGroup(Alignment.LEADING)
+            .add(Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                 .add(jButton2)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .add(jPanel3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                    .add(jLabel2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(jSeparator1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 10, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .add(jPanel3Layout.createParallelGroup(Alignment.TRAILING)
+                    .add(jLabel2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .add(jSeparator1, GroupLayout.PREFERRED_SIZE, 10, GroupLayout.PREFERRED_SIZE))
                 .add(26, 26, 26))
         );
 
@@ -269,25 +272,25 @@ try {
             }
         });
 
-        org.jdesktop.layout.GroupLayout NameLayout = new org.jdesktop.layout.GroupLayout(Name);
+        javax.swing.GroupLayout NameLayout = new javax.swing.GroupLayout(Name);
         Name.setLayout(NameLayout);
         NameLayout.setHorizontalGroup(
-            NameLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            NameLayout.createParallelGroup(Alignment.LEADING)
             .add(NameLayout.createSequentialGroup()
                 .add(28, 28, 28)
                 .add(jButton1)
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .add(NameLayout.createSequentialGroup()
                 .addContainerGap()
-                .add(name, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .add(name, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         NameLayout.setVerticalGroup(
-            NameLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            NameLayout.createParallelGroup(Alignment.LEADING)
             .add(NameLayout.createSequentialGroup()
                 .addContainerGap(31, Short.MAX_VALUE)
-                .add(name, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 23, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                .add(name, GroupLayout.PREFERRED_SIZE, 23, GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(ComponentPlacement.UNRELATED)
                 .add(jButton1)
                 .add(14, 14, 14))
         );
@@ -303,33 +306,33 @@ try {
             }
         });
 
-        Öffentlich.setBackground(new java.awt.Color(96, 96, 96));
-        Öffentlich.setForeground(new java.awt.Color(255, 255, 255));
-        Öffentlich.setText("Öffentlich");
-        Öffentlich.addActionListener(new java.awt.event.ActionListener() {
+        Oeffentlich.setBackground(new java.awt.Color(96, 96, 96));
+        Oeffentlich.setForeground(new java.awt.Color(255, 255, 255));
+        Oeffentlich.setText("Öffentlich");
+        Oeffentlich.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ÖffentlichActionPerformed(evt);
+                OeffentlichActionPerformed(evt);
             }
         });
 
-        org.jdesktop.layout.GroupLayout jPanel6Layout = new org.jdesktop.layout.GroupLayout(jPanel6);
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
-            jPanel6Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            jPanel6Layout.createParallelGroup(Alignment.LEADING)
             .add(jPanel6Layout.createSequentialGroup()
                 .addContainerGap()
-                .add(jPanel6Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(jPanel6Layout.createParallelGroup(Alignment.LEADING)
                     .add(Privat)
-                    .add(Öffentlich))
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .add(Oeffentlich))
+                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel6Layout.setVerticalGroup(
-            jPanel6Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            jPanel6Layout.createParallelGroup(Alignment.LEADING)
             .add(jPanel6Layout.createSequentialGroup()
                 .add(94, 94, 94)
                 .add(Privat)
                 .add(18, 18, 18)
-                .add(Öffentlich)
+                .add(Oeffentlich)
                 .addContainerGap(280, Short.MAX_VALUE))
         );
 
@@ -381,74 +384,74 @@ try {
             }
         });
 
-        org.jdesktop.layout.GroupLayout jPanel7Layout = new org.jdesktop.layout.GroupLayout(jPanel7);
+        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
         jPanel7Layout.setHorizontalGroup(
-            jPanel7Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            jPanel7Layout.createParallelGroup(Alignment.LEADING)
             .add(jPanel7Layout.createSequentialGroup()
                 .addContainerGap(563, Short.MAX_VALUE)
-                .add(addbtn, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 50, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(addbtn, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
             .add(jPanel7Layout.createSequentialGroup()
                 .add(jScrollPane5)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jPanel7Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .addPreferredGap(ComponentPlacement.RELATED)
+                .add(jPanel7Layout.createParallelGroup(Alignment.LEADING)
                     .add(entfernen)
                     .add(edit))
                 .add(29, 29, 29))
         );
         jPanel7Layout.setVerticalGroup(
-            jPanel7Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            jPanel7Layout.createParallelGroup(Alignment.LEADING)
             .add(jPanel7Layout.createSequentialGroup()
-                .add(jPanel7Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(jPanel7Layout.createParallelGroup(Alignment.LEADING)
                     .add(jPanel7Layout.createSequentialGroup()
                         .addContainerGap()
-                        .add(jScrollPane5, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .add(jScrollPane5, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .add(18, 18, 18))
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel7Layout.createSequentialGroup()
-                        .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .add(edit, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 44, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
+                        .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .add(edit, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
                         .add(18, 18, 18)
                         .add(entfernen)
                         .add(158, 158, 158)))
-                .add(addbtn, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 50, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(addbtn, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
-        org.jdesktop.layout.GroupLayout jPanel2Layout = new org.jdesktop.layout.GroupLayout(jPanel2);
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel2Layout.createSequentialGroup()
-                .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, jPanel6, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .add(Name, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                    .add(jPanel3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .add(jPanel7, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+            jPanel2Layout.createParallelGroup(Alignment.LEADING)
+            .add(Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .add(jPanel2Layout.createParallelGroup(Alignment.TRAILING)
+                    .add(Alignment.LEADING, jPanel6, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .add(Name, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(ComponentPlacement.RELATED)
+                .add(jPanel2Layout.createParallelGroup(Alignment.LEADING, false)
+                    .add(jPanel3, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .add(jPanel7, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
         jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            jPanel2Layout.createParallelGroup(Alignment.LEADING)
             .add(jPanel2Layout.createSequentialGroup()
-                .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
-                    .add(Name, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .add(jPanel3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(jPanel6, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .add(jPanel7, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .add(jPanel2Layout.createParallelGroup(Alignment.TRAILING, false)
+                    .add(Name, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .add(jPanel3, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(ComponentPlacement.RELATED)
+                .add(jPanel2Layout.createParallelGroup(Alignment.LEADING)
+                    .add(jPanel6, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .add(jPanel7, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
 
-        org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jPanel2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            layout.createParallelGroup(Alignment.LEADING)
+            .add(jPanel2, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jPanel2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            layout.createParallelGroup(Alignment.LEADING)
+            .add(jPanel2, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -457,7 +460,7 @@ try {
 
     private void addbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addbtnActionPerformed
     new GUI_NeueNotiz().setVisible(true);
-     this.dispose();// TODO add your handling code here:
+     this.dispose(); // Removed unnecessary TODO comment
     }//GEN-LAST:event_addbtnActionPerformed
 
     private void PrivatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PrivatActionPerformed
@@ -466,11 +469,11 @@ try {
     zeigeNotiz();
     }//GEN-LAST:event_PrivatActionPerformed
 
-    private void ÖffentlichActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ÖffentlichActionPerformed
+    private void OeffentlichActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OeffentlichActionPerformed
     OF=true;
     getOeffentlicheNotiz();
     zeigeOeffentlicheNotiz();
-    }//GEN-LAST:event_ÖffentlichActionPerformed
+    }//GEN-LAST:event_OeffentlichActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         new GUI_Anmelden().setVisible(true);
@@ -478,50 +481,31 @@ try {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void entfernenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_entfernenActionPerformed
-    entfernen.addActionListener(new ActionListener() {
-       
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int selectedRow = Ausgabe.getSelectedRow();
-                if (selectedRow != -1) { // Überprüfen, ob eine Zeile ausgewählt ist
-                    DefaultTableModel model = (DefaultTableModel) Ausgabe.getModel();
-                    
-                    idToDelete = (Integer)model.getValueAt(selectedRow, 0);
-                    
-                    
-                    
-                     model.removeRow(selectedRow);
-                    
-                    if(OF){
-                        Oloeschen();
-                    }
-                    else if(OF==false){
-                    loeschen();
-                    }
-                }
+        int selectedRow = Ausgabe.getSelectedRow();
+        if (selectedRow != -1) {
+            DefaultTableModel model = (DefaultTableModel) Ausgabe.getModel();
+            idToDelete = (Integer) model.getValueAt(selectedRow, 0);
+            model.removeRow(selectedRow);
+
+            if (OF) {
+                Oloeschen();
+            } else {
+                loeschen();
             }
-        });
+        } else {
+            JOptionPane.showMessageDialog(this, "Bitte wählen Sie eine Zeile aus, um sie zu löschen.", "Warnung", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_entfernenActionPerformed
 
     private void editActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editActionPerformed
-          edit.addActionListener(new ActionListener() {
-       
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int selectedRow = Ausgabe.getSelectedRow();
-                if (selectedRow != -1) { // Überprüfen, ob eine Zeile ausgewählt ist
-                    DefaultTableModel model = (DefaultTableModel) Ausgabe.getModel();
-                    
-                    Notiznr = (Integer)model.getValueAt(selectedRow, 0);
-                    
-                    bearbeiten();
-                  
-                     
-                    
-                  
-                }
-            }
-        });
+        int selectedRow = Ausgabe.getSelectedRow();
+        if (selectedRow != -1) {
+            DefaultTableModel model = (DefaultTableModel) Ausgabe.getModel();
+            Notiznr = (Integer) model.getValueAt(selectedRow, 0);
+            bearbeiten();
+        } else {
+            JOptionPane.showMessageDialog(this, "Bitte wählen Sie eine Zeile aus, um sie zu bearbeiten.", "Warnung", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_editActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -588,7 +572,7 @@ try {
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JLabel name;
-    private javax.swing.JButton Öffentlich;
+    private javax.swing.JButton Oeffentlich;
     // End of variables declaration//GEN-END:variables
 
 }
