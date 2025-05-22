@@ -9,7 +9,7 @@ public class TestDBConnection {
     public static void main(String[] args) {
         try {
             // Create a database connection
-            DBVerbindung dbConnection = new DBVerbindung("localhost", "its-projekt", "root", "password");
+            DBVerbindung dbConnection = new DBVerbindung("localhost", "notizprojekt", "notizuser", "notizpassword");
             dbConnection.open();
             
             // We don't have direct access to the connection, so we'll use the provided methods
@@ -21,9 +21,9 @@ public class TestDBConnection {
             System.out.println("\nUsers in the database:");
             System.out.println("--------------------");
             while (rs.next()) {
-                String username = rs.getString("Benutzername");
-                String password = rs.getString("Passwort");
-                int userId = rs.getInt("B_ID");
+                String username = rs.getString("benutzername");
+                String password = rs.getString("passwort");
+                int userId = rs.getInt("id");
                 System.out.println("ID: " + userId + ", Username: " + username + ", Password: " + password);
             }
             
