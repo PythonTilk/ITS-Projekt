@@ -18,8 +18,11 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Datenbank: `its-projekt`
+-- Datenbank: `notizprojekt`
 --
+
+CREATE DATABASE IF NOT EXISTS `notizprojekt`;
+USE `notizprojekt`;
 
 -- --------------------------------------------------------
 
@@ -27,7 +30,7 @@ SET time_zone = "+00:00";
 -- Tabellenstruktur für Tabelle `geteilte_notizen`
 --
 
-CREATE TABLE `geteilte_notizen` (
+CREATE TABLE IF NOT EXISTS `geteilte_notizen` (
   `GN_ID` int(11) NOT NULL,
   `Titel` varchar(60) NOT NULL,
   `Tag` varchar(30) NOT NULL,
@@ -45,7 +48,7 @@ CREATE TABLE `geteilte_notizen` (
 -- Tabellenstruktur für Tabelle `notiz`
 --
 
-CREATE TABLE `notiz` (
+CREATE TABLE IF NOT EXISTS `notiz` (
   `Titel` varchar(30) NOT NULL,
   `Tag` varchar(15) NOT NULL,
   `Inhalt` varchar(2000) NOT NULL,
@@ -69,17 +72,17 @@ INSERT INTO `notiz` (`Titel`, `Tag`, `Inhalt`, `N_id`, `B_id`) VALUES
 -- Tabellenstruktur für Tabelle `nutzer`
 --
 
-CREATE TABLE `nutzer` (
-  `Benutzername` varchar(20) NOT NULL,
-  `Passwort` varchar(60) NOT NULL,
-  `B_ID` int(11) NOT NULL
+CREATE TABLE IF NOT EXISTS `nutzer` (
+  `benutzername` varchar(20) NOT NULL,
+  `passwort` varchar(60) NOT NULL,
+  `id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Daten für Tabelle `nutzer`
 --
 
-INSERT INTO `nutzer` (`Benutzername`, `Passwort`, `B_ID`) VALUES
+INSERT INTO `nutzer` (`benutzername`, `passwort`, `id`) VALUES
 ('root', '420', 1),
 ('Max', 'Baumstamm123', 2);
 
@@ -104,7 +107,7 @@ ALTER TABLE `notiz`
 -- Indizes für die Tabelle `nutzer`
 --
 ALTER TABLE `nutzer`
-  ADD PRIMARY KEY (`B_ID`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- AUTO_INCREMENT für exportierte Tabellen
@@ -126,7 +129,7 @@ ALTER TABLE `notiz`
 -- AUTO_INCREMENT für Tabelle `nutzer`
 --
 ALTER TABLE `nutzer`
-  MODIFY `B_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
