@@ -52,6 +52,8 @@ jdbc:mysql://localhost:3306/notizprojekt
 
 ## Getting Started
 
+Welcome to ITS-Projekt! Follow these simple steps to get up and running:
+
 1. Clone this repository to your local machine
    ```bash
    git clone https://github.com/PythonTilk/ITS-Projekt.git
@@ -68,7 +70,7 @@ jdbc:mysql://localhost:3306/notizprojekt
 4. Configure the database connection in the application (see [Database Setup](#database-setup))
 5. Build and run the project
 
-For more detailed instructions, see the [Usage](#usage) section below.
+That's it! You're ready to start creating and sharing notes. For more detailed instructions on using the application, see the [Usage](#usage) section below.
 
 ## Usage
 
