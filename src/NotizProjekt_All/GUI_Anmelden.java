@@ -30,7 +30,7 @@ public class GUI_Anmelden extends javax.swing.JFrame {
         try {
             initComponents();
             Userliste = new ArrayList<>();
-            this.konnektor = new DBVerbindung("localhost", "its-projekt", "root", "");
+            this.konnektor = new DBVerbindung("localhost", "notizprojekt", "notizuser", "notizpassword");
             this.konnektor.open();
             this.getUser();
         } catch (ClassNotFoundException | SQLException ex) {
@@ -40,9 +40,9 @@ public class GUI_Anmelden extends javax.swing.JFrame {
 
     public void getUser() {
         try {
-            ResultSet ergebnis = this.konnektor.fuehreAbfrageAus("SELECT Benutzername, Passwort, B_id from nutzer");
+            ResultSet ergebnis = this.konnektor.fuehreAbfrageAus("SELECT benutzername, passwort, id from nutzer");
             while (ergebnis.next()) {
-                User naechsterUser = new User(ergebnis.getString("Benutzername"), ergebnis.getString("Passwort"), ergebnis.getInt("B_id"));
+                User naechsterUser = new User(ergebnis.getString("benutzername"), ergebnis.getString("passwort"), ergebnis.getInt("id"));
                 this.Userliste.add(naechsterUser);
             }
         } catch (SQLException ex) {
@@ -101,7 +101,9 @@ public class GUI_Anmelden extends javax.swing.JFrame {
         Anmelden_btn1.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(255, 255, 255)));
         Anmelden_btn1.addActionListener(evt -> {
             if (anmeldencheck()) {
-                new GUI_MenuTabelle().setVisible(true);
+                // Temporarily commented out for testing
+                // new GUI_MenuTabelle().setVisible(true);
+                System.out.println("Login successful for user: " + AngemeldeterUser + " with ID: " + NutzerID);
                 this.dispose();
             } else {
                 JOptionPane.showMessageDialog(null, "Falsches Passwort oder kein Benutzer mit diesem Benutzernamen vorhanden.", "Fehler", JOptionPane.ERROR_MESSAGE);
@@ -113,8 +115,10 @@ public class GUI_Anmelden extends javax.swing.JFrame {
         neu_hier_btn1.setText("Neu?");
         neu_hier_btn1.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(255, 255, 255)));
         neu_hier_btn1.addActionListener(evt -> {
-            new GUI_NeuHier().setVisible(true);
-            this.dispose();
+            // Temporarily commented out for testing
+            // new GUI_NeuHier().setVisible(true);
+            System.out.println("New user registration requested");
+            // this.dispose();
         });
 
         passwordField.setBackground(new java.awt.Color(96, 96, 96));
