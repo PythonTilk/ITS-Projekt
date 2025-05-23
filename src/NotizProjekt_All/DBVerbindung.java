@@ -20,9 +20,23 @@ public class DBVerbindung {
     }
     
     public void open() throws ClassNotFoundException, SQLException {
+        try {
+            // Try the newer MySQL JDBC driver class name
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            // Fall back to older driver if needed
+            Class.forName("com.mysql.jdbc.Driver");
+        }
         
-      //  Class.forName("com.mysql.jdbc.Driver");
-        verbindung = DriverManager.getConnection("jdbc:mysql://"+this.server+":3306/"+this.datenbank+"", ""+this.user+"", ""+this.passwort+"");
+        // Use a more robust connection string with parameters for newer MySQL/MariaDB versions
+        verbindung = DriverManager.getConnection(
+            "jdbc:mysql://"+this.server+":3306/"+this.datenbank+
+            "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC", 
+            this.user, 
+            this.passwort
+        );
+        
+        System.out.println("Successfully connected to database: " + this.datenbank);
     }
 
     public void close() throws SQLException {

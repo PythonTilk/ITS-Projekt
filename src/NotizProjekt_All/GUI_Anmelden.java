@@ -104,7 +104,9 @@ public class GUI_Anmelden extends javax.swing.JFrame {
                 // Temporarily commented out for testing
                 // new GUI_MenuTabelle().setVisible(true);
                 System.out.println("Login successful for user: " + AngemeldeterUser + " with ID: " + NutzerID);
-                this.dispose();
+                JOptionPane.showMessageDialog(null, "Login successful for user: " + AngemeldeterUser + " with ID: " + NutzerID, "Success", JOptionPane.INFORMATION_MESSAGE);
+                // Don't dispose the window for testing
+                // this.dispose();
             } else {
                 JOptionPane.showMessageDialog(null, "Falsches Passwort oder kein Benutzer mit diesem Benutzernamen vorhanden.", "Fehler", JOptionPane.ERROR_MESSAGE);
             }

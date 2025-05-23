@@ -7,7 +7,7 @@ public class TestLogin {
     public static void main(String[] args) {
         try {
             // Create a database connection
-            DBVerbindung dbConnection = new DBVerbindung("localhost", "its-projekt", "root", "password");
+            DBVerbindung dbConnection = new DBVerbindung("localhost", "notizprojekt", "notizuser", "notizpassword");
             dbConnection.open();
             
             System.out.println("Successfully connected to the database!");
@@ -17,20 +17,20 @@ public class TestLogin {
             String password = "420";
             
             ResultSet rs = dbConnection.fuehreAbfrageAus(
-                "SELECT * FROM nutzer WHERE Benutzername='" + username + "' AND Passwort='" + password + "'"
+                "SELECT * FROM nutzer WHERE benutzername='" + username + "' AND passwort='" + password + "'"
             );
             
             if (rs.next()) {
-                int userId = rs.getInt("B_ID");
+                int userId = rs.getInt("id");
                 System.out.println("Login successful for user: " + username + " (ID: " + userId + ")");
                 
                 // Now retrieve the user's notes
-                rs = dbConnection.fuehreAbfrageAus("SELECT * FROM notiz WHERE B_ID=" + userId);
+                rs = dbConnection.fuehreAbfrageAus("SELECT * FROM notiz WHERE B_id=" + userId);
                 
                 System.out.println("\nNotes for user " + username + ":");
                 System.out.println("--------------------");
                 while (rs.next()) {
-                    int noteId = rs.getInt("N_ID");
+                    int noteId = rs.getInt("N_id");
                     String title = rs.getString("Titel");
                     String content = rs.getString("Inhalt");
                     System.out.println("Note ID: " + noteId + ", Title: " + title + ", Content: " + content);
@@ -44,7 +44,7 @@ public class TestLogin {
             password = "wrongpassword";
             
             rs = dbConnection.fuehreAbfrageAus(
-                "SELECT * FROM nutzer WHERE Benutzername='" + username + "' AND Passwort='" + password + "'"
+                "SELECT * FROM nutzer WHERE benutzername='" + username + "' AND passwort='" + password + "'"
             );
             
             if (rs.next()) {
