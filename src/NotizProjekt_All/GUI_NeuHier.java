@@ -21,7 +21,7 @@ private DBVerbindung konnektor;
     public GUI_NeuHier() {
         try{
         initComponents();
-             this.konnektor = new DBVerbindung("localhost", "its-projekt", "root", "");
+             this.konnektor = new DBVerbindung("localhost", "notizprojekt", "notizuser", "notizpassword");
             this.konnektor.open();
         }
          catch (ClassNotFoundException | SQLException ex) {
@@ -29,20 +29,16 @@ private DBVerbindung konnektor;
         }
     }
 public boolean NutzerdatenCheck() {
-         String benutzername= nutzername.getText();
-        String passwort=passwort1.getText();
+        String benutzername = nutzername.getText();
         boolean status = false;
         try {      
-          ResultSet ergebnis = this.konnektor.fuehreAbfrageAus("SELECT Benutzername, Passwort FROM nutzer Where Benutzername = '"+benutzername+"' AND Passwort = '"+passwort+"' ");
-
-             status=ergebnis.next();
-          
-
+            // Only check if username exists, not password
+            ResultSet ergebnis = this.konnektor.fuehreAbfrageAus("SELECT Benutzername FROM nutzer WHERE Benutzername = '"+benutzername+"'");
+            status = ergebnis.next();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return status;
-        
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -193,21 +189,28 @@ public boolean NutzerdatenCheck() {
          String name= nutzername.getText();
          String passwort = passwort1.getText();
          String passwortu= passwort2.getText();
-         NutzerdatenCheck();
-        if(passwort.equals(passwortu)&& NutzerdatenCheck()==false)
+         
+         // Only check once
+         boolean userExists = NutzerdatenCheck();
+         
+         System.out.println("New user registration requested");
+         
+        if(passwort.equals(passwortu) && !userExists)
         {
-        try {      
-          int ergebnis= this.konnektor.fuehreVeraenderungAus( "INSERT INTO `nutzer` (`Benutzername`, `Passwort`, `B_ID`) VALUES ('"+name+"', '"+passwort+"', NULL)");
-           new GUI_Anmelden().setVisible(true);
-           this.dispose();
-        } catch (Exception e) {
-            e.printStackTrace();
+            try {      
+                int ergebnis = this.konnektor.fuehreVeraenderungAus("INSERT INTO `nutzer` (`Benutzername`, `Passwort`) VALUES ('"+name+"', '"+passwort+"')");
+                JOptionPane.showMessageDialog(null, "Benutzer erfolgreich registriert", "Erfolg", JOptionPane.INFORMATION_MESSAGE);
+                new GUI_Anmelden().setVisible(true);
+                this.dispose();
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Fehler bei der Registrierung: " + e.getMessage(), "Fehler", JOptionPane.ERROR_MESSAGE);
+            }
+        } else if (!passwort.equals(passwortu)) {
+            JOptionPane.showMessageDialog(null, "Fehler, Passwörter stimmen nicht überein", "Fehler", JOptionPane.ERROR_MESSAGE);
+        } else if (userExists) {
+            JOptionPane.showMessageDialog(null, "Fehler, Benutzername existiert bereits", "Fehler", JOptionPane.ERROR_MESSAGE);
         }
-        
-        }else{
-            JOptionPane.showMessageDialog(null, "Fehler, Passwörter Stimmen nicht überein","Fehler", JOptionPane.ERROR_MESSAGE);
-        }
-       
     }//GEN-LAST:event_speichernActionPerformed
 
     /**
