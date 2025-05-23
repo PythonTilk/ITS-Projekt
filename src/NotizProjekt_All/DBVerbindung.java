@@ -28,15 +28,39 @@ public class DBVerbindung {
             Class.forName("com.mysql.jdbc.Driver");
         }
         
-        // Use a more robust connection string with parameters for newer MySQL/MariaDB versions
-        verbindung = DriverManager.getConnection(
-            "jdbc:mysql://"+this.server+":3306/"+this.datenbank+
-            "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC", 
-            this.user, 
-            this.passwort
-        );
+        // Try multiple connection options to handle different network configurations
+        SQLException lastException = null;
         
-        System.out.println("Successfully connected to database: " + this.datenbank);
+        // Connection options to try
+        String[] connectionUrls = {
+            // Option 1: Standard localhost connection
+            "jdbc:mysql://"+this.server+":3306/"+this.datenbank+"?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
+            
+            // Option 2: Try with explicit IP 127.0.0.1
+            "jdbc:mysql://127.0.0.1:3306/"+this.datenbank+"?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
+            
+            // Option 3: Try with Docker container IP
+            "jdbc:mysql://172.17.0.1:3306/"+this.datenbank+"?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+        };
+        
+        // Try each connection URL
+        for (String url : connectionUrls) {
+            try {
+                verbindung = DriverManager.getConnection(url, this.user, this.passwort);
+                System.out.println("Successfully connected to database: " + this.datenbank + " using URL: " + url);
+                return; // Connection successful, exit method
+            } catch (SQLException e) {
+                lastException = e;
+                System.out.println("Connection attempt failed with URL: " + url + " - " + e.getMessage());
+            }
+        }
+        
+        // If we get here, all connection attempts failed
+        if (lastException != null) {
+            throw lastException;
+        } else {
+            throw new SQLException("Failed to connect to database: " + this.datenbank);
+        }
     }
 
     public void close() throws SQLException {
