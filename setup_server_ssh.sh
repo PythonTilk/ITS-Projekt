@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Setup script for ITS-Projekt
+# Setup script for ITS-Projekt using SSH for GitHub authentication
 # This script will:
 # 1. Update the system
 # 2. Install required dependencies
-# 3. Clone the repository
+# 3. Clone the repository using SSH
 # 4. Set up MySQL database
 # 5. Build and deploy the application
 # 6. Configure systemd service
@@ -24,8 +24,7 @@ DB_NAME="notizprojekt"
 DB_USER="notizuser"
 DB_PASSWORD="password123" # Change this to a secure password
 APP_PORT=8080
-# Use this format with your personal access token
-GIT_REPO="https://YOUR_GITHUB_USERNAME:YOUR_PERSONAL_ACCESS_TOKEN@github.com/PythonTilk/ITS-Projekt.git"
+GIT_REPO="git@github.com:PythonTilk/ITS-Projekt.git"
 GIT_BRANCH="html"
 SERVER_IP="167.172.163.254"
 
@@ -86,7 +85,22 @@ mysql -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PA
 mysql -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
 mysql -e "FLUSH PRIVILEGES;"
 
-# 5. Clone the repository
+# 5. Check if SSH key exists, if not create one
+print_status "Checking SSH key..."
+if [ ! -f /root/.ssh/id_ed25519 ]; then
+    print_status "Generating SSH key..."
+    ssh-keygen -t ed25519 -f /root/.ssh/id_ed25519 -N "" -C "server@$SERVER_IP"
+    
+    print_warning "Please add this SSH key to your GitHub account:"
+    cat /root/.ssh/id_ed25519.pub
+    echo ""
+    read -p "Press Enter after adding the SSH key to GitHub..."
+fi
+
+# Add GitHub to known hosts to avoid prompt
+ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts
+
+# 6. Clone the repository
 print_status "Cloning repository..."
 cd /home/appuser
 if [ -d "ITS-Projekt" ]; then
@@ -101,7 +115,7 @@ else
     git checkout $GIT_BRANCH
 fi
 
-# 6. Configure application properties
+# 7. Configure application properties
 print_status "Configuring application properties..."
 mkdir -p src/main/resources
 cat > src/main/resources/application.properties << EOF
@@ -130,12 +144,12 @@ spring.security.user.name=admin
 spring.security.user.password=admin
 EOF
 
-# 7. Build the application
+# 8. Build the application
 print_status "Building application..."
 chmod +x mvnw
 ./mvnw clean package -DskipTests
 
-# 8. Configure systemd service
+# 9. Configure systemd service
 print_status "Configuring systemd service..."
 cat > /etc/systemd/system/notizapp.service << EOF
 [Unit]
@@ -154,12 +168,12 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
-# 9. Set proper permissions
+# 10. Set proper permissions
 print_status "Setting permissions..."
 chown -R appuser:appuser /home/appuser/ITS-Projekt
 chmod +x /home/appuser/ITS-Projekt/mvnw
 
-# 10. Configure Nginx as a reverse proxy
+# 11. Configure Nginx as a reverse proxy
 print_status "Configuring Nginx..."
 cat > /etc/nginx/sites-available/notizapp << EOF
 server {
@@ -182,24 +196,24 @@ rm -f /etc/nginx/sites-enabled/default
 nginx -t
 systemctl restart nginx
 
-# 11. Configure firewall
+# 12. Configure firewall
 print_status "Configuring firewall..."
 ufw allow ssh
 ufw allow 'Nginx Full'
 ufw allow $APP_PORT/tcp
 ufw --force enable
 
-# 12. Start the application
+# 13. Start the application
 print_status "Starting application..."
 systemctl daemon-reload
 systemctl enable notizapp.service
 systemctl start notizapp.service
 
-# 13. Create a log file and set permissions
+# 14. Create a log file and set permissions
 touch /var/log/notizprojekt.log
 chown appuser:appuser /var/log/notizprojekt.log
 
-# 14. Print summary
+# 15. Print summary
 print_status "Setup completed successfully!"
 echo -e "${GREEN}----------------------------------------${NC}"
 echo -e "${GREEN}Application deployed at: http://$SERVER_IP${NC}"

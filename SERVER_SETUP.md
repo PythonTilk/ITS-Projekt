@@ -7,6 +7,42 @@ This document provides instructions for setting up the ITS-Projekt application o
 - A server with Ubuntu/Debian (tested on Ubuntu 20.04/22.04)
 - Root access to the server
 - Server IP: 167.172.163.254 (or your own server IP)
+- GitHub authentication (Personal Access Token or SSH key)
+
+## GitHub Authentication
+
+GitHub no longer supports password authentication for Git operations. You need to use either a Personal Access Token or SSH key.
+
+### Option 1: Personal Access Token (PAT)
+
+1. Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Click "Generate new token" → "Generate new token (classic)"
+3. Give it a name like "Server Setup"
+4. Select the "repo" scope (full control of repositories)
+5. Click "Generate token"
+6. Copy the token (you'll only see it once)
+7. Edit the setup script and replace:
+   ```
+   GIT_REPO="https://YOUR_GITHUB_USERNAME:YOUR_PERSONAL_ACCESS_TOKEN@github.com/PythonTilk/ITS-Projekt.git"
+   ```
+   with your actual username and token.
+
+### Option 2: SSH Key
+
+1. On your server, generate an SSH key:
+   ```bash
+   ssh-keygen -t ed25519 -C "your_email@example.com"
+   ```
+2. Display the public key:
+   ```bash
+   cat ~/.ssh/id_ed25519.pub
+   ```
+3. Go to GitHub → Settings → SSH and GPG keys → New SSH key
+4. Add the public key from your server
+5. Edit the setup script and replace:
+   ```
+   GIT_REPO="git@github.com:PythonTilk/ITS-Projekt.git"
+   ```
 
 ## Automatic Setup
 
