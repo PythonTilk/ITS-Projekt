@@ -18,16 +18,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/css/**", "/js/**", "/images/**", "/register", "/login", "/api/auth/**", "/test.html", "/").permitAll()
+            .csrf().disable()
+            .authorizeRequests()
+                .antMatchers("/css/**", "/js/**", "/images/**", "/register", "/login", "/api/auth/**", "/test.html", "/", "/api/test").permitAll()
                 .anyRequest().authenticated()
-            )
-            .formLogin(form -> form.disable())
-            .logout(logout -> logout
+            .and()
+            .formLogin().disable()
+            .logout()
                 .logoutSuccessUrl("/login?logout")
-                .permitAll()
-            );
+                .permitAll();
         
         return http.build();
     }
