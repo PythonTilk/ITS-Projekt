@@ -7,8 +7,11 @@ import notizprojekt.web.repository.NoteRepository;
 import notizprojekt.web.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -16,13 +19,65 @@ public class NoteService {
 
     private final NoteRepository noteRepository;
     private final UserRepository userRepository;
+    private final JdbcTemplate jdbcTemplate;
 
     public List<Note> getAllNotesByUser(Integer userId) {
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isPresent()) {
-            return noteRepository.findByUser(userOpt.get());
+        try {
+            Optional<User> userOpt = userRepository.findById(userId);
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                System.out.println("Found user: " + user.getUsername() + " with ID: " + user.getId());
+                
+                // Try direct SQL query first
+                List<Note> notes = getAllNotesByUserIdDirect(userId);
+                if (!notes.isEmpty()) {
+                    System.out.println("Found " + notes.size() + " notes using direct SQL query");
+                    return notes;
+                }
+                
+                // Fall back to repository method
+                List<Note> repoNotes = noteRepository.findByUser(user);
+                System.out.println("Found " + repoNotes.size() + " notes using repository method");
+                return repoNotes;
+            } else {
+                System.out.println("User not found with ID: " + userId);
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting notes for user: " + e.getMessage());
+            e.printStackTrace();
         }
-        throw new RuntimeException("User not found");
+        return new ArrayList<>(); // Return empty list instead of throwing exception
+    }
+    
+    public List<Note> getAllNotesByUserIdDirect(Integer userId) {
+        String sql = "SELECT n.N_id, n.Titel, n.Tag, n.Inhalt, n.B_id, n.position_x, n.position_y, n.color " +
+                     "FROM notiz n WHERE n.B_id = ?";
+        
+        RowMapper<Note> rowMapper = (rs, rowNum) -> {
+            Note note = new Note();
+            note.setId(rs.getInt("N_id"));
+            note.setTitle(rs.getString("Titel"));
+            note.setTag(rs.getString("Tag"));
+            note.setContent(rs.getString("Inhalt"));
+            
+            // Set position and color
+            note.setPositionX(rs.getObject("position_x") != null ? rs.getInt("position_x") : 0);
+            note.setPositionY(rs.getObject("position_y") != null ? rs.getInt("position_y") : 0);
+            note.setColor(rs.getString("color") != null ? rs.getString("color") : "#FFFF88");
+            
+            // Set user
+            Optional<User> userOpt = userRepository.findById(rs.getInt("B_id"));
+            userOpt.ifPresent(note::setUser);
+            
+            return note;
+        };
+        
+        try {
+            return jdbcTemplate.query(sql, rowMapper, userId);
+        } catch (Exception e) {
+            System.err.println("Error executing direct SQL query: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
     
     public Note createNote(Integer userId, String title, String tag, String content, 

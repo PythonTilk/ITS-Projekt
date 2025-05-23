@@ -36,14 +36,40 @@ public class WebController {
     public String board(Model model, HttpSession session) {
         Integer userId = (Integer) session.getAttribute("userId");
         if (userId == null) {
+            System.out.println("No userId in session, redirecting to login");
             return "redirect:/login";
         }
         
-        List<Note> notes = noteService.getAllNotesByUser(userId);
-        model.addAttribute("notes", notes);
-        model.addAttribute("username", session.getAttribute("username"));
+        System.out.println("Loading board for user ID: " + userId);
         
-        return "board";
+        try {
+            List<Note> notes = noteService.getAllNotesByUser(userId);
+            System.out.println("Found " + notes.size() + " notes for user ID: " + userId);
+            
+            // Add default positions and colors if needed
+            for (Note note : notes) {
+                if (note.getPositionX() == null) {
+                    note.setPositionX(50);
+                }
+                if (note.getPositionY() == null) {
+                    note.setPositionY(50);
+                }
+                if (note.getColor() == null) {
+                    note.setColor("#FFFF88");
+                }
+            }
+            
+            model.addAttribute("notes", notes);
+            model.addAttribute("username", session.getAttribute("username"));
+            
+            return "board";
+        } catch (Exception e) {
+            System.err.println("Error loading board: " + e.getMessage());
+            e.printStackTrace();
+            model.addAttribute("error", "Failed to load notes: " + e.getMessage());
+            model.addAttribute("username", session.getAttribute("username"));
+            return "board";
+        }
     }
     
     @GetMapping("/search")
@@ -53,11 +79,21 @@ public class WebController {
             return "redirect:/login";
         }
         
-        List<Note> notes = noteService.searchNotes(userId, searchTerm);
-        model.addAttribute("notes", notes);
-        model.addAttribute("searchTerm", searchTerm);
-        model.addAttribute("username", session.getAttribute("username"));
-        
-        return "board";
+        try {
+            List<Note> notes = noteService.searchNotes(userId, searchTerm);
+            System.out.println("Found " + notes.size() + " notes matching search term: " + searchTerm);
+            
+            model.addAttribute("notes", notes);
+            model.addAttribute("searchTerm", searchTerm);
+            model.addAttribute("username", session.getAttribute("username"));
+            
+            return "board";
+        } catch (Exception e) {
+            System.err.println("Error searching notes: " + e.getMessage());
+            e.printStackTrace();
+            model.addAttribute("error", "Failed to search notes: " + e.getMessage());
+            model.addAttribute("username", session.getAttribute("username"));
+            return "board";
+        }
     }
 }

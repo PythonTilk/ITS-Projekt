@@ -1,7 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Board.js loaded');
+    
     // DOM Elements
     const noteBoard = document.getElementById('note-board');
+    console.log('Note board element:', noteBoard);
+    
     const addNoteBtn = document.getElementById('add-note-btn');
+    console.log('Add note button:', addNoteBtn);
+    
     const noteModal = document.getElementById('note-modal');
     const closeBtn = document.querySelector('.close-btn');
     const noteForm = document.getElementById('note-form');
@@ -13,9 +19,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const noteColorInput = document.getElementById('note-color');
     const deleteNoteBtn = document.getElementById('delete-note-btn');
     const logoutBtn = document.getElementById('logout-btn');
+    console.log('Logout button:', logoutBtn);
     
     // Note template
     const noteTemplate = document.getElementById('note-template');
+    console.log('Note template:', noteTemplate);
     
     // Current dragging state
     let isDragging = false;
@@ -23,15 +31,45 @@ document.addEventListener('DOMContentLoaded', function() {
     let offsetX = 0;
     let offsetY = 0;
     
-    // Load notes from server
+    // Debug DOM structure
+    console.log('Document body:', document.body.innerHTML);
+    
+    // Initialize existing notes from the server-rendered HTML
+    initializeExistingNotes();
+    
+    // Also try to load notes from API as a fallback
     loadNotes();
     
     // Event Listeners
-    addNoteBtn.addEventListener('click', openAddNoteModal);
-    closeBtn.addEventListener('click', closeModal);
-    noteForm.addEventListener('submit', saveNote);
-    deleteNoteBtn.addEventListener('click', deleteNote);
-    logoutBtn.addEventListener('click', logout);
+    if (addNoteBtn) {
+        addNoteBtn.addEventListener('click', openAddNoteModal);
+    } else {
+        console.error('Add note button not found');
+    }
+    
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeModal);
+    } else {
+        console.error('Close button not found');
+    }
+    
+    if (noteForm) {
+        noteForm.addEventListener('submit', saveNote);
+    } else {
+        console.error('Note form not found');
+    }
+    
+    if (deleteNoteBtn) {
+        deleteNoteBtn.addEventListener('click', deleteNote);
+    } else {
+        console.error('Delete note button not found');
+    }
+    
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+    } else {
+        console.error('Logout button not found');
+    }
     
     // Close modal when clicking outside
     window.addEventListener('click', function(e) {
@@ -41,7 +79,44 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Functions
+    function initializeExistingNotes() {
+        console.log('Initializing existing notes');
+        // Get all notes that were rendered by the server
+        const existingNotes = document.querySelectorAll('.note');
+        console.log(`Found ${existingNotes.length} existing notes`);
+        
+        if (existingNotes.length === 0) {
+            console.log('No existing notes found in the DOM');
+            return;
+        }
+        
+        // Add event listeners to each note
+        existingNotes.forEach((note, index) => {
+            console.log(`Note ${index}:`, note);
+            console.log(`Note ${index} data-id:`, note.getAttribute('data-id'));
+            console.log(`Note ${index} position:`, note.style.left, note.style.top);
+            
+            note.addEventListener('mousedown', startDragging);
+            note.addEventListener('dblclick', function() {
+                const noteId = note.getAttribute('data-id');
+                const title = note.querySelector('.note-title').textContent;
+                const tag = note.querySelector('.note-tag').textContent;
+                const content = note.querySelector('.note-content').textContent;
+                const color = note.style.backgroundColor;
+                
+                openEditNoteModal({
+                    id: noteId,
+                    title: title,
+                    tag: tag,
+                    content: content,
+                    color: color
+                });
+            });
+        });
+    }
+    
     function loadNotes() {
+        console.log('Loading notes from API');
         fetch('/api/notes')
             .then(response => {
                 if (!response.ok) {
@@ -54,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(notes => {
+                console.log(`Loaded ${notes.length} notes from API`);
                 renderNotes(notes);
             })
             .catch(error => {
@@ -96,6 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function startDragging(e) {
+        console.log('Start dragging');
         // Only handle left mouse button
         if (e.button !== 0) return;
         
@@ -130,11 +207,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function stopDragging() {
         if (!isDragging) return;
         
+        console.log('Stop dragging');
+        
         // Save the new position to the server
         const noteId = currentNote.dataset.id;
         const positionX = parseInt(currentNote.style.left);
         const positionY = parseInt(currentNote.style.top);
         
+        console.log(`Updating note ${noteId} position to (${positionX}, ${positionY})`);
         updateNotePosition(noteId, positionX, positionY);
         
         // Reset dragging state
@@ -155,28 +235,37 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'PUT',
             body: formData
         })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to update note position');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Position updated successfully', data);
+        })
         .catch(error => {
             console.error('Error updating note position:', error);
         });
     }
     
     function openAddNoteModal() {
+        console.log('Opening add note modal');
         // Reset form
         noteForm.reset();
         noteIdInput.value = '';
         modalTitle.textContent = 'Add New Note';
         deleteNoteBtn.style.display = 'none';
         
-        // Set default position to center of visible board
-        const boardRect = noteBoard.getBoundingClientRect();
-        const scrollLeft = noteBoard.scrollLeft;
-        const scrollTop = noteBoard.scrollTop;
+        // Set default color
+        noteColorInput.value = '#FFFF88';
         
         // Open modal
         noteModal.style.display = 'block';
     }
     
     function openEditNoteModal(note) {
+        console.log('Opening edit note modal', note);
         // Fill form with note data
         noteIdInput.value = note.id;
         noteTitleInput.value = note.title;
@@ -198,6 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function saveNote(e) {
         e.preventDefault();
+        console.log('Saving note');
         
         const noteId = noteIdInput.value;
         const title = noteTitleInput.value;
@@ -240,10 +330,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             return response.json();
         })
-        .then(() => {
-            // Reload notes and close modal
-            loadNotes();
-            closeModal();
+        .then(data => {
+            console.log('Note saved successfully', data);
+            // Reload the page to show the updated notes
+            window.location.reload();
         })
         .catch(error => {
             console.error('Error saving note:', error);
@@ -255,6 +345,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!noteId) return;
         
+        console.log(`Deleting note ${noteId}`);
+        
         if (confirm('Are you sure you want to delete this note?')) {
             fetch(`/api/notes/${noteId}`, {
                 method: 'DELETE'
@@ -265,10 +357,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 return response.json();
             })
-            .then(() => {
-                // Reload notes and close modal
-                loadNotes();
-                closeModal();
+            .then(data => {
+                console.log('Note deleted successfully', data);
+                // Reload the page to show the updated notes
+                window.location.reload();
             })
             .catch(error => {
                 console.error('Error deleting note:', error);
@@ -277,6 +369,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function logout() {
+        console.log('Logging out');
         fetch('/api/auth/logout', {
             method: 'POST'
         })

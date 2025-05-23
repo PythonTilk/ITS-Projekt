@@ -5,6 +5,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Note Board - Notiz Projekt</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        /* Additional styles to ensure visibility */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+        }
+        
+        .app-header {
+            background-color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .board-container {
+            flex: 1;
+            position: relative;
+            overflow: auto;
+            background-color: #f5f5f5;
+            background-image: linear-gradient(#ddd 1px, transparent 1px),
+                              linear-gradient(90deg, #ddd 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        .note-board {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 100vh;
+        }
+        
+        .note {
+            position: absolute;
+            width: 220px;
+            min-height: 150px;
+            background-color: #FFFF88;
+            border-radius: 3px;
+            padding: 15px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+            cursor: move;
+            user-select: none;
+            z-index: 1;
+        }
+        
+        /* Debug info */
+        .debug-info {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            z-index: 1000;
+            max-width: 80%;
+            max-height: 200px;
+            overflow: auto;
+        }
+    </style>
 </head>
 <body>
     <div class="app-container">
@@ -22,7 +89,7 @@
             </div>
             
             <div class="user-menu">
-                <span th:text="${username}"></span>
+                <span th:text="${username}">Username</span>
                 <button id="logout-btn" class="btn btn-small">Logout</button>
             </div>
         </header>
@@ -30,9 +97,41 @@
         <main class="board-container">
             <div id="note-board" class="note-board">
                 <!-- Notes will be rendered here by JavaScript -->
+                <!-- Pre-render notes from server for debugging -->
+                <div th:each="note : ${notes}" class="note" th:attr="data-id=${note.id}"
+                     th:style="'background-color:' + ${note.color} + '; left:' + ${note.positionX} + 'px; top:' + ${note.positionY} + 'px;'">
+                    <div class="note-header">
+                        <h3 class="note-title" th:text="${note.title}">Note Title</h3>
+                        <span class="note-tag" th:text="${note.tag}">Tag</span>
+                    </div>
+                    <div class="note-body">
+                        <p class="note-content" th:text="${note.content}">Note content goes here...</p>
+                    </div>
+                </div>
             </div>
             
             <button id="add-note-btn" class="floating-btn">+</button>
+            
+            <!-- Debug information -->
+            <div class="debug-info">
+                <h3>Debug Info</h3>
+                <p>User ID: <span th:text="${session.userId}">Unknown</span></p>
+                <p>Username: <span th:text="${username}">Unknown</span></p>
+                <p>Notes Count: <span th:text="${notes != null ? notes.size() : 0}">0</span></p>
+                <div th:if="${notes != null && !notes.isEmpty()}">
+                    <h4>Notes:</h4>
+                    <ul>
+                        <li th:each="note : ${notes}">
+                            ID: <span th:text="${note.id}"></span>, 
+                            Title: <span th:text="${note.title}"></span>,
+                            Position: (<span th:text="${note.positionX}"></span>, <span th:text="${note.positionY}"></span>)
+                        </li>
+                    </ul>
+                </div>
+                <div th:if="${notes == null || notes.isEmpty()}">
+                    <p>No notes found for this user.</p>
+                </div>
+            </div>
         </main>
         
         <!-- Note Modal -->

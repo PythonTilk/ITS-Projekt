@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GUI Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #333;
+        }
+        
+        .note-board {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            overflow: hidden;
+        }
+        
+        .note {
+            position: absolute;
+            width: 200px;
+            min-height: 150px;
+            background-color: #FFFF88;
+            padding: 15px;
+            border-radius: 3px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+            cursor: move;
+            user-select: none;
+        }
+        
+        .note-header {
+            margin-bottom: 10px;
+        }
+        
+        .note-title {
+            margin: 0;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .note-tag {
+            display: inline-block;
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .note-content {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .add-note-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GUI Test - Notiz Projekt</h1>
+        <p>This is a simple test page to verify that the GUI is working correctly.</p>
+        
+        <div id="note-board" class="note-board">
+            <!-- Sample notes -->
+            <div class="note" style="left: 50px; top: 50px; background-color: #FFFF88;">
+                <div class="note-header">
+                    <h3 class="note-title">Sample Note 1</h3>
+                    <span class="note-tag">Test</span>
+                </div>
+                <div class="note-body">
+                    <p class="note-content">This is a sample note to test the drag functionality.</p>
+                </div>
+            </div>
+            
+            <div class="note" style="left: 300px; top: 100px; background-color: #FF9999;">
+                <div class="note-header">
+                    <h3 class="note-title">Sample Note 2</h3>
+                    <span class="note-tag">Important</span>
+                </div>
+                <div class="note-body">
+                    <p class="note-content">This is another sample note with a different color.</p>
+                </div>
+            </div>
+        </div>
+        
+        <button id="add-note-btn" class="add-note-btn">+</button>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Test page loaded');
+            
+            // Get all notes
+            const notes = document.querySelectorAll('.note');
+            
+            // Current dragging state
+            let isDragging = false;
+            let currentNote = null;
+            let offsetX = 0;
+            let offsetY = 0;
+            
+            // Add event listeners to each note
+            notes.forEach(note => {
+                note.addEventListener('mousedown', startDragging);
+            });
+            
+            // Add note button
+            const addNoteBtn = document.getElementById('add-note-btn');
+            addNoteBtn.addEventListener('click', addNewNote);
+            
+            // Functions
+            function startDragging(e) {
+                console.log('Start dragging');
+                // Only handle left mouse button
+                if (e.button !== 0) return;
+                
+                isDragging = true;
+                currentNote = e.currentTarget;
+                
+                // Calculate the offset
+                const rect = currentNote.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                
+                // Add move and up event listeners
+                document.addEventListener('mousemove', dragNote);
+                document.addEventListener('mouseup', stopDragging);
+                
+                // Prevent text selection during drag
+                e.preventDefault();
+            }
+            
+            function dragNote(e) {
+                if (!isDragging) return;
+                
+                // Calculate new position
+                const x = e.clientX - offsetX;
+                const y = e.clientY - offsetY;
+                
+                // Update note position
+                currentNote.style.left = `${x}px`;
+                currentNote.style.top = `${y}px`;
+            }
+            
+            function stopDragging() {
+                if (!isDragging) return;
+                
+                console.log('Stop dragging');
+                
+                // Reset dragging state
+                isDragging = false;
+                currentNote = null;
+                
+                // Remove event listeners
+                document.removeEventListener('mousemove', dragNote);
+                document.removeEventListener('mouseup', stopDragging);
+            }
+            
+            function addNewNote() {
+                console.log('Adding new note');
+                
+                // Create new note
+                const noteBoard = document.getElementById('note-board');
+                const newNote = document.createElement('div');
+                newNote.className = 'note';
+                newNote.style.left = '150px';
+                newNote.style.top = '150px';
+                newNote.style.backgroundColor = getRandomColor();
+                
+                newNote.innerHTML = `
+                    <div class="note-header">
+                        <h3 class="note-title">New Note</h3>
+                        <span class="note-tag">New</span>
+                    </div>
+                    <div class="note-body">
+                        <p class="note-content">This is a new note created by clicking the + button.</p>
+                    </div>
+                `;
+                
+                // Add event listener
+                newNote.addEventListener('mousedown', startDragging);
+                
+                // Add to board
+                noteBoard.appendChild(newNote);
+            }
+            
+            function getRandomColor() {
+                const colors = ['#FFFF88', '#FF9999', '#99FF99', '#9999FF', '#FFCC99', '#FF99FF'];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+        });
+    </script>
+</body>
+</html>
