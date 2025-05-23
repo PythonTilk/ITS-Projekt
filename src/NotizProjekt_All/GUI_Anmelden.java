@@ -101,12 +101,10 @@ public class GUI_Anmelden extends javax.swing.JFrame {
         Anmelden_btn1.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(255, 255, 255)));
         Anmelden_btn1.addActionListener(evt -> {
             if (anmeldencheck()) {
-                // Temporarily commented out for testing
-                // new GUI_MenuTabelle().setVisible(true);
+                new GUI_MenuTabelle().setVisible(true);
                 System.out.println("Login successful for user: " + AngemeldeterUser + " with ID: " + NutzerID);
                 JOptionPane.showMessageDialog(null, "Login successful for user: " + AngemeldeterUser + " with ID: " + NutzerID, "Success", JOptionPane.INFORMATION_MESSAGE);
-                // Don't dispose the window for testing
-                // this.dispose();
+                this.dispose();
             } else {
                 JOptionPane.showMessageDialog(null, "Falsches Passwort oder kein Benutzer mit diesem Benutzernamen vorhanden.", "Fehler", JOptionPane.ERROR_MESSAGE);
             }
@@ -117,10 +115,9 @@ public class GUI_Anmelden extends javax.swing.JFrame {
         neu_hier_btn1.setText("Neu?");
         neu_hier_btn1.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(255, 255, 255)));
         neu_hier_btn1.addActionListener(evt -> {
-            // Temporarily commented out for testing
-            // new GUI_NeuHier().setVisible(true);
+            new GUI_NeuHier().setVisible(true);
             System.out.println("New user registration requested");
-            // this.dispose();
+            this.dispose();
         });
 
         passwordField.setBackground(new java.awt.Color(96, 96, 96));

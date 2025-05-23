@@ -63,7 +63,7 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
             oeffentlicheNotiz = new ArrayList<>();
           
             
-            this.konnektor = new DBVerbindung("localhost", "its-projekt", "root", "");
+            this.konnektor = new DBVerbindung("localhost", "notizprojekt", "notizuser", "notizpassword");
             this.konnektor.open();
           
         } catch (ClassNotFoundException | SQLException ex) {
