@@ -9,9 +9,9 @@ This document provides instructions for setting up the ITS-Projekt application o
 - Server IP: 167.172.163.254 (or your own server IP)
 - GitHub authentication (Personal Access Token or SSH key)
 
-## GitHub Authentication
+## Repository Access Options
 
-GitHub no longer supports password authentication for Git operations. You need to use either a Personal Access Token or SSH key.
+GitHub no longer supports password authentication for Git operations. You have three options to access the repository:
 
 ### Option 1: Personal Access Token (PAT)
 
@@ -39,9 +39,26 @@ GitHub no longer supports password authentication for Git operations. You need t
    ```
 3. Go to GitHub → Settings → SSH and GPG keys → New SSH key
 4. Add the public key from your server
-5. Edit the setup script and replace:
+5. Use the SSH version of the setup script:
+   ```bash
+   ./setup_server_ssh.sh
    ```
-   GIT_REPO="git@github.com:PythonTilk/ITS-Projekt.git"
+
+### Option 3: Direct Download (No Authentication Required)
+
+This is the simplest option as it doesn't require any GitHub authentication:
+
+1. Upload the `download_repo.sh` script to your server
+2. Make it executable and run it:
+   ```bash
+   chmod +x download_repo.sh
+   ./download_repo.sh
+   ```
+3. After the script completes, run the setup script:
+   ```bash
+   cd /home/appuser/ITS-Projekt
+   chmod +x setup_server.sh
+   ./setup_server.sh
    ```
 
 ## Automatic Setup
