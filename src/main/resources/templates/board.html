@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Note Board - Notiz Projekt</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="logo">
+                <h1>Notiz Projekt</h1>
+            </div>
+            
+            <div class="search-bar">
+                <form id="search-form" action="/search" method="get">
+                    <input type="text" id="searchTerm" name="searchTerm" placeholder="Search notes..." 
+                           th:value="${searchTerm != null ? searchTerm : ''}">
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+            
+            <div class="user-menu">
+                <span th:text="${username}"></span>
+                <button id="logout-btn" class="btn btn-small">Logout</button>
+            </div>
+        </header>
+        
+        <main class="board-container">
+            <div id="note-board" class="note-board">
+                <!-- Notes will be rendered here by JavaScript -->
+            </div>
+            
+            <button id="add-note-btn" class="floating-btn">+</button>
+        </main>
+        
+        <!-- Note Modal -->
+        <div id="note-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <h2 id="modal-title">Add New Note</h2>
+                
+                <form id="note-form">
+                    <input type="hidden" id="note-id">
+                    
+                    <div class="form-group">
+                        <label for="note-title">Title</label>
+                        <input type="text" id="note-title" name="title" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="note-tag">Tag</label>
+                        <input type="text" id="note-tag" name="tag">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="note-content">Content</label>
+                        <textarea id="note-content" name="content" rows="5" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="note-color">Color</label>
+                        <select id="note-color" name="color">
+                            <option value="#FFFF88">Yellow</option>
+                            <option value="#FF9999">Red</option>
+                            <option value="#99FF99">Green</option>
+                            <option value="#9999FF">Blue</option>
+                            <option value="#FFCC99">Orange</option>
+                            <option value="#FF99FF">Pink</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" id="delete-note-btn" class="btn btn-danger" style="display: none;">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Templates for rendering notes -->
+    <template id="note-template">
+        <div class="note" data-id="">
+            <div class="note-header">
+                <h3 class="note-title"></h3>
+                <span class="note-tag"></span>
+            </div>
+            <div class="note-body">
+                <p class="note-content"></p>
+            </div>
+        </div>
+    </template>
+    
+    <script th:src="@{/js/board.js}"></script>
+</body>
+</html>
