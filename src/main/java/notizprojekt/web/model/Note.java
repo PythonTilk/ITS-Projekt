@@ -1,5 +1,6 @@
 package notizprojekt.web.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,6 +30,7 @@ public class Note {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "B_id")
+    @JsonBackReference
     private User user;
     
     // Position on the board

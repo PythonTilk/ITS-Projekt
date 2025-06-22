@@ -35,6 +35,9 @@ public class WebController {
     @GetMapping("/board")
     public String board(Model model, HttpSession session) {
         Integer userId = (Integer) session.getAttribute("userId");
+        System.out.println("Session attributes: " + session.getAttributeNames());
+        System.out.println("UserId from session: " + userId);
+        
         if (userId == null) {
             System.out.println("No userId in session, redirecting to login");
             return "redirect:/login";
@@ -57,6 +60,7 @@ public class WebController {
                 if (note.getColor() == null) {
                     note.setColor("#FFFF88");
                 }
+                System.out.println("Note: " + note.getId() + ", " + note.getTitle() + ", " + note.getPositionX() + ", " + note.getPositionY() + ", " + note.getColor());
             }
             
             model.addAttribute("notes", notes);

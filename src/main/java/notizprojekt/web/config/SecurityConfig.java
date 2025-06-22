@@ -20,8 +20,7 @@ public class SecurityConfig {
         http
             .csrf().disable()
             .authorizeRequests()
-                .antMatchers("/css/**", "/js/**", "/images/**", "/register", "/login", "/api/auth/**", "/test.html", "/", "/api/test").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             .and()
             .formLogin().disable()
             .logout()
