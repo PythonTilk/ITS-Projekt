@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class GUI_Anmelden extends JFrame {
+public final class GUI_Anmelden extends JFrame {
 
     private DBVerbindung konnektor;
     private ArrayList<User> userListe;
