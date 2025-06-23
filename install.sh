@@ -332,13 +332,45 @@ setup_application() {
     # Switch to application user directory
     cd "$PROJECT_DIR"
     
+    # Remove existing directory if it exists
+    if [[ -d "$PROJECT_NAME" ]]; then
+        warning "Existing $PROJECT_NAME directory found, removing..."
+        sudo -u "$PROJECT_USER" rm -rf "$PROJECT_NAME"
+    fi
+    
+    # Verify git is available
+    if ! command -v git &> /dev/null; then
+        error "Git is not installed or not in PATH"
+        exit 1
+    fi
+    
+    # Test git access as the application user
+    if ! sudo -u "$PROJECT_USER" git --version &> /dev/null; then
+        error "Git is not accessible for user $PROJECT_USER"
+        exit 1
+    fi
+    
     # Clone repository as application user
-    sudo -u "$PROJECT_USER" git clone "$REPO_URL"
+    info "Cloning repository from $REPO_URL..."
+    info "Target directory: $PROJECT_DIR/$PROJECT_NAME"
+    info "Running as user: $PROJECT_USER"
+    
+    if ! sudo -u "$PROJECT_USER" git clone "$REPO_URL"; then
+        error "Failed to clone repository. Check internet connection and repository URL."
+        error "Repository URL: $REPO_URL"
+        error "Current directory: $(pwd)"
+        error "User permissions: $(sudo -u "$PROJECT_USER" whoami)"
+        exit 1
+    fi
+    success "Repository cloned successfully"
     
     # Switch to the html branch (web application)
     cd "$PROJECT_DIR/$PROJECT_NAME"
     info "Switching to html branch for web application..."
-    sudo -u "$PROJECT_USER" git checkout html
+    if ! sudo -u "$PROJECT_USER" git checkout html; then
+        error "Failed to checkout html branch. Repository may be corrupted."
+        exit 1
+    fi
     success "Switched to html branch"
     
     # Verify we have the correct files
@@ -357,7 +389,17 @@ setup_application() {
     # Build application
     cd "$PROJECT_DIR/$PROJECT_NAME"
     info "Building application with Maven..."
-    sudo -u "$PROJECT_USER" mvn clean package -DskipTests
+    if ! sudo -u "$PROJECT_USER" mvn clean package -DskipTests; then
+        error "Maven build failed. Check logs above for details."
+        error "Common issues: Java version, Maven installation, or network connectivity."
+        exit 1
+    fi
+    
+    # Verify the JAR file was created
+    if [[ ! -f "target/notizprojekt-web-*.jar" ]]; then
+        error "JAR file not found in target directory. Build may have failed silently."
+        exit 1
+    fi
     
     success "Application built successfully"
 }
