@@ -29,7 +29,18 @@ For a quick and automated installation, use the provided installation script. Th
 
 ```bash
 # Download and run the installation script
-curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/main/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash
+```
+
+### 🔧 Installation with Environment Variables
+
+```bash
+# Install with predefined configuration (no prompts)
+DOMAIN="notes.example.com" \
+EMAIL="admin@example.com" \
+DB_PASSWORD="your-secure-password" \
+SKIP_PROMPTS="true" \
+curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash
 ```
 
 ### 📋 What the Installation Script Does

@@ -2,6 +2,19 @@
 
 # ITS-Projekt Installation Script
 # This script automates the complete installation of the ITS-Projekt on a fresh server
+#
+# Usage:
+#   sudo ./install.sh
+#   curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash
+#
+# Environment Variables (optional):
+#   DOMAIN="your-domain.com"        # Domain name (will prompt if not set)
+#   EMAIL="admin@domain.com"        # Email for SSL certificates (will prompt if not set)
+#   DB_PASSWORD="password"          # Database password (will prompt if not set)
+#   SKIP_PROMPTS="true"            # Skip interactive prompts (use env vars)
+#
+# Example with environment variables:
+#   DOMAIN="notes.example.com" EMAIL="admin@example.com" DB_PASSWORD="mypassword" sudo ./install.sh
 
 set -e  # Exit on any error
 
@@ -21,9 +34,10 @@ PROJECT_DIR="/opt/notizprojekt"
 REPO_URL="https://github.com/PythonTilk/ITS-Projekt.git"
 DB_NAME="notizprojekt"
 DB_USER="notizprojekt"
-DOMAIN=""
-EMAIL=""
-DB_PASSWORD=""
+DOMAIN="${DOMAIN:-}"
+EMAIL="${EMAIL:-}"
+DB_PASSWORD="${DB_PASSWORD:-}"
+SKIP_PROMPTS="${SKIP_PROMPTS:-false}"
 JAVA_OPTS="-Xmx1g -Xms512m -XX:+UseG1GC"
 
 # Functions
@@ -66,33 +80,42 @@ check_root() {
 
 # Get user input
 get_user_input() {
-    echo -e "${CYAN}Please provide the following information:${NC}"
-    echo ""
-    
-    # Domain name
-    while [[ -z "$DOMAIN" ]]; do
-        read -p "Enter your domain name (e.g., example.com): " DOMAIN
-        if [[ -z "$DOMAIN" ]]; then
-            warning "Domain name is required!"
+    if [[ "$SKIP_PROMPTS" == "true" ]]; then
+        # Validate required environment variables
+        if [[ -z "$DOMAIN" || -z "$EMAIL" || -z "$DB_PASSWORD" ]]; then
+            error "When SKIP_PROMPTS=true, you must provide DOMAIN, EMAIL, and DB_PASSWORD environment variables"
+            exit 1
         fi
-    done
-    
-    # Email for SSL certificate
-    while [[ -z "$EMAIL" ]]; do
-        read -p "Enter your email for SSL certificate: " EMAIL
-        if [[ -z "$EMAIL" ]]; then
-            warning "Email is required for SSL certificate!"
-        fi
-    done
-    
-    # Database password
-    while [[ -z "$DB_PASSWORD" ]]; do
-        read -s -p "Enter database password for $DB_USER: " DB_PASSWORD
+        info "Using environment variables (skipping prompts)"
+    else
+        echo -e "${CYAN}Please provide the following information:${NC}"
         echo ""
-        if [[ -z "$DB_PASSWORD" ]]; then
-            warning "Database password is required!"
-        fi
-    done
+        
+        # Domain name
+        while [[ -z "$DOMAIN" ]]; do
+            read -p "Enter your domain name (e.g., example.com): " DOMAIN
+            if [[ -z "$DOMAIN" ]]; then
+                warning "Domain name is required!"
+            fi
+        done
+        
+        # Email for SSL certificate
+        while [[ -z "$EMAIL" ]]; do
+            read -p "Enter your email for SSL certificate: " EMAIL
+            if [[ -z "$EMAIL" ]]; then
+                warning "Email is required for SSL certificate!"
+            fi
+        done
+        
+        # Database password
+        while [[ -z "$DB_PASSWORD" ]]; do
+            read -s -p "Enter database password for $DB_USER: " DB_PASSWORD
+            echo ""
+            if [[ -z "$DB_PASSWORD" ]]; then
+                warning "Database password is required!"
+            fi
+        done
+    fi
     
     echo ""
     info "Configuration:"
@@ -102,11 +125,13 @@ get_user_input() {
     info "Project Directory: $PROJECT_DIR"
     echo ""
     
-    read -p "Continue with installation? (y/N): " -n 1 -r
-    echo ""
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        info "Installation cancelled."
-        exit 0
+    if [[ "$SKIP_PROMPTS" != "true" ]]; then
+        read -p "Continue with installation? (y/N): " -n 1 -r
+        echo ""
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            info "Installation cancelled."
+            exit 0
+        fi
     fi
 }
 
@@ -732,6 +757,17 @@ case "${1:-}" in
         echo "Options:"
         echo "  --help, -h     Show this help message"
         echo "  --uninstall    Uninstall the application"
+        echo ""
+        echo "Environment Variables (optional):"
+        echo "  DOMAIN         Domain name (e.g., example.com)"
+        echo "  EMAIL          Email for SSL certificate"
+        echo "  DB_PASSWORD    Database password"
+        echo "  SKIP_PROMPTS   Set to 'true' to skip interactive prompts"
+        echo ""
+        echo "Examples:"
+        echo "  sudo ./install.sh"
+        echo "  DOMAIN=\"notes.example.com\" EMAIL=\"admin@example.com\" sudo ./install.sh"
+        echo "  curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash"
         echo ""
         echo "This script will install and configure:"
         echo "  - Java 11"

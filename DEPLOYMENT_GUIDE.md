@@ -6,7 +6,16 @@ Quick reference for deploying and managing your ITS-Projekt installation.
 
 ### One-Command Setup
 ```bash
-curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/main/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash
+```
+
+### Automated Setup (No Prompts)
+```bash
+DOMAIN="your-domain.com" \
+EMAIL="your-email@example.com" \
+DB_PASSWORD="your-secure-password" \
+SKIP_PROMPTS="true" \
+curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash
 ```
 
 ### Manual Download & Install
