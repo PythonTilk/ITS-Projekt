@@ -10,8 +10,9 @@ This guide provides straightforward instructions for deploying the ITS-Projekt n
 2. [Prerequisites](#prerequisites)
 3. [Automated Setup](#automated-setup)
 4. [Manual Setup](#manual-setup)
-5. [Configuration](#configuration)
-6. [Troubleshooting](#troubleshooting)
+5. [Production Deployment with Domain](#production-deployment-with-domain)
+6. [Configuration](#configuration)
+7. [Troubleshooting](#troubleshooting)
 
 ## 🚀 Quick Setup
 
@@ -185,6 +186,122 @@ sudo systemctl daemon-reload
 sudo systemctl enable notizprojekt
 sudo systemctl start notizprojekt
 ```
+
+## 🌐 Production Deployment with Domain
+
+For production deployment with a custom domain and HTTPS, follow these additional steps after completing the basic setup.
+
+### Step 1: Install and Configure Nginx
+
+```bash
+# Install Nginx
+sudo apt update
+sudo apt install nginx -y
+
+# Create Nginx configuration for your domain
+sudo tee /etc/nginx/sites-available/notizprojekt > /dev/null <<EOF
+server {
+    listen 80;
+    server_name your-domain.com www.your-domain.com;
+
+    location / {
+        proxy_pass http://localhost:12000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        
+        # WebSocket support (if needed)
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+EOF
+
+# Enable the site
+sudo ln -s /etc/nginx/sites-available/notizprojekt /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+
+# Test and restart Nginx
+sudo nginx -t
+sudo systemctl restart nginx
+sudo systemctl enable nginx
+```
+
+### Step 2: Configure Firewall for Web Traffic
+
+```bash
+# Allow HTTP and HTTPS traffic
+sudo ufw allow 'Nginx Full'
+sudo ufw allow 22/tcp  # Keep SSH access
+
+# Remove direct access to application port (optional, for security)
+sudo ufw delete allow 12000/tcp
+
+# Enable firewall
+sudo ufw --force enable
+```
+
+### Step 3: Set Up SSL with Let's Encrypt
+
+```bash
+# Install Certbot
+sudo apt install snapd -y
+sudo snap install core; sudo snap refresh core
+sudo snap install --classic certbot
+
+# Create symlink
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
+
+# Get SSL certificate (replace your-domain.com with your actual domain)
+sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+
+# Test automatic renewal
+sudo certbot renew --dry-run
+```
+
+### Step 4: Update DNS Records
+
+Point your domain to your server's IP address:
+
+```
+A Record: your-domain.com → your-server-ip
+A Record: www.your-domain.com → your-server-ip
+```
+
+### Step 5: Verify Production Setup
+
+After completing the above steps:
+
+1. **HTTP Access**: `http://your-domain.com` (should redirect to HTTPS)
+2. **HTTPS Access**: `https://your-domain.com` (secure connection)
+3. **Application**: Should be accessible through your domain
+
+### Production Configuration Example
+
+For a domain like `notes.tilk.tech`, your Nginx config would be:
+
+```nginx
+server {
+    listen 80;
+    server_name notes.tilk.tech;
+
+    location / {
+        proxy_pass http://localhost:12000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+```
+
+Then run: `sudo certbot --nginx -d notes.tilk.tech`
 
 ## ⚙️ Configuration
 

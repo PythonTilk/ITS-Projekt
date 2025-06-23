@@ -57,9 +57,24 @@ public class NoteService {
     }
     
     public List<Note> getAllNotesByUserIdDirect(Integer userId) {
+        // First get the username for the current user
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (!userOpt.isPresent()) {
+            return new ArrayList<>();
+        }
+        String username = userOpt.get().getUsername();
+        
+        // SQL query to get:
+        // 1. Notes owned by the user (B_id = userId)
+        // 2. Notes shared with everyone (privacy_level = 'everyone')
+        // 3. Notes shared with specific people where username is in shared_with field
         String sql = "SELECT n.N_id, n.Titel, n.Tag, n.Inhalt, n.B_id, n.position_x, n.position_y, n.color, " +
                      "n.note_type, n.privacy_level, n.shared_with, n.has_images, n.image_paths " +
-                     "FROM notiz n WHERE n.B_id = ?";
+                     "FROM notiz n WHERE " +
+                     "n.B_id = ? OR " +  // Notes owned by user
+                     "n.privacy_level = 'everyone' OR " +  // Notes shared with everyone
+                     "(n.privacy_level = 'some_people' AND n.shared_with IS NOT NULL AND " +
+                     "FIND_IN_SET(?, REPLACE(n.shared_with, ' ', '')) > 0)";
         
         RowMapper<Note> rowMapper = (rs, rowNum) -> {
             Note note = new Note();
@@ -98,16 +113,16 @@ public class NoteService {
             note.setImagePaths(rs.getString("image_paths"));
             
             // Set user
-            Optional<User> userOpt = userRepository.findById(rs.getInt("B_id"));
-            userOpt.ifPresent(note::setUser);
+            Optional<User> noteOwner = userRepository.findById(rs.getInt("B_id"));
+            noteOwner.ifPresent(note::setUser);
             
             return note;
         };
         
         try {
-            return jdbcTemplate.query(sql, rowMapper, userId);
+            return jdbcTemplate.query(sql, rowMapper, userId, username);
         } catch (Exception e) {
-            System.err.println("Error executing direct SQL query: " + e.getMessage());
+            System.err.println("Error executing shared notes SQL query: " + e.getMessage());
             return new ArrayList<>();
         }
     }
@@ -162,13 +177,15 @@ public class NoteService {
     }
     
     public List<Note> searchNotes(Integer userId, String searchTerm) {
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            return noteRepository.findByUserAndTitleContainingOrUserAndTagContainingOrUserAndContentContaining(
-                    user, searchTerm, user, searchTerm, user, searchTerm);
-        }
-        throw new RuntimeException("User not found");
+        // Get all notes (including shared) and filter by search term
+        List<Note> allNotes = getAllNotesByUserIdDirect(userId);
+        return allNotes.stream()
+                .filter(note -> 
+                    (note.getTitle() != null && note.getTitle().toLowerCase().contains(searchTerm.toLowerCase())) ||
+                    (note.getTag() != null && note.getTag().toLowerCase().contains(searchTerm.toLowerCase())) ||
+                    (note.getContent() != null && note.getContent().toLowerCase().contains(searchTerm.toLowerCase()))
+                )
+                .collect(java.util.stream.Collectors.toList());
     }
     
     public Note createEnhancedNote(Integer userId, Map<String, Object> noteData) {
