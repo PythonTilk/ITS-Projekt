@@ -2,6 +2,25 @@
 
 This guide provides comprehensive instructions for setting up the ITS-Projekt (Note Management System) on a server for public usage.
 
+## 🎯 Quick Summary
+
+**For most users**: Use the automated installation script for a complete, production-ready setup:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash
+```
+
+**What you get**:
+- ✅ Complete application with user profiles and collaboration features
+- ✅ SSL-secured domain with automatic certificate renewal
+- ✅ Production-grade security and performance optimizations
+- ✅ Automated backup and update system
+- ✅ Monitoring and health checks
+
+**Time to deploy**: 5-10 minutes on a fresh server
+
+---
+
 ## Table of Contents
 
 1. [Quick Start (Automated Installation)](#quick-start-automated-installation)

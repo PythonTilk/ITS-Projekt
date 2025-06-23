@@ -1,19 +1,25 @@
-# ITS-Projekt - Enhanced Note-Taking Application
+# ITS-Projekt - Advanced Note Management System
+
+A comprehensive, modern note-taking application with user profiles, collaborative features, and production-ready deployment tools.
 
 ## 🚀 Quick Production Setup
 
-Deploy the application to your server with a single command:
+Deploy the complete application to your server with a single command:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/setup.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash
 ```
 
-For custom domains:
+**Automated Setup (No Prompts):**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/setup.sh | sudo DOMAIN="your-domain.com" EMAIL="admin@your-domain.com" bash
+DOMAIN="notes.example.com" \
+EMAIL="admin@example.com" \
+DB_PASSWORD="your-secure-password" \
+SKIP_PROMPTS="true" \
+curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash
 ```
 
-📖 **[Complete Setup Guide](server-setup.md)** - Detailed instructions for production deployment
+📖 **[Complete Setup Guide](server-setup.md)** | 🚀 **[Quick Deployment Guide](DEPLOYMENT_GUIDE.md)**
 
 ## Overview
 
@@ -23,6 +29,13 @@ ITS-Projekt is a comprehensive note-taking application that allows users to crea
 2. **Web Application**: A modern Spring Boot-based web application with enhanced features (html branch)
 
 ## ✨ Enhanced Features
+
+### 👤 **User Profile System**
+- **Custom Profile Pictures**: Upload and manage profile pictures with drag-and-drop support
+- **Display Names**: Set custom display names separate from usernames
+- **User Biographies**: Add personal descriptions and information
+- **Profile Pages**: Dedicated profile pages for each user
+- **Author Links**: Click on author names in shared notes to view their profiles
 
 ### 🎨 **Visual & Interface Enhancements**
 - **Dark Mode Toggle**: Switch between light and dark themes for comfortable viewing
@@ -41,14 +54,23 @@ ITS-Projekt is a comprehensive note-taking application that allows users to crea
 ### 🔒 **Privacy & Sharing**
 - **Privacy Levels**: Private, shared, or public note visibility
 - **User-Specific Sharing**: Share notes with specific users
+- **Author Information**: Notes display author names with profile links
 - **Secure Authentication**: BCrypt password encryption
 - **Session Management**: Secure user sessions with proper logout
 
 ### 🏷️ **Organization & Search**
 - **Tagging System**: Organize notes with custom tags
 - **Advanced Search**: Search by title, content, tags, or note type
+- **User Search**: Find users by username or display name
 - **Spatial Positioning**: Remember note positions on the board
 - **Note Categories**: Organize by type (text, code, rich text)
+
+### 🚀 **Production Ready**
+- **Automated Installation**: One-command server setup with SSL
+- **Update Management**: Automated update system with rollback capability
+- **Health Monitoring**: Built-in health checks and logging
+- **Backup System**: Automated database and application backups
+- **Security Hardening**: Production security configurations
 
 ## Technical Details
 
@@ -145,9 +167,26 @@ spring.datasource.password=notizpassword
 
 ## 🚀 Getting Started
 
-Welcome to the enhanced ITS-Projekt! Choose your preferred version:
+### 🌟 **Production Deployment (Recommended)**
 
-### 🌟 **Recommended: Enhanced Web Application**
+For production servers, use the automated installation:
+
+```bash
+# Interactive installation
+curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash
+
+# Or automated installation
+DOMAIN="your-domain.com" EMAIL="admin@example.com" DB_PASSWORD="secure-password" \
+curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash
+```
+
+This will automatically:
+- Install all dependencies (Java, Maven, MySQL, Nginx)
+- Configure SSL certificates
+- Set up the application as a system service
+- Configure firewall and security settings
+
+### 💻 **Development Setup**
 
 #### 1️⃣ **Clone and Setup Database**
 ```bash
@@ -181,6 +220,7 @@ mvn spring-boot:run
 
 #### 3️⃣ **Access the Application**
 - **URL**: `http://localhost:12000`
+- **Create Account**: Register a new user or use test account
 - **Test Account**: 
   - Username: `testuser123`
   - Password: `password123`
@@ -215,9 +255,16 @@ After setup, you should see:
 ### 🌟 **Enhanced Web Application Features**
 
 #### 🔐 **Authentication**
-1. **Login**: Use `testuser123` / `password123` or create a new account
+1. **Login**: Use existing account or create a new one
 2. **Registration**: Create new accounts with email validation
 3. **Security**: Passwords are encrypted with BCrypt
+
+#### 👤 **User Profile Management**
+1. **Profile Setup**: Click "Profile" in the user menu to access your profile
+2. **Profile Picture**: Upload custom profile pictures with drag-and-drop support
+3. **Display Name**: Set a custom display name different from your username
+4. **Biography**: Add a personal description or bio
+5. **View Profiles**: Click on author names in shared notes to view their profiles
 
 #### 📝 **Creating and Managing Notes**
 1. **Add Note**: Click the "+" button to create a new note
@@ -226,6 +273,7 @@ After setup, you should see:
    - **🎨 Rich Text**: Full WYSIWYG editor with formatting toolbar
    - **💻 Code**: Syntax-highlighted code editor with language support
 3. **Auto-Save**: Changes are saved automatically as you type
+4. **Author Information**: Notes display author names with clickable profile links
 
 #### 🎨 **Visual Organization**
 1. **Drag & Drop**: Move notes around the board to organize spatially
@@ -238,11 +286,19 @@ After setup, you should see:
 2. **Privacy Levels**: Set notes as private, shared, or public
 3. **Image Upload**: Attach images to notes (drag & drop supported)
 4. **Search**: Find notes by title, content, or tags
+5. **User Search**: Find other users by username or display name
 
 #### 🔄 **Collaboration**
 1. **Share Notes**: Share specific notes with other users
 2. **Privacy Control**: Manage who can see your notes
 3. **User Management**: View and manage shared access
+4. **Author Discovery**: Explore other users' profiles through shared notes
+
+#### 🛠️ **Server Management** (Production)
+1. **Updates**: Use `./update.sh` for automatic updates
+2. **Monitoring**: Check logs with `sudo journalctl -u notizprojekt -f`
+3. **Backups**: Automated backups are created before updates
+4. **Health Checks**: Built-in health monitoring and alerts
 
 ### 🖥️ **Desktop Application (Classic)**
 
@@ -256,6 +312,54 @@ After setup, you should see:
 DBVerbindung dbConnection = new DBVerbindung("localhost", "notizprojekt", "notizuser", "notizpassword");
 dbConnection.open();
 ```
+
+## 🔄 Update Management
+
+### Automatic Updates
+
+The project includes a comprehensive update system for production deployments:
+
+#### **Update Script Usage**
+```bash
+# Basic update (interactive)
+sudo -u notizprojekt /opt/notizprojekt/ITS-Projekt/update.sh
+
+# Check application status
+sudo -u notizprojekt /opt/notizprojekt/ITS-Projekt/update.sh --status
+
+# View application logs
+sudo -u notizprojekt /opt/notizprojekt/ITS-Projekt/update.sh --logs
+```
+
+#### **Scheduled Updates**
+```bash
+# Setup automatic weekly updates
+sudo -u notizprojekt crontab -e
+# Add: 0 3 * * 0 /opt/notizprojekt/ITS-Projekt/update.sh
+```
+
+#### **Update Features**
+- ✅ Automatic backup before updates
+- ✅ Health checks after deployment
+- ✅ Rollback capability if issues occur
+- ✅ Zero-downtime updates
+- ✅ Comprehensive logging
+
+### Manual Server Updates
+
+For existing installations without the update script:
+
+```bash
+# Download the update script
+sudo -u notizprojekt curl -o /opt/notizprojekt/ITS-Projekt/update.sh \
+  https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/update.sh
+sudo -u notizprojekt chmod +x /opt/notizprojekt/ITS-Projekt/update.sh
+
+# Run the update
+sudo -u notizprojekt /opt/notizprojekt/ITS-Projekt/update.sh
+```
+
+📖 **[Complete Update Guide](server-setup.md#update-script-usage-guide)** - Detailed update documentation
 
 ## Testing
 
@@ -405,6 +509,30 @@ DROP USER IF EXISTS 'notizuser'@'%';
 -- Then re-run the CREATE USER commands above
 ```
 
+### 🛠️ **Production Management Commands**
+
+For production installations:
+
+```bash
+# Check application status
+sudo systemctl status notizprojekt
+
+# View application logs
+sudo journalctl -u notizprojekt -f
+
+# Restart application
+sudo systemctl restart notizprojekt
+
+# Update application
+sudo -u notizprojekt /opt/notizprojekt/ITS-Projekt/update.sh
+
+# Check update logs
+tail -f /opt/notizprojekt/ITS-Projekt/update.log
+
+# View backups
+ls -la /opt/notizprojekt/backups/
+```
+
 ### 📞 **Getting Help**
 
 If you're still experiencing issues:
@@ -414,6 +542,7 @@ If you're still experiencing issues:
 3. **Test Database**: Verify database connection independently
 4. **Browser Console**: Check for JavaScript errors (web version)
 5. **Port Conflicts**: Ensure port 12000 is available
+6. **Update System**: Try running the update script to get latest fixes
 
 #### Quick Health Check
 ```bash
@@ -422,7 +551,15 @@ mysql -u notizuser -pnotizpassword -e "SELECT COUNT(*) FROM notizprojekt.nutzer;
 
 # Application test (should return 200 or 302)
 curl -I http://localhost:12000/login
+
+# Production health check
+sudo -u notizprojekt /opt/notizprojekt/ITS-Projekt/update.sh --status
 ```
+
+#### 📚 **Documentation Links**
+- 📖 **[Complete Setup Guide](server-setup.md)** - Comprehensive installation and configuration
+- 🚀 **[Quick Deployment Guide](DEPLOYMENT_GUIDE.md)** - Fast reference for common tasks
+- 🔄 **[Update Script Guide](server-setup.md#update-script-usage-guide)** - Detailed update management
 
 ## License
 
