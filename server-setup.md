@@ -1,13 +1,15 @@
 # ITS-Projekt Server Setup Guide
 
-This guide provides comprehensive instructions for setting up the ITS-Projekt (Note Management System) on a server for public usage.
+This guide provides comprehensive instructions for setting up the ITS-Projekt Note Management System on a production server for public usage.
 
 ## 🎯 Quick Summary
 
 **For most users**: Use the automated installation script for a complete, production-ready setup:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh -o install.sh
+chmod +x install.sh
+sudo ./install.sh
 ```
 
 **What you get**:
@@ -18,6 +20,30 @@ curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install
 - ✅ Monitoring and health checks
 
 **Time to deploy**: 5-10 minutes on a fresh server
+
+### 🌐 Example Deployment
+
+Here's a real-world example of deploying to a DigitalOcean droplet:
+
+```bash
+# 1. Create a new Ubuntu 24.10 droplet with your domain pointing to it
+# 2. SSH into your server
+ssh root@your-server-ip
+
+# 3. Run the installation
+curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh -o install.sh
+chmod +x install.sh
+./install.sh
+
+# 4. Follow prompts:
+# Domain: notes.yourdomain.com
+# Email: admin@yourdomain.com  
+# Database Password: [secure password]
+
+# 5. Access your application at https://notes.yourdomain.com
+```
+
+**Result**: A fully functional, SSL-secured note management system ready for production use.
 
 ---
 
@@ -44,12 +70,27 @@ curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install
 
 For a quick and automated installation, use the provided installation script. This is the **recommended method** for most users.
 
-### 🚀 One-Command Installation
+### 🚀 Recommended Installation Method
 
 ```bash
-# Download and run the installation script
-curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash
+# Download and run the installation script (recommended)
+curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh -o install.sh
+chmod +x install.sh
+sudo ./install.sh
 ```
+
+**Note**: The script has been updated with Java 17 support and improved JAR file detection for better compatibility.
+
+### 🔧 Recent Improvements (Latest Version)
+
+The installation script has been enhanced with:
+
+- ✅ **Java 17 Support**: Automatic installation and configuration of Java 17 (required for Spring Boot)
+- ✅ **Dynamic JAR Detection**: Improved build process with proper JAR file detection
+- ✅ **Enhanced Error Handling**: Better error messages and debugging information
+- ✅ **Systemd Service Optimization**: Dynamic JAR file path configuration
+- ✅ **Cross-Platform Support**: Works on Ubuntu, Debian, CentOS, and RHEL
+- ✅ **Security Hardening**: Enhanced security configurations and file permissions
 
 ### 🔧 Installation with Environment Variables
 
@@ -193,11 +234,21 @@ If you prefer manual installation or need custom configuration, follow the detai
 ### Software Requirements
 
 - **Operating System**: Ubuntu 20.04 LTS or newer (recommended), CentOS 8+, or Debian 11+
-- **Java**: OpenJDK 17 or higher
-- **Database**: MySQL 8.0+ or MariaDB 10.5+
-- **Web Server**: Nginx (recommended) or Apache
-- **Build Tool**: Maven 3.6+
-- **Version Control**: Git
+- **Java**: OpenJDK 17 or higher (automatically installed by script)
+- **Database**: MySQL 8.0+ or MariaDB 10.5+ (automatically configured)
+- **Web Server**: Nginx (automatically configured with SSL)
+- **Build Tool**: Maven 3.6+ (automatically installed)
+- **Version Control**: Git (automatically installed)
+
+### Tested Platforms
+
+The installation script has been tested and verified on:
+- ✅ Ubuntu 24.10 (latest)
+- ✅ Ubuntu 22.04 LTS
+- ✅ Ubuntu 20.04 LTS
+- ✅ Debian 11+
+- ✅ CentOS 8+
+- ✅ RHEL 8+
 
 ### Hardware Requirements
 
@@ -1267,7 +1318,36 @@ This comprehensive guide ensures you can effectively manage updates for your ITS
 
 ### Common Issues
 
-#### 1. Application Won't Start
+#### 1. Installation Script Issues
+
+**JAR File Not Found Error**
+If you see "JAR file not found in target directory" despite successful Maven build:
+
+```bash
+# Check if JAR file exists
+ls -la /opt/notizprojekt/ITS-Projekt/target/*.jar
+
+# If JAR exists but script fails, update to latest version
+cd /opt/notizprojekt/ITS-Projekt
+git pull origin html
+sudo ./install.sh --continue
+```
+
+**Java Version Mismatch**
+The application requires Java 17. If you see Java version errors:
+
+```bash
+# Check Java version
+java -version
+
+# Install Java 17 if needed
+sudo apt install openjdk-17-jdk -y
+
+# Set Java alternatives
+sudo update-alternatives --config java
+```
+
+#### 2. Application Won't Start
 
 ```bash
 # Check logs
@@ -1278,9 +1358,12 @@ tail -f /opt/notizprojekt/logs/application.log
 
 # Check if port is in use
 sudo netstat -tlnp | grep :8080
+
+# Verify JAR file exists and is executable
+ls -la /opt/notizprojekt/ITS-Projekt/target/notizprojekt-web-*.jar
 ```
 
-#### 2. Database Connection Issues
+#### 3. Database Connection Issues
 
 ```bash
 # Test database connection
@@ -1293,7 +1376,7 @@ sudo systemctl status mysql
 sudo tail -f /var/log/mysql/error.log
 ```
 
-#### 3. Nginx Issues
+#### 4. Nginx Issues
 
 ```bash
 # Check Nginx status
