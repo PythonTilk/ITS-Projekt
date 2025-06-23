@@ -6,10 +6,17 @@ import notizprojekt.web.model.User;
 import notizprojekt.web.repository.NoteRepository;
 import notizprojekt.web.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -50,7 +57,8 @@ public class NoteService {
     }
     
     public List<Note> getAllNotesByUserIdDirect(Integer userId) {
-        String sql = "SELECT n.N_id, n.Titel, n.Tag, n.Inhalt, n.B_id, n.position_x, n.position_y, n.color " +
+        String sql = "SELECT n.N_id, n.Titel, n.Tag, n.Inhalt, n.B_id, n.position_x, n.position_y, n.color, " +
+                     "n.note_type, n.privacy_level, n.shared_with, n.has_images, n.image_paths " +
                      "FROM notiz n WHERE n.B_id = ?";
         
         RowMapper<Note> rowMapper = (rs, rowNum) -> {
@@ -63,7 +71,31 @@ public class NoteService {
             // Set position and color
             note.setPositionX(rs.getObject("position_x") != null ? rs.getInt("position_x") : 0);
             note.setPositionY(rs.getObject("position_y") != null ? rs.getInt("position_y") : 0);
-            note.setColor(rs.getString("color") != null ? rs.getString("color") : "#FFFF88");
+            note.setColor(rs.getString("color") != null ? rs.getString("color") : "#fef3c7");
+            
+            // Set new fields
+            String noteTypeStr = rs.getString("note_type");
+            if (noteTypeStr != null) {
+                note.setNoteType(Note.NoteType.valueOf(noteTypeStr));
+            } else {
+                note.setNoteType(Note.NoteType.text);
+            }
+            
+            String privacyLevelStr = rs.getString("privacy_level");
+            if (privacyLevelStr != null) {
+                for (Note.PrivacyLevel level : Note.PrivacyLevel.values()) {
+                    if (level.getValue().equals(privacyLevelStr)) {
+                        note.setPrivacyLevel(level);
+                        break;
+                    }
+                }
+            } else {
+                note.setPrivacyLevel(Note.PrivacyLevel.private_);
+            }
+            
+            note.setSharedWith(rs.getString("shared_with"));
+            note.setHasImages(rs.getBoolean("has_images"));
+            note.setImagePaths(rs.getString("image_paths"));
             
             // Set user
             Optional<User> userOpt = userRepository.findById(rs.getInt("B_id"));
@@ -137,5 +169,149 @@ public class NoteService {
                     user, searchTerm, user, searchTerm, user, searchTerm);
         }
         throw new RuntimeException("User not found");
+    }
+    
+    public Note createEnhancedNote(Integer userId, Map<String, Object> noteData) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            
+            Note note = new Note();
+            note.setTitle((String) noteData.get("title"));
+            note.setTag((String) noteData.get("tag"));
+            note.setContent((String) noteData.get("content"));
+            note.setUser(user);
+            note.setPositionX((Integer) noteData.getOrDefault("positionX", 100));
+            note.setPositionY((Integer) noteData.getOrDefault("positionY", 100));
+            note.setColor((String) noteData.getOrDefault("color", "#fef3c7"));
+            
+            // Set note type
+            String noteTypeStr = (String) noteData.getOrDefault("noteType", "text");
+            note.setNoteType(Note.NoteType.valueOf(noteTypeStr));
+            
+            // Set privacy level
+            String privacyLevelStr = (String) noteData.getOrDefault("privacyLevel", "private");
+            for (Note.PrivacyLevel level : Note.PrivacyLevel.values()) {
+                if (level.getValue().equals(privacyLevelStr)) {
+                    note.setPrivacyLevel(level);
+                    break;
+                }
+            }
+            
+            note.setSharedWith((String) noteData.get("sharedWith"));
+            
+            // Handle images
+            @SuppressWarnings("unchecked")
+            List<Map<String, String>> images = (List<Map<String, String>>) noteData.get("images");
+            if (images != null && !images.isEmpty()) {
+                note.setHasImages(true);
+                // Process and save images here
+                List<String> imagePaths = new ArrayList<>();
+                for (Map<String, String> image : images) {
+                    String imagePath = saveBase64Image(image.get("data"), userId);
+                    imagePaths.add(imagePath);
+                }
+                note.setImagePaths(String.join(",", imagePaths));
+            }
+            
+            return noteRepository.save(note);
+        }
+        throw new RuntimeException("User not found");
+    }
+    
+    public Note updateEnhancedNote(Integer noteId, Map<String, Object> noteData) {
+        Optional<Note> noteOpt = noteRepository.findById(noteId);
+        if (noteOpt.isPresent()) {
+            Note note = noteOpt.get();
+            note.setTitle((String) noteData.get("title"));
+            note.setTag((String) noteData.get("tag"));
+            note.setContent((String) noteData.get("content"));
+            note.setColor((String) noteData.getOrDefault("color", note.getColor()));
+            
+            // Update note type
+            String noteTypeStr = (String) noteData.get("noteType");
+            if (noteTypeStr != null) {
+                note.setNoteType(Note.NoteType.valueOf(noteTypeStr));
+            }
+            
+            // Update privacy level
+            String privacyLevelStr = (String) noteData.get("privacyLevel");
+            if (privacyLevelStr != null) {
+                for (Note.PrivacyLevel level : Note.PrivacyLevel.values()) {
+                    if (level.getValue().equals(privacyLevelStr)) {
+                        note.setPrivacyLevel(level);
+                        break;
+                    }
+                }
+            }
+            
+            note.setSharedWith((String) noteData.get("sharedWith"));
+            
+            // Handle images
+            @SuppressWarnings("unchecked")
+            List<Map<String, String>> images = (List<Map<String, String>>) noteData.get("images");
+            if (images != null && !images.isEmpty()) {
+                note.setHasImages(true);
+                // Process and save images here
+                List<String> imagePaths = new ArrayList<>();
+                for (Map<String, String> image : images) {
+                    String imagePath = saveBase64Image(image.get("data"), note.getUser().getId());
+                    imagePaths.add(imagePath);
+                }
+                note.setImagePaths(String.join(",", imagePaths));
+            }
+            
+            return noteRepository.save(note);
+        }
+        throw new RuntimeException("Note not found");
+    }
+    
+    public String saveUploadedFile(MultipartFile file, Integer userId) throws IOException {
+        if (file.isEmpty()) {
+            throw new RuntimeException("File is empty");
+        }
+        
+        // Create uploads directory if it doesn't exist
+        Path uploadDir = Paths.get("uploads", "user_" + userId);
+        Files.createDirectories(uploadDir);
+        
+        // Generate unique filename
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename != null ? 
+            originalFilename.substring(originalFilename.lastIndexOf(".")) : "";
+        String filename = UUID.randomUUID().toString() + extension;
+        
+        // Save file
+        Path filePath = uploadDir.resolve(filename);
+        Files.copy(file.getInputStream(), filePath);
+        
+        return filePath.toString();
+    }
+    
+    private String saveBase64Image(String base64Data, Integer userId) {
+        try {
+            // Remove data URL prefix if present
+            if (base64Data.startsWith("data:")) {
+                base64Data = base64Data.substring(base64Data.indexOf(",") + 1);
+            }
+            
+            // Decode base64
+            byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Data);
+            
+            // Create uploads directory if it doesn't exist
+            Path uploadDir = Paths.get("uploads", "user_" + userId);
+            Files.createDirectories(uploadDir);
+            
+            // Generate unique filename
+            String filename = UUID.randomUUID().toString() + ".png";
+            Path filePath = uploadDir.resolve(filename);
+            
+            // Save file
+            Files.write(filePath, imageBytes);
+            
+            return filePath.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Error saving image: " + e.getMessage());
+        }
     }
 }

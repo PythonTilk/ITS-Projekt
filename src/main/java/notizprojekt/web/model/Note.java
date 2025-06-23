@@ -25,7 +25,7 @@ public class Note {
     @Column(name = "Tag", nullable = false)
     private String tag = "";
 
-    @Column(name = "Inhalt", nullable = false, length = 2000)
+    @Column(name = "Inhalt", columnDefinition = "MEDIUMTEXT")
     private String content = "";
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -43,4 +43,43 @@ public class Note {
     // Color of the note
     @Column(name = "color")
     private String color = "#FFFF88"; // Default yellow color
+    
+    // Note type (text or code)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "note_type")
+    private NoteType noteType = NoteType.text;
+    
+    // Privacy level
+    @Enumerated(EnumType.STRING)
+    @Column(name = "privacy_level")
+    private PrivacyLevel privacyLevel = PrivacyLevel.private_;
+    
+    // Users this note is shared with (comma-separated usernames)
+    @Column(name = "shared_with", columnDefinition = "TEXT")
+    private String sharedWith;
+    
+    // Image support
+    @Column(name = "has_images")
+    private Boolean hasImages = false;
+    
+    @Column(name = "image_paths", columnDefinition = "TEXT")
+    private String imagePaths;
+    
+    public enum NoteType {
+        text, code
+    }
+    
+    public enum PrivacyLevel {
+        private_("private"), some_people("some_people"), everyone("everyone");
+        
+        private final String value;
+        
+        PrivacyLevel(String value) {
+            this.value = value;
+        }
+        
+        public String getValue() {
+            return value;
+        }
+    }
 }

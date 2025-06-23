@@ -5,6 +5,7 @@ import notizprojekt.web.model.Note;
 import notizprojekt.web.service.NoteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
@@ -30,46 +31,61 @@ public class NoteController {
     }
     
     @PostMapping
-    public ResponseEntity<?> createNote(
-            @RequestParam String title,
-            @RequestParam(required = false) String tag,
-            @RequestParam String content,
-            @RequestParam(required = false, defaultValue = "0") Integer positionX,
-            @RequestParam(required = false, defaultValue = "0") Integer positionY,
-            @RequestParam(required = false, defaultValue = "#FFFF88") String color,
-            HttpSession session) {
-        
+    public ResponseEntity<?> createNote(@RequestBody Map<String, Object> noteData, HttpSession session) {
         Integer userId = (Integer) session.getAttribute("userId");
         if (userId == null) {
-            return ResponseEntity.status(401).body("Not authenticated");
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Not authenticated");
+            return ResponseEntity.status(401).body(response);
         }
         
-        Note note = noteService.createNote(userId, title, tag, content, positionX, positionY, color);
-        return ResponseEntity.ok(note);
+        try {
+            Note note = noteService.createEnhancedNote(userId, noteData);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("note", note);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
     }
     
     @PutMapping("/{noteId}")
     public ResponseEntity<?> updateNote(
             @PathVariable Integer noteId,
-            @RequestParam String title,
-            @RequestParam(required = false) String tag,
-            @RequestParam String content,
+            @RequestBody Map<String, Object> noteData,
             HttpSession session) {
         
         Integer userId = (Integer) session.getAttribute("userId");
         if (userId == null) {
-            return ResponseEntity.status(401).body("Not authenticated");
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Not authenticated");
+            return ResponseEntity.status(401).body(response);
         }
         
-        Note note = noteService.updateNote(noteId, title, tag, content);
-        return ResponseEntity.ok(note);
+        try {
+            Note note = noteService.updateEnhancedNote(noteId, noteData);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("note", note);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
     }
     
     @PutMapping("/{noteId}/position")
     public ResponseEntity<?> updateNotePosition(
             @PathVariable Integer noteId,
-            @RequestParam Integer positionX,
-            @RequestParam Integer positionY,
+            @RequestBody Map<String, Integer> positionData,
             HttpSession session) {
         
         Integer userId = (Integer) session.getAttribute("userId");
@@ -77,7 +93,8 @@ public class NoteController {
             return ResponseEntity.status(401).body("Not authenticated");
         }
         
-        Note note = noteService.updateNotePosition(noteId, positionX, positionY);
+        Note note = noteService.updateNotePosition(noteId, 
+            positionData.get("positionX"), positionData.get("positionY"));
         return ResponseEntity.ok(note);
     }
     
@@ -110,5 +127,32 @@ public class NoteController {
         
         List<Note> notes = noteService.searchNotes(userId, searchTerm);
         return ResponseEntity.ok(notes);
+    }
+    
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadFile(
+            @RequestParam("file") MultipartFile file,
+            HttpSession session) {
+        
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Not authenticated");
+            return ResponseEntity.status(401).body(response);
+        }
+        
+        try {
+            String filePath = noteService.saveUploadedFile(file, userId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("filePath", filePath);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 }

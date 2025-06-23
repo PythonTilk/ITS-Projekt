@@ -5,76 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Note Board - Notiz Projekt</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
-    <style>
-        /* Additional styles to ensure visibility */
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            width: 100%;
-        }
-        
-        .app-header {
-            background-color: white;
-            padding: 15px 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 10;
-        }
-        
-        .board-container {
-            flex: 1;
-            position: relative;
-            overflow: auto;
-            background-color: #f5f5f5;
-            background-image: linear-gradient(#ddd 1px, transparent 1px),
-                              linear-gradient(90deg, #ddd 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-        
-        .note-board {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            min-height: 100vh;
-        }
-        
-        .note {
-            position: absolute;
-            width: 220px;
-            min-height: 150px;
-            background-color: #FFFF88;
-            border-radius: 3px;
-            padding: 15px;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
-            cursor: move;
-            user-select: none;
-            z-index: 1;
-        }
-        
-        /* Debug info */
-        .debug-info {
-            position: fixed;
-            bottom: 10px;
-            left: 10px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            z-index: 1000;
-            max-width: 80%;
-            max-height: 200px;
-            overflow: auto;
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="app-container">
+    <!-- Dark mode toggle -->
+    <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">
+        <svg class="sun-icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg class="moon-icon" viewBox="0 0 24 24" style="display: none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+    </button>
+
+    <div class="app-container fade-in">
         <header class="app-header">
             <div class="logo">
                 <h1>Notiz Projekt</h1>
@@ -84,11 +38,18 @@
                 <form id="search-form" action="/search" method="get">
                     <input type="text" id="searchTerm" name="searchTerm" placeholder="Search notes..." 
                            th:value="${searchTerm != null ? searchTerm : ''}">
-                    <button type="submit">Search</button>
+                    <button type="submit">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                        Search
+                    </button>
                 </form>
             </div>
             
             <div class="user-menu">
+                <div class="user-avatar" th:text="${username != null ? username.substring(0,1).toUpperCase() : 'U'}">U</div>
                 <span th:text="${username}">Username</span>
                 <button id="logout-btn" class="btn btn-small">Logout</button>
             </div>
@@ -97,82 +58,208 @@
         <main class="board-container">
             <div id="note-board" class="note-board">
                 <!-- Notes will be rendered here by JavaScript -->
-                <!-- Pre-render notes from server for debugging -->
-                <div th:each="note : ${notes}" class="note" th:attr="data-id=${note.id}"
+                <!-- Pre-render notes from server -->
+                <div th:each="note : ${notes}" 
+                     th:class="'note ' + (${note.noteType} != null ? ${note.noteType} + '-note' : 'text-note')" 
+                     th:attr="data-id=${note.id}, data-type=${note.noteType != null ? note.noteType : 'text'}"
                      th:style="'background-color:' + ${note.color} + '; left:' + ${note.positionX} + 'px; top:' + ${note.positionY} + 'px;'">
                     <div class="note-header">
                         <h3 class="note-title" th:text="${note.title}">Note Title</h3>
-                        <span class="note-tag" th:text="${note.tag}">Tag</span>
+                        <div class="note-meta">
+                            <span class="note-tag" th:text="${note.tag}" th:if="${note.tag != null && !note.tag.isEmpty()}">Tag</span>
+                            <div th:class="'note-type-indicator ' + (${note.noteType} != null ? ${note.noteType} : 'text')" 
+                                 th:text="${note.noteType != null ? (note.noteType == 'code' ? 'C' : 'T') : 'T'}">T</div>
+                            <span class="note-privacy-indicator" 
+                                  th:text="${note.privacyLevel != null ? note.privacyLevel.getValue() : 'private'}">private</span>
+                        </div>
                     </div>
                     <div class="note-body">
-                        <p class="note-content" th:text="${note.content}">Note content goes here...</p>
+                        <div th:class="'note-content ' + (${note.noteType} == 'text' ? 'rich-text' : '')" 
+                             th:utext="${note.content}">Note content goes here...</div>
+                        <div class="note-images" th:if="${note.hasImages != null && note.hasImages}">
+                            <!-- Images will be loaded by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="note-footer">
+                        <span class="note-timestamp">Just now</span>
+                        <div class="note-actions">
+                            <button class="note-action edit-note" title="Edit">
+                                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </button>
+                            <button class="note-action delete-note" title="Delete">
+                                <svg viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <button id="add-note-btn" class="floating-btn">+</button>
-            
-            <!-- Debug information -->
-            <div class="debug-info">
-                <h3>Debug Info</h3>
-                <p>User ID: <span th:text="${session.userId}">Unknown</span></p>
-                <p>Username: <span th:text="${username}">Unknown</span></p>
-                <p>Notes Count: <span th:text="${notes != null ? notes.size() : 0}">0</span></p>
-                <div th:if="${notes != null && !notes.isEmpty()}">
-                    <h4>Notes:</h4>
-                    <ul>
-                        <li th:each="note : ${notes}">
-                            ID: <span th:text="${note.id}"></span>, 
-                            Title: <span th:text="${note.title}"></span>,
-                            Position: (<span th:text="${note.positionX}"></span>, <span th:text="${note.positionY}"></span>)
-                        </li>
-                    </ul>
+            <!-- Floating add button with menu -->
+            <button id="add-note-btn" class="floating-btn" title="Add new note">+</button>
+            <div id="add-note-menu" class="add-note-menu">
+                <div class="add-note-option" data-type="text">
+                    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
+                    Text Note
                 </div>
-                <div th:if="${notes == null || notes.isEmpty()}">
-                    <p>No notes found for this user.</p>
+                <div class="add-note-option" data-type="code">
+                    <svg viewBox="0 0 24 24"><polyline points="16,18 22,12 16,6"/><polyline points="8,6 2,12 8,18"/></svg>
+                    Code Note
                 </div>
             </div>
         </main>
         
-        <!-- Note Modal -->
+        <!-- Enhanced Note Modal -->
         <div id="note-modal" class="modal">
             <div class="modal-content">
-                <span class="close-btn">&times;</span>
+                <button class="close-btn">&times;</button>
                 <h2 id="modal-title">Add New Note</h2>
                 
                 <form id="note-form">
                     <input type="hidden" id="note-id">
+                    <input type="hidden" id="note-type" value="text">
                     
                     <div class="form-group">
                         <label for="note-title">Title</label>
-                        <input type="text" id="note-title" name="title" required>
+                        <input type="text" id="note-title" name="title" required placeholder="Enter note title...">
                     </div>
                     
                     <div class="form-group">
                         <label for="note-tag">Tag</label>
-                        <input type="text" id="note-tag" name="tag">
+                        <input type="text" id="note-tag" name="tag" placeholder="Add a tag...">
                     </div>
                     
+                    <!-- Rich Text Editor for text notes -->
+                    <div class="form-group" id="rich-editor-group">
+                        <label>Content</label>
+                        <div class="rich-editor">
+                            <div class="rich-editor-toolbar">
+                                <button type="button" class="rich-editor-btn" data-command="bold" title="Bold">
+                                    <strong>B</strong>
+                                </button>
+                                <button type="button" class="rich-editor-btn" data-command="italic" title="Italic">
+                                    <em>I</em>
+                                </button>
+                                <button type="button" class="rich-editor-btn" data-command="underline" title="Underline">
+                                    <u>U</u>
+                                </button>
+                                <button type="button" class="rich-editor-btn" data-command="strikeThrough" title="Strikethrough">
+                                    <s>S</s>
+                                </button>
+                                <span style="border-left: 1px solid var(--border-color); height: 20px; margin: 0 8px;"></span>
+                                <button type="button" class="rich-editor-btn" data-command="formatBlock" data-value="h1" title="Heading 1">
+                                    H1
+                                </button>
+                                <button type="button" class="rich-editor-btn" data-command="formatBlock" data-value="h2" title="Heading 2">
+                                    H2
+                                </button>
+                                <button type="button" class="rich-editor-btn" data-command="formatBlock" data-value="h3" title="Heading 3">
+                                    H3
+                                </button>
+                                <span style="border-left: 1px solid var(--border-color); height: 20px; margin: 0 8px;"></span>
+                                <button type="button" class="rich-editor-btn" data-command="hiliteColor" data-value="yellow" title="Highlight">
+                                    <span style="background: yellow; padding: 2px 4px;">H</span>
+                                </button>
+                                <button type="button" class="rich-editor-btn" data-command="foreColor" data-value="#3b82f6" title="Text Color">
+                                    <span style="color: #3b82f6;">A</span>
+                                </button>
+                            </div>
+                            <div class="rich-editor-content" id="rich-editor-content" contenteditable="true" 
+                                 placeholder="Start typing your note..."></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Code Editor for code notes -->
+                    <div class="form-group" id="code-editor-group" style="display: none;">
+                        <label>Code</label>
+                        <div class="code-editor">
+                            <div class="code-editor-header">
+                                <span>Language:</span>
+                                <select class="code-editor-language" id="code-language">
+                                    <option value="javascript">JavaScript</option>
+                                    <option value="python">Python</option>
+                                    <option value="java">Java</option>
+                                    <option value="html">HTML</option>
+                                    <option value="css">CSS</option>
+                                    <option value="sql">SQL</option>
+                                    <option value="bash">Bash</option>
+                                    <option value="json">JSON</option>
+                                    <option value="xml">XML</option>
+                                    <option value="markdown">Markdown</option>
+                                </select>
+                            </div>
+                            <textarea class="code-editor-content" id="code-editor-content" 
+                                      placeholder="Enter your code here..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Image Upload -->
                     <div class="form-group">
-                        <label for="note-content">Content</label>
-                        <textarea id="note-content" name="content" rows="5" required></textarea>
+                        <label>Images</label>
+                        <div class="file-upload-area" id="file-upload-area">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14,2 14,8 20,8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                <polyline points="10,9 9,9 8,9"/>
+                            </svg>
+                            <div class="file-upload-text">Click to upload images or drag and drop</div>
+                            <div class="file-upload-hint">PNG, JPG, GIF up to 5MB each</div>
+                        </div>
+                        <input type="file" id="file-input" multiple accept="image/*" style="display: none;">
+                        <div class="uploaded-files" id="uploaded-files"></div>
+                    </div>
+                    
+                    <!-- Privacy Settings -->
+                    <div class="form-group">
+                        <label>Privacy</label>
+                        <div class="privacy-settings">
+                            <label class="privacy-option selected" data-value="private">
+                                <input type="radio" name="privacy" value="private" checked>
+                                <div class="privacy-option-content">
+                                    <div class="privacy-option-title">Private</div>
+                                    <div class="privacy-option-description">Only you can see this note</div>
+                                </div>
+                            </label>
+                            <label class="privacy-option" data-value="some_people">
+                                <input type="radio" name="privacy" value="some_people">
+                                <div class="privacy-option-content">
+                                    <div class="privacy-option-title">Some People</div>
+                                    <div class="privacy-option-description">Share with specific users</div>
+                                </div>
+                            </label>
+                            <label class="privacy-option" data-value="everyone">
+                                <input type="radio" name="privacy" value="everyone">
+                                <div class="privacy-option-content">
+                                    <div class="privacy-option-title">Everyone</div>
+                                    <div class="privacy-option-description">Public note visible to all users</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="form-group" id="shared-users-group" style="display: none;">
+                            <label for="shared-users">Share with users (comma-separated usernames)</label>
+                            <input type="text" id="shared-users" name="sharedUsers" placeholder="user1, user2, user3...">
+                        </div>
                     </div>
                     
                     <div class="form-group">
                         <label for="note-color">Color</label>
                         <select id="note-color" name="color">
-                            <option value="#FFFF88">Yellow</option>
-                            <option value="#FF9999">Red</option>
-                            <option value="#99FF99">Green</option>
-                            <option value="#9999FF">Blue</option>
-                            <option value="#FFCC99">Orange</option>
-                            <option value="#FF99FF">Pink</option>
+                            <option value="#fef3c7">Warm Yellow</option>
+                            <option value="#fecaca">Soft Red</option>
+                            <option value="#bbf7d0">Mint Green</option>
+                            <option value="#bfdbfe">Sky Blue</option>
+                            <option value="#fed7aa">Peach</option>
+                            <option value="#f3e8ff">Lavender</option>
+                            <option value="#e0e7ff">Periwinkle</option>
+                            <option value="#fef7cd">Cream</option>
                         </select>
                     </div>
                     
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn" id="cancel-btn">Cancel</button>
                         <button type="button" id="delete-note-btn" class="btn btn-danger" style="display: none;">Delete</button>
+                        <button type="submit" class="btn btn-primary">Save Note</button>
                     </div>
                 </form>
             </div>
@@ -181,17 +268,33 @@
     
     <!-- Templates for rendering notes -->
     <template id="note-template">
-        <div class="note" data-id="">
+        <div class="note" data-id="" data-type="text">
             <div class="note-header">
                 <h3 class="note-title"></h3>
-                <span class="note-tag"></span>
+                <div class="note-meta">
+                    <span class="note-tag"></span>
+                    <div class="note-type-indicator text">T</div>
+                    <span class="note-privacy-indicator">private</span>
+                </div>
             </div>
             <div class="note-body">
-                <p class="note-content"></p>
+                <div class="note-content rich-text"></div>
+                <div class="note-images"></div>
+            </div>
+            <div class="note-footer">
+                <span class="note-timestamp">Just now</span>
+                <div class="note-actions">
+                    <button class="note-action edit-note" title="Edit">
+                        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button class="note-action delete-note" title="Delete">
+                        <svg viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/></svg>
+                    </button>
+                </div>
             </div>
         </div>
     </template>
     
-    <script th:src="@{/js/board.js}"></script>
+    <script th:src="@{/js/enhanced-board.js}"></script>
 </body>
 </html>
