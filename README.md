@@ -1,41 +1,92 @@
-# ITS-Projekt
+# ITS-Projekt - Enhanced Note-Taking Application
 
 ## Overview
 
-ITS-Projekt is a note-taking application that allows users to create, edit, and share notes. The application uses a MySQL database to store user information and notes. It is available in two versions:
+ITS-Projekt is a comprehensive note-taking application that allows users to create, edit, organize, and share notes with advanced features. The application uses a MySQL/MariaDB database and is available in two versions:
 
-1. **Desktop Application**: A Java Swing-based desktop application
-2. **Web Application**: A Spring Boot-based web application with a modern drag-and-drop interface
+1. **Desktop Application**: A Java Swing-based desktop application (main branch)
+2. **Web Application**: A modern Spring Boot-based web application with enhanced features (html branch)
 
-## Features
+## ✨ Enhanced Features
 
-- **User Authentication**: Secure login and registration system
-- **Personal Notes**: Create, edit, and manage your private notes
-- **Note Sharing**: Share notes with other users in the system
-- **Organization**: Organize notes with tags for easy retrieval
-- **Drag-and-Drop Interface** (Web Version): Intuitive interface for organizing notes visually
-- **Responsive Design** (Web Version): Access your notes from any device with a web browser
+### 🎨 **Visual & Interface Enhancements**
+- **Dark Mode Toggle**: Switch between light and dark themes for comfortable viewing
+- **Drag-and-Drop Interface**: Intuitive spatial organization of notes on a virtual board
+- **Color-Coded Notes**: Assign colors to notes for visual categorization
+- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
+- **Modern UI**: Clean, intuitive interface with smooth animations
+
+### 📝 **Advanced Note Editing**
+- **Rich Text Editor**: Full WYSIWYG editor with formatting options (bold, italic, underline, colors)
+- **Code Editor**: Syntax-highlighted code editor with multiple language support
+- **Note Types**: Support for text, rich text, and code notes
+- **Auto-Save**: Automatic saving of changes as you type
+- **Image Upload**: Attach and embed images directly in notes
+
+### 🔒 **Privacy & Sharing**
+- **Privacy Levels**: Private, shared, or public note visibility
+- **User-Specific Sharing**: Share notes with specific users
+- **Secure Authentication**: BCrypt password encryption
+- **Session Management**: Secure user sessions with proper logout
+
+### 🏷️ **Organization & Search**
+- **Tagging System**: Organize notes with custom tags
+- **Advanced Search**: Search by title, content, tags, or note type
+- **Spatial Positioning**: Remember note positions on the board
+- **Note Categories**: Organize by type (text, code, rich text)
 
 ## Technical Details
 
 ### Database Setup
 
-The project uses a MySQL database. You can find the database schema in the [`its-projekt18.6.sql`](its-projekt18.6.sql) file, which includes:
+The project uses a MySQL/MariaDB database with enhanced schema. The [`its-projekt18.6.sql`](its-projekt18.6.sql) file includes:
 
-- `nutzer` table for user information
-- `notiz` table for personal notes
-- `geteilte_notizen` table for shared notes
+#### 📊 **Database Tables**
+- **`nutzer`**: Enhanced user table with email, timestamps, and security features
+- **`notiz`**: Enhanced notes table with positioning, colors, privacy levels, and image support
+- **`geteilte_notizen`**: Shared notes management
 
-You can run MySQL directly on your machine or use Docker for a containerized setup:
+#### 🚀 **Quick Setup**
+The SQL file automatically creates:
+- Database (`notizprojekt`)
+- Application user (`notizuser` with password `notizpassword`)
+- All required tables with proper constraints
+- Sample data for testing
 
+#### 🐳 **Database Options**
+
+**Option 1: Local MySQL/MariaDB**
 ```bash
-# Run MySQL in Docker
-docker run --name mysql -e MYSQL_ROOT_PASSWORD=420 -p 3306:3306 -d mysql:8.0
+# Install MariaDB (Ubuntu/Debian)
+sudo apt update && sudo apt install mariadb-server
+
+# Start MariaDB
+sudo systemctl start mariadb
+
+# Import the database
+mysql -u root -p < its-projekt18.6.sql
 ```
 
-```sql
--- Example database connection
-jdbc:mysql://localhost:3306/notizprojekt
+**Option 2: Docker Setup**
+```bash
+# Run MariaDB in Docker
+docker run --name mariadb \
+  -e MYSQL_ROOT_PASSWORD=rootpassword \
+  -e MYSQL_DATABASE=notizprojekt \
+  -e MYSQL_USER=notizuser \
+  -e MYSQL_PASSWORD=notizpassword \
+  -p 3306:3306 -d mariadb:10.6
+
+# Import schema (after container is running)
+docker exec -i mariadb mysql -u root -prootpassword < its-projekt18.6.sql
+```
+
+#### 🔗 **Connection Details**
+```properties
+# Application connection (already configured)
+spring.datasource.url=jdbc:mysql://localhost:3306/notizprojekt
+spring.datasource.username=notizuser
+spring.datasource.password=notizpassword
 ```
 
 ### Project Structure
@@ -61,95 +112,135 @@ jdbc:mysql://localhost:3306/notizprojekt
   - `templates/` - Thymeleaf HTML templates
 - `pom.xml` - Maven project configuration
 
-### Requirements
+### 🛠️ Requirements
 
-#### Desktop Application
-- Java Development Kit (JDK) 8 or higher
-- MySQL Server 5.7 or higher (or Docker for containerized setup)
-- JDBC MySQL Connector (included in the `lib` directory)
-- NetBeans IDE (recommended for development)
+#### Desktop Application (main branch)
+- **Java**: JDK 8 or higher
+- **Database**: MySQL/MariaDB 5.7+ or Docker
+- **IDE**: NetBeans (recommended) or any Java IDE
+- **Dependencies**: JDBC MySQL Connector (included)
 
-#### Web Application
-- Java Development Kit (JDK) 11 or higher
-- MySQL Server 5.7 or higher
-- Maven 3.6 or higher
-- Spring Boot 2.7.0
-- Modern web browser
+#### Web Application (html branch) - **Enhanced Version**
+- **Java**: JDK 11 or higher
+- **Database**: MySQL/MariaDB 5.7+ or Docker
+- **Build Tool**: Maven 3.6+
+- **Framework**: Spring Boot 2.7.0
+- **Browser**: Modern web browser (Chrome, Firefox, Safari, Edge)
+- **Features**: File upload support, responsive design
 
-## Getting Started
+## 🚀 Getting Started
 
-Welcome to ITS-Projekt! Follow these simple steps to get up and running:
+Welcome to the enhanced ITS-Projekt! Choose your preferred version:
 
-### Common Setup (Both Versions)
+### 🌟 **Recommended: Enhanced Web Application**
 
-1. Clone this repository to your local machine
-   ```bash
-   git clone https://github.com/PythonTilk/ITS-Projekt.git
-   ```
-2. Import the database schema from [`its-projekt18.6.sql`](its-projekt18.6.sql)
-   ```bash
-   # Import schema
-   mysql -u root -p < its-projekt18.6.sql
-   
-   # Create application user (if not already in the schema)
-   mysql -u root -p -e "CREATE USER IF NOT EXISTS 'notizuser'@'%' IDENTIFIED BY 'notizpassword'; GRANT ALL PRIVILEGES ON notizprojekt.* TO 'notizuser'@'%'; FLUSH PRIVILEGES;"
-   ```
+#### 1️⃣ **Clone and Setup Database**
+```bash
+# Clone the repository
+git clone https://github.com/PythonTilk/ITS-Projekt.git
+cd ITS-Projekt
 
-### Desktop Application Setup
+# Switch to the enhanced web version
+git checkout html
 
-1. Open the project in NetBeans or your preferred Java IDE
-2. Configure the database connection in the application (see [Database Setup](#database-setup))
-3. Build and run the project
+# Setup database (choose one option)
+# Option A: Local MariaDB
+sudo apt install mariadb-server
+sudo systemctl start mariadb
+mysql -u root -p < its-projekt18.6.sql
 
-### Web Application Setup
+# Option B: Docker
+docker run --name mariadb -e MYSQL_ROOT_PASSWORD=rootpassword -p 3306:3306 -d mariadb:10.6
+sleep 10
+docker exec -i mariadb mysql -u root -prootpassword < its-projekt18.6.sql
+```
 
-1. Switch to the web application branch
-   ```bash
-   git checkout html
-   ```
-2. Build the project using Maven
-   ```bash
-   ./mvnw clean package
-   ```
-3. Run the Spring Boot application
-   ```bash
-   ./mvnw spring-boot:run
-   ```
-4. Access the application in your web browser at `http://localhost:12000`
+#### 2️⃣ **Run the Application**
+```bash
+# Build and run (Maven wrapper included)
+./mvnw spring-boot:run
 
-That's it! You're ready to start creating and sharing notes. For more detailed instructions on using the application, see the [Usage](#usage) section below.
+# Or if you have Maven installed
+mvn spring-boot:run
+```
 
-## Usage
+#### 3️⃣ **Access the Application**
+- **URL**: `http://localhost:12000`
+- **Test Account**: 
+  - Username: `testuser123`
+  - Password: `password123`
 
-### Desktop Application
+### 🖥️ **Desktop Application (Classic Version)**
 
-After starting the desktop application:
+#### 1️⃣ **Setup**
+```bash
+# Clone and switch to main branch
+git clone https://github.com/PythonTilk/ITS-Projekt.git
+cd ITS-Projekt
+git checkout main
 
-1. Register a new account or log in with existing credentials
-   - Default test account: Username: `root`, Password: `420`
-2. Use the main interface to create and manage your notes
-3. Access the sharing options to collaborate with other users
+# Setup database (same as above)
+mysql -u root -p < its-projekt18.6.sql
+```
+
+#### 2️⃣ **Run**
+1. Open in NetBeans or your preferred Java IDE
+2. Build and run the project
+3. Use test account: `root` / `420`
+
+### ✅ **Verification**
+After setup, you should see:
+- ✅ Database connection successful
+- ✅ Sample notes loaded
+- ✅ User authentication working
+- ✅ All enhanced features available (web version)
+
+## 📖 Usage Guide
+
+### 🌟 **Enhanced Web Application Features**
+
+#### 🔐 **Authentication**
+1. **Login**: Use `testuser123` / `password123` or create a new account
+2. **Registration**: Create new accounts with email validation
+3. **Security**: Passwords are encrypted with BCrypt
+
+#### 📝 **Creating and Managing Notes**
+1. **Add Note**: Click the "+" button to create a new note
+2. **Note Types**:
+   - **📄 Text**: Simple text notes with basic formatting
+   - **🎨 Rich Text**: Full WYSIWYG editor with formatting toolbar
+   - **💻 Code**: Syntax-highlighted code editor with language support
+3. **Auto-Save**: Changes are saved automatically as you type
+
+#### 🎨 **Visual Organization**
+1. **Drag & Drop**: Move notes around the board to organize spatially
+2. **Color Coding**: Right-click notes to change colors
+3. **Dark Mode**: Toggle between light and dark themes
+4. **Responsive**: Works on desktop, tablet, and mobile
+
+#### 🏷️ **Advanced Features**
+1. **Tags**: Add tags for categorization and search
+2. **Privacy Levels**: Set notes as private, shared, or public
+3. **Image Upload**: Attach images to notes (drag & drop supported)
+4. **Search**: Find notes by title, content, or tags
+
+#### 🔄 **Collaboration**
+1. **Share Notes**: Share specific notes with other users
+2. **Privacy Control**: Manage who can see your notes
+3. **User Management**: View and manage shared access
+
+### 🖥️ **Desktop Application (Classic)**
+
+#### Basic Usage
+1. **Login**: Use `root` / `420` for testing
+2. **Create Notes**: Use the interface to add new notes
+3. **Share**: Access sharing options for collaboration
 
 ```java
-// Example login code
+// Example database connection
 DBVerbindung dbConnection = new DBVerbindung("localhost", "notizprojekt", "notizuser", "notizpassword");
 dbConnection.open();
 ```
-
-### Web Application
-
-After starting the web application:
-
-1. Access the application in your web browser at `http://localhost:12000`
-2. Register a new account or log in with existing credentials
-   - Default test account: Username: `testuser123`, Password: `password123`
-3. Use the interactive board to:
-   - Create new notes by clicking the "Add Note" button
-   - Drag and drop notes to organize them spatially
-   - Double-click on a note to edit its content
-   - Change note colors to categorize them visually
-   - Add tags to notes for better organization
-4. Notes are automatically saved when you make changes
 
 ## Testing
 
@@ -194,60 +285,129 @@ You can also manually test the web application by:
 2. Accessing the application in your browser at `http://localhost:12000`
 3. Testing user registration, login, and note management functionality
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
-### Database Connection Issues
+### 🗄️ **Database Issues**
 
-If you encounter database connection problems:
+#### Connection Problems
+```bash
+# Check if MariaDB/MySQL is running
+sudo systemctl status mariadb
+# or for Docker
+docker ps | grep mariadb
 
-1. Verify MySQL is running:
-   ```bash
-   # For local MySQL
-   sudo systemctl status mysql
-   
-   # For Docker
-   docker ps | grep mysql
-   ```
+# Test connection manually
+mysql -u notizuser -pnotizpassword -h localhost notizprojekt
 
-2. Check connection parameters:
-   - Desktop App: Check `DBVerbindung.java`
-   - Web App: Check `application.properties`
-   - Host: Usually `localhost` or `127.0.0.1`
-   - Database name: `notizprojekt`
-   - Username: `notizuser`
-   - Password: `notizpassword`
+# If connection fails, check:
+# 1. Database service is running
+# 2. User exists and has permissions
+# 3. Firewall settings (port 3306)
+```
 
-3. Test database connectivity:
-   ```bash
-   mysql -u notizuser -p -h localhost notizprojekt
-   ```
+#### Schema Issues
+```sql
+-- Verify tables exist
+SHOW TABLES;
 
-### Desktop Application Issues
+-- Check table structure
+DESCRIBE notiz;
+DESCRIBE nutzer;
 
-If you encounter compilation errors in the desktop application:
+-- Re-import if needed
+mysql -u root -p < its-projekt18.6.sql
+```
 
-1. Ensure all required libraries are in the `lib` directory
-2. Check that your Java version is compatible (JDK 8+)
-3. Run the tests to verify basic functionality
+### 🌐 **Web Application Issues**
 
-### Web Application Issues
+#### Application Won't Start
+```bash
+# Check Java version (needs JDK 11+)
+java -version
 
-If you encounter issues with the web application:
+# Check Maven
+./mvnw -version
 
-1. Check the Spring Boot logs for error messages
-2. Verify that the application is running on the correct port (12000)
-3. Check browser console for JavaScript errors
-4. Ensure your database has the required columns:
-   ```sql
-   -- Check if position and color columns exist
-   DESCRIBE notiz;
-   
-   -- Add columns if they don't exist
-   ALTER TABLE notiz ADD COLUMN IF NOT EXISTS position_x INT DEFAULT 0;
-   ALTER TABLE notiz ADD COLUMN IF NOT EXISTS position_y INT DEFAULT 0;
-   ALTER TABLE notiz ADD COLUMN IF NOT EXISTS color VARCHAR(20) DEFAULT '#FFFF88';
-   ```
-5. Clear browser cache if you're seeing outdated content
+# Clean and rebuild
+./mvnw clean package
+
+# Check logs for errors
+./mvnw spring-boot:run
+```
+
+#### Port Issues
+```bash
+# Check if port 12000 is in use
+netstat -tlnp | grep 12000
+
+# Kill process if needed
+sudo kill -9 $(lsof -t -i:12000)
+```
+
+#### Browser Issues
+1. **Clear Cache**: Ctrl+F5 or Cmd+Shift+R
+2. **Check Console**: F12 → Console tab for JavaScript errors
+3. **Disable Extensions**: Try incognito/private mode
+4. **Update Browser**: Ensure modern browser version
+
+### 🖥️ **Desktop Application Issues**
+
+#### Compilation Errors
+```bash
+# Check Java version (needs JDK 8+)
+java -version
+
+# Verify JDBC driver in lib/
+ls -la lib/mysql-connector-java-*.jar
+
+# Clean and rebuild in NetBeans
+# Build → Clean and Build Project
+```
+
+### 🚨 **Common Solutions**
+
+#### "User 'notizuser' doesn't exist"
+```sql
+-- Run as root user
+CREATE USER 'notizuser'@'localhost' IDENTIFIED BY 'notizpassword';
+CREATE USER 'notizuser'@'%' IDENTIFIED BY 'notizpassword';
+GRANT ALL PRIVILEGES ON notizprojekt.* TO 'notizuser'@'localhost';
+GRANT ALL PRIVILEGES ON notizprojekt.* TO 'notizuser'@'%';
+FLUSH PRIVILEGES;
+```
+
+#### "Table doesn't exist"
+```bash
+# Re-import the complete schema
+mysql -u root -p < its-projekt18.6.sql
+```
+
+#### "Access denied for user"
+```sql
+-- Reset user permissions
+DROP USER IF EXISTS 'notizuser'@'localhost';
+DROP USER IF EXISTS 'notizuser'@'%';
+-- Then re-run the CREATE USER commands above
+```
+
+### 📞 **Getting Help**
+
+If you're still experiencing issues:
+
+1. **Check Logs**: Look for error messages in application logs
+2. **Verify Setup**: Ensure all requirements are met
+3. **Test Database**: Verify database connection independently
+4. **Browser Console**: Check for JavaScript errors (web version)
+5. **Port Conflicts**: Ensure port 12000 is available
+
+#### Quick Health Check
+```bash
+# Database connection test
+mysql -u notizuser -pnotizpassword -e "SELECT COUNT(*) FROM notizprojekt.nutzer;"
+
+# Application test (should return 200 or 302)
+curl -I http://localhost:12000/login
+```
 
 ## License
 
