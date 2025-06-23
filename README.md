@@ -1,5 +1,20 @@
 # ITS-Projekt - Enhanced Note-Taking Application
 
+## 🚀 Quick Production Setup
+
+Deploy the application to your server with a single command:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/setup.sh | sudo bash
+```
+
+For custom domains:
+```bash
+curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/setup.sh | sudo DOMAIN="your-domain.com" EMAIL="admin@your-domain.com" bash
+```
+
+📖 **[Complete Setup Guide](server-setup.md)** - Detailed instructions for production deployment
+
 ## Overview
 
 ITS-Projekt is a comprehensive note-taking application that allows users to create, edit, organize, and share notes with advanced features. The application uses a MySQL/MariaDB database and is available in two versions:
