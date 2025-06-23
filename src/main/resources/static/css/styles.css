@@ -783,49 +783,72 @@ body {
 [data-theme="dark"] .note {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     border: 1px solid var(--border-color);
-    background: var(--card-bg);
 }
 
 /* Default notes in dark mode should have good contrast */
-[data-theme="dark"] .note:not([style*="background-color"]) {
+[data-theme="dark"] .note:not([style*="background"]):not([style*="background-color"]) {
     background: var(--card-bg) !important;
     color: var(--text-color) !important;
 }
 
-[data-theme="dark"] .note:not([style*="background-color"]) .note-title {
+[data-theme="dark"] .note:not([style*="background"]):not([style*="background-color"]) .note-title {
     color: var(--text-color) !important;
 }
 
-[data-theme="dark"] .note:not([style*="background-color"]) .note-content {
+[data-theme="dark"] .note:not([style*="background"]):not([style*="background-color"]) .note-content {
     color: var(--text-color) !important;
 }
 
-/* Ensure note colors are visible in dark mode */
-[data-theme="dark"] .note[style*="background-color"] {
-    color: #1a1a1a !important; /* Dark text for colored notes */
+/* Force dark text for ALL colored notes in dark mode */
+[data-theme="dark"] .note {
+    color: #1a1a1a !important; /* Dark text for all notes */
 }
 
-[data-theme="dark"] .note[style*="background-color"] .note-title {
+[data-theme="dark"] .note .note-title {
     color: #1a1a1a !important;
 }
 
-[data-theme="dark"] .note[style*="background-color"] .note-content {
-    color: #2a2a2a !important;
+[data-theme="dark"] .note .note-content {
+    color: #1a1a1a !important;
 }
 
-[data-theme="dark"] .note[style*="background-color"] .note-footer {
-    color: #3a3a3a !important;
+[data-theme="dark"] .note .note-footer {
+    color: #2a2a2a !important;
     border-top-color: rgba(0, 0, 0, 0.2) !important;
 }
 
-[data-theme="dark"] .note[style*="background-color"] .note-action {
+[data-theme="dark"] .note .note-action {
     background: rgba(0, 0, 0, 0.1) !important;
-    color: #2a2a2a !important;
+    color: #1a1a1a !important;
 }
 
-[data-theme="dark"] .note[style*="background-color"] .note-action:hover {
+[data-theme="dark"] .note .note-action:hover {
     background: rgba(0, 0, 0, 0.2) !important;
     color: #000 !important;
+}
+
+/* Special case for notes without custom background - use light text */
+[data-theme="dark"] .note:not([style*="background"]):not([style*="background-color"]) {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+[data-theme="dark"] .note:not([style*="background"]):not([style*="background-color"]) .note-title {
+    color: var(--text-color) !important;
+}
+
+[data-theme="dark"] .note:not([style*="background"]):not([style*="background-color"]) .note-content {
+    color: var(--text-color) !important;
+}
+
+[data-theme="dark"] .note:not([style*="background"]):not([style*="background-color"]) .note-footer {
+    color: var(--text-color) !important;
+    border-top-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .note:not([style*="background"]):not([style*="background-color"]) .note-action {
+    background: var(--button-hover) !important;
+    color: var(--text-color) !important;
 }
 
 .note:hover {
