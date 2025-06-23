@@ -1,25 +1,14 @@
 package NotizProjekt_All;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.table.DefaultTableModel;
 
 /**
  * Simplified version of GUI_MenuTabelle that doesn't rely on the swing-layout library
@@ -40,8 +29,15 @@ public class SimpleGUI_MenuTabelle extends JFrame {
     
     public SimpleGUI_MenuTabelle(int nutzerID) {
         this.nutzerID = nutzerID;
-        initComponents();
+        try {
+            // Verwende hier den System-Look-and-Feel oder alternativ FlatLaf, wenn verfügbar.
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ex) {
+            System.err.println("Fehler beim Setzen des Look-and-Feel: " + ex);
+        }
+        
         initDatabase();
+        initComponents();
         refreshTable();
     }
     
@@ -55,57 +51,124 @@ public class SimpleGUI_MenuTabelle extends JFrame {
     }
     
     private void initComponents() {
-        setTitle("Notizen Übersicht");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
-        setLocationRelativeTo(null);
+        // Hauptpanel mit BorderLayout für klare Struktur
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(245, 245, 245));
+        mainPanel.setBorder(new EmptyBorder(30, 30, 30, 30));
         
-        // Create components
-        lblTitel = new JLabel("Notizen Übersicht");
-        lblTitel.setFont(new Font("Tahoma", Font.BOLD, 18));
+        // Header: Titel der App
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(245, 245, 245));
+        JLabel titleLabel = new JLabel("NoteGO", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 40));
+        titleLabel.setForeground(new Color(45, 45, 45));
+        headerPanel.add(titleLabel, BorderLayout.CENTER);
         
-        // Table setup
+        // Untertitel mit Benutzername
+        JLabel subtitleLabel = new JLabel("Notizen Übersicht - " + GUI_Anmelden.AngemeldeterUser, SwingConstants.CENTER);
+        subtitleLabel.setFont(new Font("SansSerif", Font.PLAIN, 20));
+        subtitleLabel.setForeground(new Color(70, 70, 70));
+        headerPanel.add(subtitleLabel, BorderLayout.SOUTH);
+        
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        
+        // Center-Panel: Tabelle
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.setBackground(new Color(245, 245, 245));
+        centerPanel.setBorder(new EmptyBorder(20, 0, 20, 0));
+        
+        // Table setup mit modernem Design
         notizTabelle = new JTable();
         notizTabelle.setModel(new DefaultTableModel(
             new Object [][] {},
             new String [] {"Titel", "Tag"}
         ));
+        notizTabelle.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        notizTabelle.setRowHeight(30);
+        notizTabelle.setBackground(Color.WHITE);
+        notizTabelle.setSelectionBackground(new Color(52, 152, 219));
+        notizTabelle.setSelectionForeground(Color.WHITE);
+        notizTabelle.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 16));
+        notizTabelle.getTableHeader().setBackground(new Color(70, 70, 70));
+        notizTabelle.getTableHeader().setForeground(Color.WHITE);
+        
         JScrollPane scrollPane = new JScrollPane(notizTabelle);
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
+        centerPanel.add(scrollPane, BorderLayout.CENTER);
         
-        // Buttons
-        btnNeueNotiz = new JButton("Neue Notiz");
-        btnBearbeiten = new JButton("Bearbeiten");
-        btnLoeschen = new JButton("Löschen");
-        btnSuchen = new JButton("Suchen");
-        txtSuche = new JTextField(20);
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
         
-        // Layout
-        setLayout(new BorderLayout(10, 10));
-        
-        // Title panel
-        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        titlePanel.add(lblTitel);
-        add(titlePanel, BorderLayout.NORTH);
-        
-        // Table panel
-        add(scrollPane, BorderLayout.CENTER);
+        // Footer-Panel: Buttons und Suche
+        JPanel footerPanel = new JPanel(new BorderLayout());
+        footerPanel.setBackground(new Color(245, 245, 245));
         
         // Button panel
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        buttonPanel.setBackground(new Color(245, 245, 245));
+        
+        // Buttons im modernen Flat-Design
+        btnNeueNotiz = new JButton("Neue Notiz");
+        btnNeueNotiz.setFont(new Font("SansSerif", Font.BOLD, 16));
+        btnNeueNotiz.setBackground(new Color(46, 204, 113));
+        btnNeueNotiz.setForeground(Color.WHITE);
+        btnNeueNotiz.setOpaque(true);
+        btnNeueNotiz.setBorderPainted(false);
+        btnNeueNotiz.setPreferredSize(new Dimension(140, 45));
         buttonPanel.add(btnNeueNotiz);
+        
+        btnBearbeiten = new JButton("Bearbeiten");
+        btnBearbeiten.setFont(new Font("SansSerif", Font.BOLD, 16));
+        btnBearbeiten.setBackground(new Color(52, 152, 219));
+        btnBearbeiten.setForeground(Color.WHITE);
+        btnBearbeiten.setOpaque(true);
+        btnBearbeiten.setBorderPainted(false);
+        btnBearbeiten.setPreferredSize(new Dimension(140, 45));
         buttonPanel.add(btnBearbeiten);
+        
+        btnLoeschen = new JButton("Löschen");
+        btnLoeschen.setFont(new Font("SansSerif", Font.BOLD, 16));
+        btnLoeschen.setBackground(new Color(231, 76, 60));
+        btnLoeschen.setForeground(Color.WHITE);
+        btnLoeschen.setOpaque(true);
+        btnLoeschen.setBorderPainted(false);
+        btnLoeschen.setPreferredSize(new Dimension(140, 45));
         buttonPanel.add(btnLoeschen);
+        
+        footerPanel.add(buttonPanel, BorderLayout.NORTH);
         
         // Search panel
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        searchPanel.setBackground(new Color(245, 245, 245));
+        
+        JLabel searchLabel = new JLabel("Suchen:");
+        searchLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        searchLabel.setForeground(new Color(70, 70, 70));
+        searchPanel.add(searchLabel);
+        
+        txtSuche = new JTextField();
+        txtSuche.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        txtSuche.setPreferredSize(new Dimension(300, 35));
         searchPanel.add(txtSuche);
+        
+        btnSuchen = new JButton("Suchen");
+        btnSuchen.setFont(new Font("SansSerif", Font.BOLD, 16));
+        btnSuchen.setBackground(new Color(149, 165, 166));
+        btnSuchen.setForeground(Color.WHITE);
+        btnSuchen.setOpaque(true);
+        btnSuchen.setBorderPainted(false);
+        btnSuchen.setPreferredSize(new Dimension(100, 35));
         searchPanel.add(btnSuchen);
         
-        // Bottom panel
-        JPanel bottomPanel = new JPanel(new BorderLayout());
-        bottomPanel.add(buttonPanel, BorderLayout.NORTH);
-        bottomPanel.add(searchPanel, BorderLayout.SOUTH);
-        add(bottomPanel, BorderLayout.SOUTH);
+        footerPanel.add(searchPanel, BorderLayout.SOUTH);
+        mainPanel.add(footerPanel, BorderLayout.SOUTH);
+        
+        // Frame konfigurieren
+        this.setTitle("NoteGO - Notizen Übersicht");
+        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        this.getContentPane().add(mainPanel);
+        this.setMinimumSize(new Dimension(900, 700));
+        this.pack();
+        this.setLocationRelativeTo(null);
         
         // Add action listeners
         btnNeueNotiz.addActionListener(new ActionListener() {

@@ -1,20 +1,11 @@
 package NotizProjekt_All;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
 
 /**
  * Simple implementation of GUI_NeueNotiz
@@ -32,8 +23,15 @@ public class SimpleGUI_NeueNotiz extends JFrame {
     
     public SimpleGUI_NeueNotiz(int nutzerID) {
         this.nutzerID = nutzerID;
-        initComponents();
+        try {
+            // Verwende hier den System-Look-and-Feel oder alternativ FlatLaf, wenn verfügbar.
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ex) {
+            System.err.println("Fehler beim Setzen des Look-and-Feel: " + ex);
+        }
+        
         initDatabase();
+        initComponents();
     }
     
     private void initDatabase() {
@@ -46,48 +44,121 @@ public class SimpleGUI_NeueNotiz extends JFrame {
     }
     
     private void initComponents() {
-        setTitle("Neue Notiz");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(600, 500);
-        setLocationRelativeTo(null);
+        // Hauptpanel mit BorderLayout für klare Struktur
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(245, 245, 245));
+        mainPanel.setBorder(new EmptyBorder(40, 40, 40, 40));
         
-        // Create components
+        // Header: Titel der App
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(245, 245, 245));
+        JLabel titleLabel = new JLabel("NoteGO", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 40));
+        titleLabel.setForeground(new Color(45, 45, 45));
+        headerPanel.add(titleLabel, BorderLayout.CENTER);
+        
+        // Untertitel
+        JLabel subtitleLabel = new JLabel("Neue Notiz erstellen", SwingConstants.CENTER);
+        subtitleLabel.setFont(new Font("SansSerif", Font.PLAIN, 20));
+        subtitleLabel.setForeground(new Color(70, 70, 70));
+        headerPanel.add(subtitleLabel, BorderLayout.SOUTH);
+        
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        
+        // Center-Panel: Enthält Labels und Textfelder
+        JPanel centerPanel = new JPanel();
+        centerPanel.setBackground(new Color(245, 245, 245));
+        centerPanel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 20, 10, 20);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.CENTER;
+        
+        // Titel-Label
         JLabel lblTitel = new JLabel("Titel:");
-        lblTitel.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        lblTitel.setFont(new Font("SansSerif", Font.PLAIN, 18));
+        lblTitel.setForeground(new Color(70, 70, 70));
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        centerPanel.add(lblTitel, gbc);
         
+        // Titel-Textfeld
+        txtTitel = new JTextField();
+        txtTitel.setFont(new Font("SansSerif", Font.PLAIN, 18));
+        txtTitel.setPreferredSize(new Dimension(500, 40));
+        gbc.gridy = 1;
+        centerPanel.add(txtTitel, gbc);
+        
+        // Tag-Label
         JLabel lblTag = new JLabel("Tag:");
-        lblTag.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        lblTag.setFont(new Font("SansSerif", Font.PLAIN, 18));
+        lblTag.setForeground(new Color(70, 70, 70));
+        gbc.gridy = 2;
+        centerPanel.add(lblTag, gbc);
         
+        // Tag-Textfeld
+        txtTag = new JTextField();
+        txtTag.setFont(new Font("SansSerif", Font.PLAIN, 18));
+        txtTag.setPreferredSize(new Dimension(500, 40));
+        gbc.gridy = 3;
+        centerPanel.add(txtTag, gbc);
+        
+        // Inhalt-Label
         JLabel lblInhalt = new JLabel("Inhalt:");
-        lblInhalt.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        lblInhalt.setFont(new Font("SansSerif", Font.PLAIN, 18));
+        lblInhalt.setForeground(new Color(70, 70, 70));
+        gbc.gridy = 4;
+        centerPanel.add(lblInhalt, gbc);
         
-        txtTitel = new JTextField(20);
-        txtTag = new JTextField(20);
-        txtInhalt = new JTextArea(10, 30);
+        // Inhalt-TextArea mit ScrollPane
+        txtInhalt = new JTextArea(10, 40);
+        txtInhalt.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        txtInhalt.setLineWrap(true);
+        txtInhalt.setWrapStyleWord(true);
+        JScrollPane scrollPane = new JScrollPane(txtInhalt);
+        scrollPane.setPreferredSize(new Dimension(500, 250));
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
+        gbc.gridy = 5;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1.0;
+        centerPanel.add(scrollPane, gbc);
         
-        btnSpeichern = new JButton("Speichern");
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
+        
+        // Footer-Panel: Buttons
+        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 20));
+        footerPanel.setBackground(new Color(245, 245, 245));
+        
+        // Abbrechen-Button im modernen Flat-Design
         btnAbbrechen = new JButton("Abbrechen");
+        btnAbbrechen.setFont(new Font("SansSerif", Font.BOLD, 18));
+        btnAbbrechen.setBackground(new Color(149, 165, 166));
+        btnAbbrechen.setForeground(Color.WHITE);
+        btnAbbrechen.setOpaque(true);
+        btnAbbrechen.setBorderPainted(false);
+        btnAbbrechen.setPreferredSize(new Dimension(150, 50));
+        footerPanel.add(btnAbbrechen);
         
-        // Layout
-        setLayout(new BorderLayout(10, 10));
+        // Speichern-Button im modernen Flat-Design
+        btnSpeichern = new JButton("Speichern");
+        btnSpeichern.setFont(new Font("SansSerif", Font.BOLD, 18));
+        btnSpeichern.setBackground(new Color(46, 204, 113));
+        btnSpeichern.setForeground(Color.WHITE);
+        btnSpeichern.setOpaque(true);
+        btnSpeichern.setBorderPainted(false);
+        btnSpeichern.setPreferredSize(new Dimension(150, 50));
+        footerPanel.add(btnSpeichern);
         
-        // Form panel
-        JPanel formPanel = new JPanel(new GridLayout(3, 2, 10, 10));
-        formPanel.add(lblTitel);
-        formPanel.add(txtTitel);
-        formPanel.add(lblTag);
-        formPanel.add(txtTag);
-        formPanel.add(lblInhalt);
-        formPanel.add(txtInhalt);
+        mainPanel.add(footerPanel, BorderLayout.SOUTH);
         
-        // Button panel
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        buttonPanel.add(btnSpeichern);
-        buttonPanel.add(btnAbbrechen);
-        
-        // Add panels to frame
-        add(formPanel, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
+        // Frame konfigurieren
+        this.setTitle("NoteGO - Neue Notiz");
+        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        this.getContentPane().add(mainPanel);
+        this.setMinimumSize(new Dimension(800, 700));
+        this.pack();
+        this.setLocationRelativeTo(null);
         
         // Add action listeners
         btnSpeichern.addActionListener(new ActionListener() {
