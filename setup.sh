@@ -84,7 +84,8 @@ install_java() {
         print_status "Java is already installed: $JAVA_VERSION"
         
         # Check if it's Java 11 or higher
-        if [[ "$JAVA_VERSION" =~ ^1\.[0-7]\. ]] || [[ "$JAVA_VERSION" =~ ^[0-9]\. ]] && [[ ! "$JAVA_VERSION" =~ ^1[1-9]\. ]]; then
+        JAVA_MAJOR=$(echo "$JAVA_VERSION" | cut -d. -f1)
+        if [[ "$JAVA_MAJOR" -lt 11 ]]; then
             print_warning "Java version is too old. Installing Java 11..."
             apt install -y openjdk-11-jdk
         fi
@@ -93,8 +94,16 @@ install_java() {
     fi
     
     # Set JAVA_HOME
-    JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::")
+    if [[ -d "/usr/lib/jvm/java-11-openjdk-amd64" ]]; then
+        JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
+    elif [[ -d "/usr/lib/jvm/java-11-openjdk" ]]; then
+        JAVA_HOME="/usr/lib/jvm/java-11-openjdk"
+    else
+        JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::")
+    fi
+    
     echo "export JAVA_HOME=$JAVA_HOME" >> /etc/environment
+    export JAVA_HOME=$JAVA_HOME
     
     print_success "Java 11 installed successfully"
 }
@@ -159,7 +168,15 @@ deploy_application() {
     # Build application
     print_status "Building application (this may take a few minutes)..."
     chmod +x mvnw
-    ./mvnw clean package -DskipTests -q
+    
+    # Try building the application
+    if ! ./mvnw clean package -DskipTests; then
+        print_error "Failed to build application"
+        print_status "This might be due to Java version compatibility issues"
+        print_status "Trying to build with verbose output..."
+        ./mvnw clean package -DskipTests -X
+        exit 1
+    fi
     
     # Create uploads directory
     mkdir -p uploads
@@ -206,11 +223,15 @@ create_service() {
     print_status "Creating systemd service..."
     
     # Find the JAR file
-    JAR_FILE=$(find $APP_DIR/target -name "*.jar" | head -1)
+    JAR_FILE=$(find $APP_DIR/target -name "*.jar" -not -name "*sources.jar" -not -name "*javadoc.jar" | head -1)
     if [[ -z "$JAR_FILE" ]]; then
-        print_error "Could not find JAR file"
+        print_error "Could not find JAR file in $APP_DIR/target"
+        print_status "Available files in target directory:"
+        ls -la $APP_DIR/target/ || echo "Target directory does not exist"
         exit 1
     fi
+    
+    print_status "Found JAR file: $JAR_FILE"
     
     cat > /etc/systemd/system/notizprojekt.service << EOF
 [Unit]

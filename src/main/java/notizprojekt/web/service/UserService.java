@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,14 +49,14 @@ public class UserService {
             return userRepository.findAll().stream()
                     .filter(user -> !user.getId().equals(excludeUserId))
                     .limit(10)
-                    .toList();
+                    .collect(Collectors.toList());
         }
         
         return userRepository.findAll().stream()
                 .filter(user -> !user.getId().equals(excludeUserId))
                 .filter(user -> user.getUsername().toLowerCase().contains(searchTerm.toLowerCase()))
                 .limit(10)
-                .toList();
+                .collect(Collectors.toList());
     }
     
     public List<User> getAllUsers() {
