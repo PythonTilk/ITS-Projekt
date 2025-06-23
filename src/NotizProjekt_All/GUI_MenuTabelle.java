@@ -284,6 +284,7 @@ try {
         Geteilt = new javax.swing.JButton();
         jPanel7 = new javax.swing.JPanel();
         addbtn = new javax.swing.JButton();
+        addSharedBtn = new javax.swing.JButton();
         jScrollPane5 = new javax.swing.JScrollPane();
         Ausgabe = new javax.swing.JTable();
         entfernen = new javax.swing.JButton();
@@ -448,6 +449,17 @@ try {
                 addbtnActionPerformed(evt);
             }
         });
+        
+        addSharedBtn.setBackground(new java.awt.Color(96, 96, 96));
+        addSharedBtn.setForeground(new java.awt.Color(255, 255, 255));
+        addSharedBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/image/image.png")));
+        addSharedBtn.setText("G");
+        addSharedBtn.setToolTipText("Geteilte Notiz erstellen");
+        addSharedBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addSharedBtnActionPerformed(evt);
+            }
+        });
 
         Ausgabe.setAutoCreateRowSorter(true);
         Ausgabe.setBackground(new java.awt.Color(96, 96, 96));
@@ -502,7 +514,9 @@ try {
         jPanel7Layout.setHorizontalGroup(
             jPanel7Layout.createParallelGroup(Alignment.LEADING)
             .add(jPanel7Layout.createSequentialGroup()
-                .addContainerGap(563, Short.MAX_VALUE)
+                .addContainerGap(503, Short.MAX_VALUE)
+                .add(addSharedBtn, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(ComponentPlacement.RELATED)
                 .add(addbtn, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
             .add(jPanel7Layout.createSequentialGroup()
@@ -530,7 +544,9 @@ try {
                         .add(18, 18, 18)
                         .add(entfernen)
                         .add(96, 96, 96)))
-                .add(addbtn, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
+                .add(jPanel7Layout.createParallelGroup(Alignment.BASELINE)
+                    .add(addbtn, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
+                    .add(addSharedBtn, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -578,6 +594,22 @@ try {
     new GUI_NeueNotiz().setVisible(true);
      this.dispose(); // Removed unnecessary TODO comment
     }//GEN-LAST:event_addbtnActionPerformed
+    
+    private void addSharedBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addSharedBtnActionPerformed
+        // Open the create shared note dialog
+        GUI_CreateSharedNotiz createSharedDialog = new GUI_CreateSharedNotiz(Nutzer, GUI_Anmelden.AngemeldeterUser);
+        createSharedDialog.setVisible(true);
+        
+        // Refresh the notes list after dialog is closed
+        createSharedDialog.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent e) {
+                refreshNotes();
+            }
+        });
+    }//GEN-LAST:event_addSharedBtnActionPerformed
+
+    // This method was removed as it was a duplicate
 
     private void PrivatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PrivatActionPerformed
     OF=false;
@@ -720,6 +752,7 @@ try {
     private javax.swing.JPanel Name;
     private javax.swing.JToggleButton Privat;
     private javax.swing.JButton addbtn;
+    private javax.swing.JButton addSharedBtn;
     private javax.swing.JButton edit;
     private javax.swing.JButton entfernen;
     private javax.swing.JButton share;
