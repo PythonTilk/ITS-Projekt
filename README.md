@@ -4,19 +4,26 @@ A comprehensive, modern note-taking application with user profiles, collaborativ
 
 ## 🚀 Quick Production Setup
 
-Deploy the complete application to your server with a single command:
+Deploy the complete application to your server with the automated installation script:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh -o install.sh
+chmod +x install.sh
+sudo ./install.sh
 ```
 
 **Automated Setup (No Prompts):**
 ```bash
+# Download script first
+curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh -o install.sh
+chmod +x install.sh
+
+# Run with environment variables
 DOMAIN="notes.example.com" \
 EMAIL="admin@example.com" \
 DB_PASSWORD="your-secure-password" \
 SKIP_PROMPTS="true" \
-curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash
+sudo ./install.sh
 ```
 
 📖 **[Complete Setup Guide](server-setup.md)** | 🚀 **[Quick Deployment Guide](DEPLOYMENT_GUIDE.md)**
