@@ -443,10 +443,19 @@ setup_application() {
     fi
     
     # Verify the JAR file was created
-    if [[ ! -f "target/notizprojekt-web-*.jar" ]]; then
+    JAR_FILE=$(find target -name "notizprojekt-web-*.jar" -type f | head -n 1)
+    if [[ -z "$JAR_FILE" ]]; then
         error "JAR file not found in target directory. Build may have failed silently."
+        error "Looking for: target/notizprojekt-web-*.jar"
+        error "Files in target directory:"
+        ls -la target/ || true
         exit 1
     fi
+    
+    success "JAR file created: $JAR_FILE"
+    
+    # Store JAR file name for later use
+    export BUILT_JAR_FILE="$JAR_FILE"
     
     success "Application built successfully"
 }
@@ -518,7 +527,22 @@ EOF
 
 # Setup systemd service
 setup_systemd_service() {
+    local jar_file="$1"
     log "Setting up systemd service..."
+    
+    if [[ -z "$jar_file" ]]; then
+        # Find the JAR file if not provided
+        jar_file=$(find "$PROJECT_DIR/$PROJECT_NAME/target" -name "notizprojekt-web-*.jar" -type f | head -n 1)
+        if [[ -z "$jar_file" ]]; then
+            error "No JAR file found for systemd service"
+            exit 1
+        fi
+        # Get relative path from working directory
+        jar_file=$(basename "$jar_file")
+        jar_file="target/$jar_file"
+    fi
+    
+    info "Using JAR file for service: $jar_file"
     
     cat > "/etc/systemd/system/$PROJECT_USER.service" << EOF
 [Unit]
@@ -533,7 +557,7 @@ Group=$PROJECT_USER
 WorkingDirectory=$PROJECT_DIR/$PROJECT_NAME
 Environment=SPRING_PROFILES_ACTIVE=prod
 EnvironmentFile=$PROJECT_DIR/.env
-ExecStart=/usr/bin/java \$JAVA_OPTS -jar target/notizprojekt-0.0.1-SNAPSHOT.jar
+ExecStart=/usr/bin/java \$JAVA_OPTS -jar $jar_file
 ExecStop=/bin/kill -TERM \$MAINPID
 Restart=always
 RestartSec=10
@@ -842,7 +866,7 @@ main() {
     create_app_user
     setup_application
     configure_application
-    setup_systemd_service
+    setup_systemd_service "$BUILT_JAR_FILE"
     configure_nginx
     configure_firewall
     setup_ssl
