@@ -4,20 +4,159 @@ This guide provides comprehensive instructions for setting up the ITS-Projekt (N
 
 ## Table of Contents
 
-1. [Prerequisites](#prerequisites)
-2. [System Requirements](#system-requirements)
-3. [Installation](#installation)
-4. [Database Setup](#database-setup)
-5. [Application Configuration](#application-configuration)
-6. [Security Configuration](#security-configuration)
-7. [Reverse Proxy Setup (Nginx)](#reverse-proxy-setup-nginx)
-8. [SSL/TLS Configuration](#ssltls-configuration)
-9. [Systemd Service Setup](#systemd-service-setup)
-10. [Firewall Configuration](#firewall-configuration)
-11. [Monitoring and Logging](#monitoring-and-logging)
-12. [Backup Strategy](#backup-strategy)
-13. [Automatic Updates](#automatic-updates)
-14. [Troubleshooting](#troubleshooting)
+1. [Quick Start (Automated Installation)](#quick-start-automated-installation)
+2. [Prerequisites](#prerequisites)
+3. [System Requirements](#system-requirements)
+4. [Manual Installation](#manual-installation)
+5. [Database Setup](#database-setup)
+6. [Application Configuration](#application-configuration)
+7. [Security Configuration](#security-configuration)
+8. [Reverse Proxy Setup (Nginx)](#reverse-proxy-setup-nginx)
+9. [SSL/TLS Configuration](#ssltls-configuration)
+10. [Systemd Service Setup](#systemd-service-setup)
+11. [Firewall Configuration](#firewall-configuration)
+12. [Monitoring and Logging](#monitoring-and-logging)
+13. [Backup Strategy](#backup-strategy)
+14. [Automatic Updates](#automatic-updates)
+15. [Update Script Usage Guide](#update-script-usage-guide)
+16. [Troubleshooting](#troubleshooting)
+
+## Quick Start (Automated Installation)
+
+For a quick and automated installation, use the provided installation script. This is the **recommended method** for most users.
+
+### 🚀 One-Command Installation
+
+```bash
+# Download and run the installation script
+curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/main/install.sh | sudo bash
+```
+
+### 📋 What the Installation Script Does
+
+The `install.sh` script automatically:
+
+1. **System Setup**
+   - Updates system packages
+   - Installs Java 11, Maven, Git, MySQL, Nginx, and Certbot
+   - Configures firewall (UFW/firewalld)
+
+2. **Database Configuration**
+   - Secures MySQL installation
+   - Creates database and user
+   - Sets up proper permissions
+
+3. **Application Deployment**
+   - Creates dedicated application user
+   - Clones and builds the application
+   - Configures production settings
+   - Sets up systemd service
+
+4. **Web Server & SSL**
+   - Configures Nginx reverse proxy
+   - Obtains and configures SSL certificate
+   - Sets up security headers and optimizations
+
+5. **Monitoring & Backups**
+   - Configures automated database backups
+   - Sets up log rotation
+   - Enables SSL certificate auto-renewal
+
+### 🔧 Installation Script Usage
+
+#### Basic Installation
+```bash
+# Make the script executable
+chmod +x install.sh
+
+# Run the installation (requires root)
+sudo ./install.sh
+```
+
+#### Get Help
+```bash
+./install.sh --help
+```
+
+#### Uninstall
+```bash
+sudo ./install.sh --uninstall
+```
+
+### 📝 Installation Process
+
+When you run the installation script, it will:
+
+1. **Prompt for Information**
+   - Domain name (e.g., `example.com`)
+   - Email address for SSL certificate
+   - Database password
+
+2. **Automated Setup**
+   - Install all required software
+   - Configure services
+   - Set up SSL certificate
+   - Start the application
+
+3. **Completion Summary**
+   - Display access URL
+   - Show management commands
+   - List important file locations
+
+### ⚡ Quick Installation Example
+
+```bash
+# Download the repository
+git clone https://github.com/PythonTilk/ITS-Projekt.git
+cd ITS-Projekt
+
+# Run the installation script
+sudo ./install.sh
+
+# Follow the prompts:
+# Domain: your-domain.com
+# Email: your-email@example.com
+# Database Password: [secure password]
+
+# Wait for completion (5-10 minutes)
+# Access your application at https://your-domain.com
+```
+
+### 🎯 Post-Installation
+
+After successful installation:
+
+1. **Access Your Application**
+   - Visit `https://your-domain.com`
+   - Create your first user account
+   - Start using the note management system
+
+2. **Verify Installation**
+   ```bash
+   # Check application status
+   sudo systemctl status notizprojekt
+   
+   # View application logs
+   sudo journalctl -u notizprojekt -f
+   
+   # Test SSL certificate
+   curl -I https://your-domain.com
+   ```
+
+3. **Customize Configuration** (Optional)
+   ```bash
+   # Edit environment variables
+   sudo nano /opt/notizprojekt/.env
+   
+   # Restart application after changes
+   sudo systemctl restart notizprojekt
+   ```
+
+---
+
+## Manual Installation
+
+If you prefer manual installation or need custom configuration, follow the detailed steps below.
 
 ## Prerequisites
 
@@ -44,7 +183,7 @@ This guide provides comprehensive instructions for setting up the ITS-Projekt (N
 - Storage: 50GB+ SSD
 - Network: 1 Gbps
 
-## Installation
+## Manual Installation
 
 ### 1. Update System
 
@@ -724,6 +863,375 @@ sudo su - notizprojekt
 cd ITS-Projekt
 ./update.sh
 ```
+
+## Update Script Usage Guide
+
+The `update.sh` script provides comprehensive update management for your ITS-Projekt installation. This section covers all aspects of using the update script effectively.
+
+### 🔄 Overview
+
+The update script (`update.sh`) is a powerful tool that:
+- Automatically pulls the latest code changes
+- Builds and deploys the updated application
+- Manages application lifecycle (stop/start)
+- Creates backups before updates
+- Performs health checks after updates
+- Handles rollbacks if needed
+
+### 📍 Script Location
+
+After installation, the update script is located at:
+```bash
+/opt/notizprojekt/ITS-Projekt/update.sh
+```
+
+### 🚀 Basic Usage
+
+#### Full Update Process
+```bash
+# Switch to application user
+sudo su - notizprojekt
+
+# Navigate to project directory
+cd ITS-Projekt
+
+# Run full update
+./update.sh
+```
+
+#### Alternative (as root/sudo)
+```bash
+# Run as application user from anywhere
+sudo -u notizprojekt /opt/notizprojekt/ITS-Projekt/update.sh
+```
+
+### 🛠️ Command Options
+
+The update script supports several command-line options:
+
+#### Show Help
+```bash
+./update.sh --help
+# or
+./update.sh -h
+```
+
+#### Stop Application Only
+```bash
+./update.sh --stop
+```
+
+#### Start Application Only
+```bash
+./update.sh --start
+```
+
+#### Check Application Status
+```bash
+./update.sh --status
+```
+
+#### View Application Logs
+```bash
+./update.sh --logs
+```
+
+### 📋 Update Process Details
+
+When you run `./update.sh` (full update), the script performs these steps:
+
+#### 1. **Prerequisites Check**
+- Verifies Git, Java, and Maven are installed
+- Checks if running as correct user
+- Validates project directory structure
+
+#### 2. **Backup Creation**
+- Creates timestamped backup of current JAR file
+- Stores backups in `/opt/notizprojekt/backups/`
+- Automatically removes old backups (keeps last 5)
+
+#### 3. **Application Stop**
+- Gracefully stops the running application
+- Waits up to 30 seconds for clean shutdown
+- Force kills if necessary
+
+#### 4. **Source Code Update**
+- Stashes any local changes (if present)
+- Fetches latest changes from Git repository
+- Pulls updates from current branch
+
+#### 5. **Application Build**
+- Runs `mvn clean package -DskipTests`
+- Compiles and packages the application
+- Validates build success
+
+#### 6. **Application Start**
+- Starts the application with configured JVM options
+- Saves process ID for management
+- Monitors startup process
+
+#### 7. **Health Check**
+- Waits for application to be ready
+- Tests HTTP endpoint response
+- Verifies application is healthy
+
+#### 8. **Cleanup**
+- Rotates log files
+- Cleans up temporary files
+- Reports update status
+
+### 📊 Update Script Output
+
+The script provides detailed, color-coded output:
+
+```bash
+[2024-01-15 10:30:00] Starting automatic update process...
+[SUCCESS] All prerequisites are met.
+[2024-01-15 10:30:05] Creating backup...
+[SUCCESS] Backup created at /opt/notizprojekt/backups/backup_20240115_103005
+[2024-01-15 10:30:10] Stopping application...
+[SUCCESS] Application stopped gracefully.
+[2024-01-15 10:30:15] Updating source code...
+[SUCCESS] Source code updated successfully.
+[2024-01-15 10:30:45] Building application...
+[SUCCESS] Application built successfully.
+[2024-01-15 10:31:00] Starting application...
+[SUCCESS] Application started successfully with PID 12345
+[2024-01-15 10:31:10] Performing health check...
+[SUCCESS] Application is healthy and responding.
+[SUCCESS] Update completed successfully!
+
+✓ Update completed successfully!
+ℹ Application is running at: http://localhost:8080
+ℹ Logs: /opt/notizprojekt/app.log
+ℹ Update log: /opt/notizprojekt/ITS-Projekt/update.log
+```
+
+### 🔍 Monitoring Updates
+
+#### View Update Logs
+```bash
+# View recent update activity
+tail -f /opt/notizprojekt/ITS-Projekt/update.log
+
+# View application logs
+tail -f /opt/notizprojekt/app.log
+
+# View system service logs
+sudo journalctl -u notizprojekt -f
+```
+
+#### Check Update History
+```bash
+# View update log file
+cat /opt/notizprojekt/ITS-Projekt/update.log
+
+# Check backup history
+ls -la /opt/notizprojekt/backups/
+```
+
+### ⚙️ Configuration
+
+#### Environment Variables
+The update script respects these environment variables:
+
+```bash
+# Java options for the application
+JAVA_OPTS="-Xmx2g -Xms1g -XX:+UseG1GC"
+
+# Spring profile
+SPRING_PROFILES_ACTIVE=prod
+```
+
+#### Customizing Update Behavior
+Edit the script variables at the top of `update.sh`:
+
+```bash
+# Project configuration
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BACKUP_DIR="$PROJECT_DIR/backups"
+LOG_FILE="$PROJECT_DIR/update.log"
+PID_FILE="$PROJECT_DIR/app.pid"
+JAR_FILE="$PROJECT_DIR/target/notizprojekt-0.0.1-SNAPSHOT.jar"
+JAVA_OPTS="-Xmx512m -Xms256m"
+```
+
+### 🔄 Automated Updates
+
+#### Setup Automatic Updates
+```bash
+# Edit crontab for application user
+sudo -u notizprojekt crontab -e
+
+# Add automatic update schedule
+# Weekly updates on Sunday at 3 AM
+0 3 * * 0 /opt/notizprojekt/ITS-Projekt/update.sh
+
+# Daily updates at 2 AM (more frequent)
+0 2 * * * /opt/notizprojekt/ITS-Projekt/update.sh
+
+# Check every 6 hours
+0 */6 * * * /opt/notizprojekt/ITS-Projekt/update.sh
+```
+
+#### View Scheduled Updates
+```bash
+# Check current cron jobs
+sudo -u notizprojekt crontab -l
+
+# View cron execution logs
+sudo tail -f /var/log/cron
+```
+
+### 🛡️ Safety Features
+
+#### Automatic Backups
+- Creates backup before each update
+- Keeps last 5 backups automatically
+- Backup location: `/opt/notizprojekt/backups/`
+
+#### Rollback Capability
+```bash
+# Manual rollback to previous version
+cd /opt/notizprojekt/backups
+ls -la  # Find backup to restore
+
+# Stop current application
+sudo -u notizprojekt /opt/notizprojekt/ITS-Projekt/update.sh --stop
+
+# Restore backup (replace with actual backup file)
+sudo -u notizprojekt cp backup_20240115_103005/notizprojekt-0.0.1-SNAPSHOT.jar \
+  /opt/notizprojekt/ITS-Projekt/target/
+
+# Start application
+sudo -u notizprojekt /opt/notizprojekt/ITS-Projekt/update.sh --start
+```
+
+#### Health Checks
+- Verifies application responds after update
+- Automatic restart if health check fails
+- Detailed error reporting
+
+### 🚨 Troubleshooting Updates
+
+#### Update Fails to Start
+```bash
+# Check application logs
+./update.sh --logs
+
+# Check system service status
+sudo systemctl status notizprojekt
+
+# Manual restart
+sudo systemctl restart notizprojekt
+```
+
+#### Build Failures
+```bash
+# Check Maven build logs
+cd /opt/notizprojekt/ITS-Projekt
+sudo -u notizprojekt mvn clean package
+
+# Check Java version
+java -version
+
+# Check disk space
+df -h
+```
+
+#### Git Update Issues
+```bash
+# Check Git status
+cd /opt/notizprojekt/ITS-Projekt
+sudo -u notizprojekt git status
+
+# Reset local changes
+sudo -u notizprojekt git reset --hard HEAD
+sudo -u notizprojekt git clean -fd
+
+# Force update
+sudo -u notizprojekt git pull --force
+```
+
+#### Permission Issues
+```bash
+# Fix ownership
+sudo chown -R notizprojekt:notizprojekt /opt/notizprojekt
+
+# Fix script permissions
+sudo chmod +x /opt/notizprojekt/ITS-Projekt/update.sh
+```
+
+### 📈 Best Practices
+
+#### 1. **Regular Updates**
+- Schedule weekly automatic updates
+- Monitor update logs regularly
+- Test updates in staging environment first
+
+#### 2. **Backup Management**
+- Verify backups are created successfully
+- Periodically test backup restoration
+- Consider external backup storage
+
+#### 3. **Monitoring**
+- Set up alerts for failed updates
+- Monitor application performance after updates
+- Keep update logs for troubleshooting
+
+#### 4. **Maintenance Windows**
+- Schedule updates during low-traffic periods
+- Notify users of planned maintenance
+- Have rollback plan ready
+
+### 🔧 Advanced Usage
+
+#### Custom Update Scripts
+Create custom update hooks:
+
+```bash
+# Pre-update hook
+cat > /opt/notizprojekt/pre-update.sh << 'EOF'
+#!/bin/bash
+echo "Running pre-update tasks..."
+# Add custom pre-update logic here
+EOF
+
+# Post-update hook
+cat > /opt/notizprojekt/post-update.sh << 'EOF'
+#!/bin/bash
+echo "Running post-update tasks..."
+# Add custom post-update logic here
+EOF
+
+chmod +x /opt/notizprojekt/pre-update.sh
+chmod +x /opt/notizprojekt/post-update.sh
+```
+
+#### Integration with CI/CD
+```bash
+# Webhook endpoint for automatic updates
+curl -X POST https://your-domain.com/webhook/update \
+  -H "Authorization: Bearer your-token"
+```
+
+### 📋 Update Checklist
+
+Before running updates:
+- [ ] Verify backup space available
+- [ ] Check application is running normally
+- [ ] Review recent changes in repository
+- [ ] Ensure maintenance window if needed
+- [ ] Have rollback plan ready
+
+After updates:
+- [ ] Verify application starts successfully
+- [ ] Test key functionality
+- [ ] Check application logs for errors
+- [ ] Monitor performance metrics
+- [ ] Verify SSL certificate still valid
+
+This comprehensive guide ensures you can effectively manage updates for your ITS-Projekt installation with confidence and safety.
 
 ## Troubleshooting
 
