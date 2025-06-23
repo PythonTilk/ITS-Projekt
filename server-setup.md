@@ -1,439 +1,624 @@
-# ITS-Projekt Server Setup Guide
+# Server Setup Guide for ITS-Projekt Notes Application
 
-## 🚀 Simple Server Deployment Guide
+This guide provides comprehensive instructions for setting up the ITS-Projekt notes application on a server for public usage.
 
-This guide provides straightforward instructions for deploying the ITS-Projekt note-taking application on a server for public usage with minimal complexity.
+## Table of Contents
 
-## 📋 Table of Contents
+1. [Prerequisites](#prerequisites)
+2. [System Requirements](#system-requirements)
+3. [Installation Steps](#installation-steps)
+4. [Database Setup](#database-setup)
+5. [Application Configuration](#application-configuration)
+6. [Building the Application](#building-the-application)
+7. [Running the Application](#running-the-application)
+8. [Production Deployment](#production-deployment)
+9. [SSL/HTTPS Setup](#ssl-https-setup)
+10. [Monitoring and Maintenance](#monitoring-and-maintenance)
+11. [Troubleshooting](#troubleshooting)
 
-1. [Quick Setup](#quick-setup)
-2. [Prerequisites](#prerequisites)
-3. [Automated Setup](#automated-setup)
-4. [Manual Setup](#manual-setup)
-5. [Production Deployment with Domain](#production-deployment-with-domain)
-6. [Configuration](#configuration)
-7. [Troubleshooting](#troubleshooting)
+## Prerequisites
 
-## 🚀 Quick Setup
+- Ubuntu 20.04 LTS or newer (or equivalent Linux distribution)
+- Root or sudo access
+- Domain name (optional but recommended for production)
+- Basic knowledge of Linux command line
 
-**TL;DR**: Run this one command to set everything up automatically:
+## System Requirements
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/setup.sh | sudo bash
-```
+### Minimum Requirements
+- **CPU**: 1 vCPU
+- **RAM**: 1 GB
+- **Storage**: 10 GB
+- **Network**: 1 Mbps
 
-Then access your application at `http://your-server-ip:12000`
+### Recommended for Production
+- **CPU**: 2+ vCPUs
+- **RAM**: 2+ GB
+- **Storage**: 20+ GB SSD
+- **Network**: 10+ Mbps
 
-## 📋 Prerequisites
+## Installation Steps
 
-### System Requirements
-- **Operating System**: Ubuntu 18.04+ or Debian 10+ (other Linux distributions may work)
-- **RAM**: Minimum 1GB, recommended 2GB+
-- **Storage**: Minimum 5GB free space
-- **Network**: Public IP address
-
-### What Gets Installed Automatically
-- **Java**: OpenJDK 11
-- **Database**: MariaDB
-- **Application**: ITS-Projekt web application
-- **Basic firewall rules**
-
-## 🤖 Automated Setup
-
-The setup script (`setup.sh`) will automatically:
-
-1. ✅ Install Java 11
-2. ✅ Install and configure MariaDB
-3. ✅ Create database and import schema
-4. ✅ Download and build the application
-5. ✅ Create systemd service
-6. ✅ Configure firewall
-7. ✅ Start the application
-
-### Usage
+### 1. Update System Packages
 
 ```bash
-# Download and run the setup script
-curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/setup.sh | sudo bash
-
-# Or download first, then run
-wget https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/setup.sh
-chmod +x setup.sh
-sudo ./setup.sh
-```
-
-### Custom Configuration
-
-You can set environment variables before running the script:
-
-```bash
-# Custom database password
-export DB_PASSWORD="your_custom_password"
-
-# Custom application port
-export APP_PORT="8080"
-
-# Custom domain (for future SSL setup)
-export DOMAIN="your-domain.com"
-
-# Run setup with custom settings
-curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/setup.sh | sudo bash
-```
-
-## 📖 Manual Setup
-
-If you prefer to set up manually or the automated script doesn't work for your system:
-
-### Step 1: Install Dependencies
-
-```bash
-# Update system
 sudo apt update && sudo apt upgrade -y
+```
 
-# Install Java 11
-sudo apt install openjdk-11-jdk -y
+### 2. Install Java 17
 
+```bash
+# Install OpenJDK 17
+sudo apt install openjdk-17-jdk -y
+
+# Verify installation
+java -version
+javac -version
+
+# Set JAVA_HOME (add to ~/.bashrc for persistence)
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+echo 'export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64' >> ~/.bashrc
+```
+
+### 3. Install MySQL/MariaDB
+
+```bash
 # Install MariaDB
-sudo apt install mariadb-server -y
+sudo apt install mariadb-server mariadb-client -y
 
-# Install Git and other tools
+# Secure the installation
+sudo mysql_secure_installation
+
+# Start and enable MariaDB
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+```
+
+### 4. Install Git and Other Dependencies
+
+```bash
 sudo apt install git curl wget unzip -y
 ```
 
-### Step 2: Configure Database
+### 5. Install Nginx (for reverse proxy)
 
 ```bash
-# Start MariaDB
-sudo systemctl start mariadb
-sudo systemctl enable mariadb
-
-# Set root password (use 'notizpassword' for simplicity)
-sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'notizpassword';"
-
-# Download and import database schema
-cd /tmp
-wget https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/its-projekt18.6.sql
-mysql -u root -pnotizpassword < its-projekt18.6.sql
+sudo apt install nginx -y
+sudo systemctl start nginx
+sudo systemctl enable nginx
 ```
 
-### Step 3: Deploy Application
+## Database Setup
+
+### 1. Create Database and User
+
+```bash
+# Login to MySQL/MariaDB
+sudo mysql -u root -p
+
+# Create database and user
+CREATE DATABASE notizprojekt CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'notizuser'@'localhost' IDENTIFIED BY 'your_secure_password';
+GRANT ALL PRIVILEGES ON notizprojekt.* TO 'notizuser'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+### 2. Import Database Schema
+
+If you have an existing database dump:
+
+```bash
+mysql -u notizuser -p notizprojekt < database_dump.sql
+```
+
+Or create the tables manually using the application's auto-creation feature.
+
+## Application Configuration
+
+### 1. Clone the Repository
 
 ```bash
 # Create application directory
 sudo mkdir -p /opt/notizprojekt
+sudo chown $USER:$USER /opt/notizprojekt
+
+# Clone the repository
 cd /opt/notizprojekt
-
-# Clone repository
-sudo git clone https://github.com/PythonTilk/ITS-Projekt.git .
-sudo git checkout html
-
-# Build application
-sudo ./mvnw clean package -DskipTests
-
-# Create uploads directory
-sudo mkdir -p uploads
+git clone https://github.com/PythonTilk/ITS-Projekt.git .
+git checkout html  # Use the html branch
 ```
 
-### Step 4: Configure Application
+### 2. Configure Application Properties
+
+Create or edit the application configuration:
 
 ```bash
-# Create simple configuration
-sudo tee /opt/notizprojekt/application.properties > /dev/null <<EOF
-# Database Configuration
-spring.datasource.url=jdbc:mysql://localhost:3306/notizprojekt
-spring.datasource.username=notizuser
-spring.datasource.password=notizpassword
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-
+# Create application-prod.properties
+cat > src/main/resources/application-prod.properties << EOF
 # Server Configuration
 server.port=12000
 server.address=0.0.0.0
 
-# File Upload Configuration
-spring.servlet.multipart.max-file-size=10MB
-spring.servlet.multipart.max-request-size=50MB
-spring.web.resources.static-locations=classpath:/static/,file:/opt/notizprojekt/uploads/
+# Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/notizprojekt?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+spring.datasource.username=notizuser
+spring.datasource.password=your_secure_password
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
 # JPA Configuration
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+spring.jpa.properties.hibernate.format_sql=true
+
+# Security Configuration
+spring.security.user.name=admin
+spring.security.user.password=admin_password
+
+# Logging Configuration
+logging.level.notizprojekt=INFO
+logging.level.org.springframework.security=INFO
+logging.file.name=/opt/notizprojekt/logs/application.log
+
+# File Upload Configuration
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
+
+# Session Configuration
+server.servlet.session.timeout=30m
 EOF
 ```
 
-### Step 5: Create Service
+### 3. Create Logs Directory
 
 ```bash
-# Create systemd service
-sudo tee /etc/systemd/system/notizprojekt.service > /dev/null <<EOF
+mkdir -p /opt/notizprojekt/logs
+```
+
+## Building the Application
+
+### 1. Make Setup Script Executable
+
+```bash
+chmod +x setup.sh
+```
+
+### 2. Run Setup Script
+
+```bash
+./setup.sh
+```
+
+Or build manually:
+
+```bash
+# Set JAVA_HOME
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+
+# Build the application
+./mvnw clean package -DskipTests
+
+# Verify the JAR file was created
+ls -la target/notizprojekt-web-*.jar
+```
+
+## Running the Application
+
+### 1. Test Run
+
+```bash
+# Test the application
+cd /opt/notizprojekt
+java -jar target/notizprojekt-web-*.jar --spring.profiles.active=prod
+```
+
+### 2. Create Systemd Service
+
+Create a systemd service for automatic startup:
+
+```bash
+sudo tee /etc/systemd/system/notizprojekt.service > /dev/null << EOF
 [Unit]
-Description=ITS-Projekt Note-Taking Application
-After=network.target mariadb.service
+Description=Notizprojekt Notes Application
+After=network.target mysql.service
 
 [Service]
 Type=simple
-User=root
+User=www-data
+Group=www-data
 WorkingDirectory=/opt/notizprojekt
-ExecStart=/usr/bin/java -jar /opt/notizprojekt/target/notizprojekt-web-0.0.1-SNAPSHOT.jar --spring.config.location=file:/opt/notizprojekt/application.properties
+ExecStart=/usr/bin/java -jar /opt/notizprojekt/target/notizprojekt-web-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 Restart=always
 RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=notizprojekt
+
+Environment=JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+Environment=SPRING_PROFILES_ACTIVE=prod
 
 [Install]
 WantedBy=multi-user.target
 EOF
+```
 
-# Start service
+### 3. Set Permissions and Start Service
+
+```bash
+# Set ownership
+sudo chown -R www-data:www-data /opt/notizprojekt
+
+# Reload systemd and start service
 sudo systemctl daemon-reload
 sudo systemctl enable notizprojekt
 sudo systemctl start notizprojekt
+
+# Check status
+sudo systemctl status notizprojekt
 ```
 
-## 🌐 Production Deployment with Domain
+## Production Deployment
 
-For production deployment with a custom domain and HTTPS, follow these additional steps after completing the basic setup.
+### 1. Configure Nginx Reverse Proxy
 
-### Step 1: Install and Configure Nginx
+Create Nginx configuration:
 
 ```bash
-# Install Nginx
-sudo apt update
-sudo apt install nginx -y
-
-# Create Nginx configuration for your domain
-sudo tee /etc/nginx/sites-available/notizprojekt > /dev/null <<EOF
+sudo tee /etc/nginx/sites-available/notizprojekt > /dev/null << 'EOF'
 server {
     listen 80;
-    server_name your-domain.com www.your-domain.com;
+    server_name your-domain.com www.your-domain.com;  # Replace with your domain
 
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied expired no-cache no-store private must-revalidate auth;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/javascript;
+
+    # Main application
     location / {
-        proxy_pass http://localhost:12000;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        
-        # WebSocket support (if needed)
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "upgrade";
-    }
-}
-EOF
-
-# Enable the site
-sudo ln -s /etc/nginx/sites-available/notizprojekt /etc/nginx/sites-enabled/
-sudo rm -f /etc/nginx/sites-enabled/default
-
-# Test and restart Nginx
-sudo nginx -t
-sudo systemctl restart nginx
-sudo systemctl enable nginx
-```
-
-### Step 2: Configure Firewall for Web Traffic
-
-```bash
-# Allow HTTP and HTTPS traffic
-sudo ufw allow 'Nginx Full'
-sudo ufw allow 22/tcp  # Keep SSH access
-
-# Remove direct access to application port (optional, for security)
-sudo ufw delete allow 12000/tcp
-
-# Enable firewall
-sudo ufw --force enable
-```
-
-### Step 3: Set Up SSL with Let's Encrypt
-
-```bash
-# Install Certbot
-sudo apt install snapd -y
-sudo snap install core; sudo snap refresh core
-sudo snap install --classic certbot
-
-# Create symlink
-sudo ln -s /snap/bin/certbot /usr/bin/certbot
-
-# Get SSL certificate (replace your-domain.com with your actual domain)
-sudo certbot --nginx -d your-domain.com -d www.your-domain.com
-
-# Test automatic renewal
-sudo certbot renew --dry-run
-```
-
-### Step 4: Update DNS Records
-
-Point your domain to your server's IP address:
-
-```
-A Record: your-domain.com → your-server-ip
-A Record: www.your-domain.com → your-server-ip
-```
-
-### Step 5: Verify Production Setup
-
-After completing the above steps:
-
-1. **HTTP Access**: `http://your-domain.com` (should redirect to HTTPS)
-2. **HTTPS Access**: `https://your-domain.com` (secure connection)
-3. **Application**: Should be accessible through your domain
-
-### Production Configuration Example
-
-For a domain like `notes.tilk.tech`, your Nginx config would be:
-
-```nginx
-server {
-    listen 80;
-    server_name notes.tilk.tech;
-
-    location / {
-        proxy_pass http://localhost:12000;
+        proxy_pass http://127.0.0.1:12000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         
+        # WebSocket support
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+        
+        # Buffer settings
+        proxy_buffering on;
+        proxy_buffer_size 128k;
+        proxy_buffers 4 256k;
+        proxy_busy_buffers_size 256k;
     }
+
+    # Static files caching
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        proxy_pass http://127.0.0.1:12000;
+        proxy_set_header Host $host;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Health check endpoint
+    location /actuator/health {
+        proxy_pass http://127.0.0.1:12000;
+        access_log off;
+    }
+
+    # Deny access to sensitive files
+    location ~ /\. {
+        deny all;
+    }
+
+    # Logs
+    access_log /var/log/nginx/notizprojekt_access.log;
+    error_log /var/log/nginx/notizprojekt_error.log;
 }
+EOF
 ```
 
-Then run: `sudo certbot --nginx -d notes.tilk.tech`
-
-## ⚙️ Configuration
-
-### Basic Firewall Setup (Optional)
+### 2. Enable Nginx Site
 
 ```bash
-# Allow application port
-sudo ufw allow 12000/tcp
+# Enable the site
+sudo ln -s /etc/nginx/sites-available/notizprojekt /etc/nginx/sites-enabled/
 
-# Allow SSH (if needed)
-sudo ufw allow 22/tcp
+# Remove default site (optional)
+sudo rm -f /etc/nginx/sites-enabled/default
+
+# Test Nginx configuration
+sudo nginx -t
+
+# Restart Nginx
+sudo systemctl restart nginx
+```
+
+### 3. Configure Firewall
+
+```bash
+# Install UFW if not already installed
+sudo apt install ufw -y
+
+# Configure firewall
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow ssh
+sudo ufw allow 'Nginx Full'
 
 # Enable firewall
 sudo ufw --force enable
 ```
 
-### Access Your Application
+## SSL/HTTPS Setup
 
-After setup is complete, you can access your application at:
+### 1. Install Certbot
 
-- **Local**: `http://localhost:12000`
-- **Remote**: `http://your-server-ip:12000`
+```bash
+sudo apt install certbot python3-certbot-nginx -y
+```
 
-### Default Login Credentials
+### 2. Obtain SSL Certificate
 
-- **Username**: `testuser123`
-- **Password**: `password123`
+```bash
+# Replace with your domain
+sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+```
 
-Or create a new account using the registration form.
+### 3. Auto-renewal Setup
 
-## 🔧 Troubleshooting
+```bash
+# Test auto-renewal
+sudo certbot renew --dry-run
+
+# The cron job is automatically created, but you can verify:
+sudo crontab -l | grep certbot
+```
+
+## Monitoring and Maintenance
+
+### 1. Log Monitoring
+
+```bash
+# Application logs
+sudo journalctl -u notizprojekt -f
+
+# Nginx logs
+sudo tail -f /var/log/nginx/notizprojekt_access.log
+sudo tail -f /var/log/nginx/notizprojekt_error.log
+
+# System logs
+sudo tail -f /var/log/syslog
+```
+
+### 2. Health Checks
+
+Create a simple health check script:
+
+```bash
+cat > /opt/notizprojekt/health-check.sh << 'EOF'
+#!/bin/bash
+
+# Check if application is running
+if curl -f -s http://localhost:12000/actuator/health > /dev/null; then
+    echo "$(date): Application is healthy"
+else
+    echo "$(date): Application is down, restarting..."
+    sudo systemctl restart notizprojekt
+fi
+EOF
+
+chmod +x /opt/notizprojekt/health-check.sh
+
+# Add to crontab (check every 5 minutes)
+(crontab -l 2>/dev/null; echo "*/5 * * * * /opt/notizprojekt/health-check.sh >> /opt/notizprojekt/logs/health-check.log 2>&1") | crontab -
+```
+
+### 3. Database Backup
+
+```bash
+# Create backup script
+cat > /opt/notizprojekt/backup-db.sh << 'EOF'
+#!/bin/bash
+
+BACKUP_DIR="/opt/notizprojekt/backups"
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_FILE="$BACKUP_DIR/notizprojekt_backup_$DATE.sql"
+
+mkdir -p $BACKUP_DIR
+
+mysqldump -u notizuser -p'your_secure_password' notizprojekt > $BACKUP_FILE
+
+# Keep only last 7 days of backups
+find $BACKUP_DIR -name "notizprojekt_backup_*.sql" -mtime +7 -delete
+
+echo "$(date): Database backup completed: $BACKUP_FILE"
+EOF
+
+chmod +x /opt/notizprojekt/backup-db.sh
+
+# Add to crontab (daily backup at 2 AM)
+(crontab -l 2>/dev/null; echo "0 2 * * * /opt/notizprojekt/backup-db.sh >> /opt/notizprojekt/logs/backup.log 2>&1") | crontab -
+```
+
+### 4. System Updates
+
+```bash
+# Create update script
+cat > /opt/notizprojekt/update-system.sh << 'EOF'
+#!/bin/bash
+
+echo "$(date): Starting system update..."
+
+# Update packages
+sudo apt update && sudo apt upgrade -y
+
+# Clean up
+sudo apt autoremove -y
+sudo apt autoclean
+
+echo "$(date): System update completed"
+EOF
+
+chmod +x /opt/notizprojekt/update-system.sh
+
+# Add to crontab (weekly updates on Sunday at 3 AM)
+(crontab -l 2>/dev/null; echo "0 3 * * 0 /opt/notizprojekt/update-system.sh >> /opt/notizprojekt/logs/updates.log 2>&1") | crontab -
+```
+
+## Troubleshooting
 
 ### Common Issues
 
-#### Application Won't Start
+#### 1. Application Won't Start
+
 ```bash
-# Check service status
-sudo systemctl status notizprojekt
+# Check Java version
+java -version
 
-# Check logs
-sudo journalctl -u notizprojekt -f
+# Check if port is in use
+sudo netstat -tlnp | grep :12000
 
-# Restart service
-sudo systemctl restart notizprojekt
+# Check application logs
+sudo journalctl -u notizprojekt -n 50
+
+# Check database connection
+mysql -u notizuser -p notizprojekt -e "SELECT 1;"
 ```
 
-#### Database Connection Issues
-```bash
-# Test database connection
-mysql -u notizuser -pnotizpassword notizprojekt
-
-# Restart MariaDB
-sudo systemctl restart mariadb
-
-# Re-import database if needed
-mysql -u root -pnotizpassword < /tmp/its-projekt18.6.sql
-```
-
-#### Port Already in Use
-```bash
-# Check what's using port 12000
-sudo netstat -tlnp | grep 12000
-
-# Kill process if needed
-sudo kill -9 $(sudo lsof -t -i:12000)
-
-# Restart application
-sudo systemctl restart notizprojekt
-```
-
-#### Can't Access from External IP
-```bash
-# Check if application is binding to all interfaces
-sudo netstat -tlnp | grep 12000
-
-# Make sure firewall allows the port
-sudo ufw allow 12000/tcp
-
-# Check if your cloud provider has security groups blocking the port
-```
-
-### Useful Commands
+#### 2. Database Connection Issues
 
 ```bash
-# Check application status
-sudo systemctl status notizprojekt
-
-# View application logs
-sudo journalctl -u notizprojekt -f
-
-# Restart application
-sudo systemctl restart notizprojekt
-
-# Check database status
+# Check MySQL/MariaDB status
 sudo systemctl status mariadb
 
-# Test database connection
-mysql -u notizuser -pnotizpassword -e "SHOW DATABASES;"
+# Check database user permissions
+mysql -u root -p -e "SELECT User, Host FROM mysql.user WHERE User='notizuser';"
 
-# Check open ports
-sudo netstat -tlnp
-
-# Check disk space
-df -h
-
-# Check memory usage
-free -h
+# Test connection
+mysql -u notizuser -p notizprojekt
 ```
 
-## 📝 Notes
+#### 3. Nginx Issues
 
-- The application runs on port 12000 by default
-- Database credentials: `notizuser` / `notizpassword`
-- Application files are stored in `/opt/notizprojekt/`
-- Uploads are stored in `/opt/notizprojekt/uploads/`
-- For production use, consider changing default passwords
-- For HTTPS, you'll need to set up a reverse proxy (Nginx/Apache) with SSL certificates
+```bash
+# Check Nginx status
+sudo systemctl status nginx
 
-## 🆘 Getting Help
+# Test configuration
+sudo nginx -t
 
-If you encounter issues:
+# Check error logs
+sudo tail -f /var/log/nginx/error.log
+```
 
-1. Check the application logs: `sudo journalctl -u notizprojekt -f`
-2. Verify database connection: `mysql -u notizuser -pnotizpassword notizprojekt`
-3. Ensure all services are running: `sudo systemctl status notizprojekt mariadb`
-4. Check firewall settings: `sudo ufw status`
-5. Verify port availability: `sudo netstat -tlnp | grep 12000`
+#### 4. SSL Certificate Issues
+
+```bash
+# Check certificate status
+sudo certbot certificates
+
+# Renew certificate manually
+sudo certbot renew
+
+# Check certificate expiry
+openssl x509 -in /etc/letsencrypt/live/your-domain.com/cert.pem -text -noout | grep "Not After"
+```
+
+### Performance Optimization
+
+#### 1. JVM Tuning
+
+Edit the systemd service file to add JVM options:
+
+```bash
+sudo systemctl edit notizprojekt
+```
+
+Add:
+
+```ini
+[Service]
+Environment="JAVA_OPTS=-Xms512m -Xmx1024m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+```
+
+#### 2. Database Optimization
+
+```sql
+-- Add indexes for better performance
+USE notizprojekt;
+
+-- Index on user ID for notes
+CREATE INDEX idx_notiz_user ON notiz(B_id);
+
+-- Index on privacy level for sharing
+CREATE INDEX idx_notiz_privacy ON notiz(privacy_level);
+
+-- Index on shared_with for faster sharing queries
+CREATE INDEX idx_notiz_shared ON notiz(shared_with);
+```
+
+#### 3. Nginx Optimization
+
+Add to Nginx configuration:
+
+```nginx
+# Worker processes
+worker_processes auto;
+worker_connections 1024;
+
+# Keepalive
+keepalive_timeout 65;
+keepalive_requests 100;
+
+# Client settings
+client_max_body_size 10M;
+client_body_timeout 60;
+client_header_timeout 60;
+```
+
+### Security Considerations
+
+1. **Change Default Passwords**: Update all default passwords in production
+2. **Regular Updates**: Keep system and application updated
+3. **Firewall**: Use UFW or iptables to restrict access
+4. **SSL/TLS**: Always use HTTPS in production
+5. **Database Security**: Use strong passwords and limit database access
+6. **Backup**: Regular backups with encryption
+7. **Monitoring**: Set up log monitoring and alerting
+
+### Support and Updates
+
+- **Repository**: https://github.com/PythonTilk/ITS-Projekt
+- **Branch**: html (for web version)
+- **Issues**: Report issues on GitHub
+- **Updates**: Pull latest changes regularly
+
+```bash
+# Update application
+cd /opt/notizprojekt
+git pull origin html
+./mvnw clean package -DskipTests
+sudo systemctl restart notizprojekt
+```
 
 ---
 
-**Quick Start Summary:**
-1. Run: `curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/setup.sh | sudo bash`
-2. Wait for installation to complete
-3. Access: `http://your-server-ip:12000`
-4. Login with: `testuser123` / `password123`
+**Note**: Replace `your-domain.com` and `your_secure_password` with your actual domain and secure passwords throughout this guide.
