@@ -6,6 +6,7 @@ import notizprojekt.web.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -40,5 +41,24 @@ public class UserService {
             return password.equals(user.getPassword());
         }
         return false;
+    }
+    
+    public List<User> searchUsers(String searchTerm, Integer excludeUserId) {
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            return userRepository.findAll().stream()
+                    .filter(user -> !user.getId().equals(excludeUserId))
+                    .limit(10)
+                    .toList();
+        }
+        
+        return userRepository.findAll().stream()
+                .filter(user -> !user.getId().equals(excludeUserId))
+                .filter(user -> user.getUsername().toLowerCase().contains(searchTerm.toLowerCase()))
+                .limit(10)
+                .toList();
+    }
+    
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 }

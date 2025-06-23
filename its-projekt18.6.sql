@@ -78,6 +78,26 @@ CREATE TABLE IF NOT EXISTS `notiz` (
   KEY `fk_notiz_nutzer` (`b_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for `note_shares` - Better sharing management
+--
+
+CREATE TABLE IF NOT EXISTS `note_shares` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `note_id` int(11) NOT NULL,
+  `shared_with_user_id` int(11) NOT NULL,
+  `shared_by_user_id` int(11) NOT NULL,
+  `permission_level` varchar(50) DEFAULT 'read',
+  `shared_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_note_user_share` (`note_id`, `shared_with_user_id`),
+  KEY `fk_note_shares_note` (`note_id`),
+  KEY `fk_note_shares_shared_with` (`shared_with_user_id`),
+  KEY `fk_note_shares_shared_by` (`shared_by_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 --
 -- Sample data for `notiz` table with enhanced features
 --
@@ -175,6 +195,15 @@ ALTER TABLE `notiz`
 --
 ALTER TABLE `geteilte_notizen`
   ADD CONSTRAINT `fk_geteilte_nutzer` FOREIGN KEY (`B_ID`) REFERENCES `nutzer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Foreign keys for table `note_shares`
+--
+ALTER TABLE `note_shares`
+  ADD CONSTRAINT `fk_note_shares_note` FOREIGN KEY (`note_id`) REFERENCES `notiz` (`n_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_note_shares_shared_with` FOREIGN KEY (`shared_with_user_id`) REFERENCES `nutzer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_note_shares_shared_by` FOREIGN KEY (`shared_by_user_id`) REFERENCES `nutzer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

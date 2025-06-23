@@ -16,15 +16,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentTheme = document.documentElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
         
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        updateThemeIcons(newTheme);
+        // Add switching animation
+        themeToggle.classList.add('switching');
         
-        // Add animation
-        themeToggle.style.transform = 'scale(0.8)';
         setTimeout(() => {
-            themeToggle.style.transform = 'scale(1)';
-        }, 150);
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcons(newTheme);
+        }, 300);
+        
+        setTimeout(() => {
+            themeToggle.classList.remove('switching');
+        }, 600);
     });
     
     function updateThemeIcons(theme) {
@@ -74,7 +77,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Privacy elements
     const privacyOptions = document.querySelectorAll('.privacy-option');
     const sharedUsersGroup = document.getElementById('shared-users-group');
-    const sharedUsersInput = document.getElementById('shared-users');
+    const userSearchInput = document.getElementById('user-search');
+    const searchResults = document.getElementById('search-results');
+    const selectedUsersList = document.getElementById('selected-users-list');
+    
+    // User selection state
+    let selectedUsers = [];
+    let searchTimeout;
     
     // State
     let isDragging = false;
@@ -213,6 +222,12 @@ document.addEventListener('DOMContentLoaded', function() {
         privacyOptions[0].querySelector('input').checked = true;
         sharedUsersGroup.style.display = 'none';
         
+        // Reset selected users
+        selectedUsers = [];
+        updateSelectedUsersDisplay();
+        if (userSearchInput) userSearchInput.value = '';
+        hideSearchResults();
+        
         showModal();
     }
     
@@ -340,7 +355,7 @@ document.addEventListener('DOMContentLoaded', function() {
             color: noteColorInput.value,
             noteType: noteTypeInput.value,
             privacyLevel: document.querySelector('input[name="privacy"]:checked').value,
-            sharedWith: sharedUsersInput.value
+            sharedWith: selectedUsers.map(user => user.username).join(',')
         };
         
         // Get content based on note type
@@ -596,6 +611,126 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!result) return '#fef3c7';
         return '#' + result.map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
     }
+    
+    // User search and selection functionality
+    if (userSearchInput) {
+        userSearchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length === 0) {
+                hideSearchResults();
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                searchUsers(query);
+            }, 300);
+        });
+        
+        userSearchInput.addEventListener('focus', function() {
+            if (this.value.trim().length > 0) {
+                searchUsers(this.value.trim());
+            }
+        });
+        
+        // Hide search results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.user-search')) {
+                hideSearchResults();
+            }
+        });
+    }
+    
+    function searchUsers(query) {
+        searchResults.innerHTML = '<div class="search-results loading">Searching users...</div>';
+        searchResults.classList.add('loading');
+        searchResults.style.display = 'block';
+        
+        fetch(`/api/users/search?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                searchResults.classList.remove('loading');
+                
+                if (data.success && data.users.length > 0) {
+                    displaySearchResults(data.users);
+                } else {
+                    searchResults.innerHTML = '<div class="search-results no-results">No users found</div>';
+                    searchResults.classList.add('no-results');
+                }
+            })
+            .catch(error => {
+                console.error('Error searching users:', error);
+                searchResults.classList.remove('loading');
+                searchResults.innerHTML = '<div class="search-results no-results">Error searching users</div>';
+                searchResults.classList.add('no-results');
+            });
+    }
+    
+    function displaySearchResults(users) {
+        searchResults.classList.remove('no-results');
+        searchResults.innerHTML = '';
+        
+        users.forEach(user => {
+            // Skip if user is already selected
+            if (selectedUsers.some(selected => selected.id === user.id)) {
+                return;
+            }
+            
+            const resultItem = document.createElement('div');
+            resultItem.className = 'search-result-item';
+            resultItem.innerHTML = `
+                <div class="user-avatar-small">${user.avatar}</div>
+                <div class="user-info">
+                    <div class="user-name">${user.username}</div>
+                    ${user.email ? `<div class="user-email">${user.email}</div>` : ''}
+                </div>
+            `;
+            
+            resultItem.addEventListener('click', () => {
+                selectUser(user);
+                hideSearchResults();
+                userSearchInput.value = '';
+            });
+            
+            searchResults.appendChild(resultItem);
+        });
+        
+        searchResults.style.display = 'block';
+    }
+    
+    function selectUser(user) {
+        if (!selectedUsers.some(selected => selected.id === user.id)) {
+            selectedUsers.push(user);
+            updateSelectedUsersDisplay();
+        }
+    }
+    
+    function removeUser(userId) {
+        selectedUsers = selectedUsers.filter(user => user.id !== userId);
+        updateSelectedUsersDisplay();
+    }
+    
+    function updateSelectedUsersDisplay() {
+        if (selectedUsers.length === 0) {
+            selectedUsersList.innerHTML = '<div class="no-users-selected">No users selected</div>';
+        } else {
+            selectedUsersList.innerHTML = selectedUsers.map(user => `
+                <div class="selected-user-tag">
+                    <span>${user.username}</span>
+                    <span class="remove-user" onclick="removeUser(${user.id})">×</span>
+                </div>
+            `).join('');
+        }
+    }
+    
+    function hideSearchResults() {
+        searchResults.style.display = 'none';
+        searchResults.classList.remove('loading', 'no-results');
+    }
+    
+    // Make removeUser function global so it can be called from HTML
+    window.removeUser = removeUser;
     
     // Add CSS animations
     const style = document.createElement('style');
