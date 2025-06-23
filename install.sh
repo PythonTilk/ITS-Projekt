@@ -545,18 +545,24 @@ setup_systemd_service() {
             error "No JAR file found for systemd service"
             exit 1
         fi
-        # Get relative path from working directory
-        jar_file=$(basename "$jar_file")
-        jar_file="target/$jar_file"
+        # Use absolute path for systemd service
+        jar_file_absolute="$jar_file"
+        # Get relative path for display
+        jar_file_relative=$(basename "$jar_file")
+        jar_file_relative="target/$jar_file_relative"
+    else
+        # If jar_file was provided, assume it's relative and make it absolute
+        jar_file_absolute="$PROJECT_DIR/$PROJECT_NAME/$jar_file"
+        jar_file_relative="$jar_file"
     fi
     
-    info "Using JAR file for service: $jar_file"
+    info "Using JAR file for service: $jar_file_relative"
     
     cat > "/etc/systemd/system/$PROJECT_USER.service" << EOF
 [Unit]
 Description=ITS-Projekt Note Management System
 After=network.target mysql.service
-Requires=mysql.service
+Wants=mysql.service
 
 [Service]
 Type=simple
@@ -564,8 +570,9 @@ User=$PROJECT_USER
 Group=$PROJECT_USER
 WorkingDirectory=$PROJECT_DIR/$PROJECT_NAME
 Environment=SPRING_PROFILES_ACTIVE=prod
-EnvironmentFile=$PROJECT_DIR/.env
-ExecStart=/usr/bin/java \$JAVA_OPTS -jar $jar_file
+Environment=JAVA_OPTS=-Xmx1g -Xms512m -XX:+UseG1GC
+EnvironmentFile=-$PROJECT_DIR/.env
+ExecStart=/usr/bin/java \$JAVA_OPTS -jar $jar_file_absolute
 ExecStop=/bin/kill -TERM \$MAINPID
 Restart=always
 RestartSec=10
@@ -599,7 +606,7 @@ configure_nginx() {
     cat > "/etc/nginx/sites-available/$PROJECT_USER" << EOF
 server {
     listen 80;
-    server_name $DOMAIN www.$DOMAIN;
+    server_name $DOMAIN;
     
     # Temporary location for Let's Encrypt verification
     location /.well-known/acme-challenge/ {
@@ -640,20 +647,20 @@ setup_ssl() {
     systemctl start "$PROJECT_USER"
     sleep 10
     
-    # Obtain SSL certificate
-    certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" --email "$EMAIL" --agree-tos --non-interactive
+    # Obtain SSL certificate (only for main domain, not www)
+    certbot --nginx -d "$DOMAIN" --email "$EMAIL" --agree-tos --non-interactive
     
     # Update Nginx configuration with SSL
     cat > "/etc/nginx/sites-available/$PROJECT_USER" << EOF
 server {
     listen 80;
-    server_name $DOMAIN www.$DOMAIN;
+    server_name $DOMAIN;
     return 301 https://\$server_name\$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name $DOMAIN www.$DOMAIN;
+    server_name $DOMAIN;
     
     # SSL Configuration
     ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
