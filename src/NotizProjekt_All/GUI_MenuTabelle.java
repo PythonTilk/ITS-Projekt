@@ -31,11 +31,13 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
     private DBVerbindung konnektor;
     private ArrayList<Notiz> notizenliste;
     private ArrayList<OeffentlichNotiz> oeffentlicheNotiz;
+    private ArrayList<SharedNotiz> sharedNotizen;
     
     int Nutzer= GUI_Anmelden.NutzerID;
     static int idToDelete;
     static int Notiznr;
     static boolean OF;
+    static boolean SHARED;
     
     String[] spalten = {"Nummer", "Titel", "Inhalt"};
     Color Standard = new Color(96, 96, 96);
@@ -61,6 +63,7 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
             
             notizenliste = new ArrayList<>();
             oeffentlicheNotiz = new ArrayList<>();
+            sharedNotizen = new ArrayList<>();
           
             
             this.konnektor = new DBVerbindung("localhost", "notizprojekt", "notizuser", "notizpassword");
@@ -114,6 +117,34 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(rootPane, "Fehler bei der Abfrage der Datenbank: " + ex);
         }
     }   
+    
+    public void getSharedNotiz() {
+        try {
+            sharedNotizen.clear();
+            // Get notes shared with the current user
+            ResultSet ergebnis = this.konnektor.fuehreAbfrageAus(
+                "SELECT GN_id, Titel, Tag, Inhalt, Datum, Uhrzeit, Ort, Mitbenutzer, B_ID " +
+                "FROM geteilte_notizen WHERE FIND_IN_SET(" + Nutzer + ", Mitbenutzer) > 0");
+            
+            while (ergebnis.next()) {
+                SharedNotiz naechsteNotiz = new SharedNotiz(
+                    ergebnis.getInt("GN_id"),
+                    ergebnis.getString("Titel"), 
+                    ergebnis.getString("Inhalt"),
+                    ergebnis.getString("Tag"), 
+                    ergebnis.getString("Datum"),
+                    ergebnis.getString("Uhrzeit"),
+                    ergebnis.getString("Ort"),
+                    ergebnis.getString("Mitbenutzer"),
+                    ergebnis.getInt("B_ID")
+                );
+                this.sharedNotizen.add(naechsteNotiz);
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(rootPane, "Fehler bei der Abfrage der Datenbank: " + ex);
+        }
+    }
    
 public void zeigeNotiz() {
     tblModel.setRowCount(0);
@@ -149,6 +180,37 @@ public void zeigeNotiz() {
     Ausgabe.setModel(tblModel);
     }
     
+    public void zeigeSharedNotiz(){
+        tblModel.setRowCount(0);
+       
+        for (SharedNotiz sharedNotiz : sharedNotizen) {
+            // Display note content instead of tag
+            String inhaltPreview = sharedNotiz.getInhalt();
+            // Truncate content if it's too long
+            if (inhaltPreview.length() > 50) {
+                inhaltPreview = inhaltPreview.substring(0, 47) + "...";
+            }
+            // Get the username of the note creator
+            String creatorName = getUsernameById(sharedNotiz.getUserId());
+            Object[] row = {sharedNotiz.getSharedId(), sharedNotiz.getTitel() + " (geteilt von " + creatorName + ")", inhaltPreview};
+            tblModel.addRow(row);
+        }
+        Ausgabe.setModel(tblModel);
+    }
+    
+    private String getUsernameById(int userId) {
+        try {
+            ResultSet ergebnis = this.konnektor.fuehreAbfrageAus(
+                "SELECT Benutzername FROM nutzer WHERE B_id = " + userId);
+            if (ergebnis.next()) {
+                return ergebnis.getString("Benutzername");
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(rootPane, "Fehler beim Abrufen des Benutzernamens: " + ex);
+        }
+        return "Unbekannt";
+    }
+    
     
     public void bearbeiten(){
         new GUI_NotizBearbeiten().setVisible(true);
@@ -162,6 +224,9 @@ public void zeigeNotiz() {
         if (OF) {
             getOeffentlicheNotiz();
             zeigeOeffentlicheNotiz();
+        } else if (SHARED) {
+            getSharedNotiz();
+            zeigeSharedNotiz();
         } else {
             getNotiz();
             zeigeNotiz();
@@ -216,6 +281,7 @@ try {
         jPanel6 = new javax.swing.JPanel();
         Privat = new javax.swing.JToggleButton();
         Oeffentlich = new javax.swing.JButton();
+        Geteilt = new javax.swing.JButton();
         jPanel7 = new javax.swing.JPanel();
         addbtn = new javax.swing.JButton();
         jScrollPane5 = new javax.swing.JScrollPane();
@@ -341,6 +407,15 @@ try {
             }
         });
 
+        Geteilt.setBackground(new java.awt.Color(96, 96, 96));
+        Geteilt.setForeground(new java.awt.Color(255, 255, 255));
+        Geteilt.setText("Geteilt");
+        Geteilt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                GeteiltActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
@@ -349,7 +424,8 @@ try {
                 .addContainerGap()
                 .add(jPanel6Layout.createParallelGroup(Alignment.LEADING)
                     .add(Privat)
-                    .add(Oeffentlich))
+                    .add(Oeffentlich)
+                    .add(Geteilt))
                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel6Layout.setVerticalGroup(
@@ -359,7 +435,9 @@ try {
                 .add(Privat)
                 .add(18, 18, 18)
                 .add(Oeffentlich)
-                .addContainerGap(280, Short.MAX_VALUE))
+                .add(18, 18, 18)
+                .add(Geteilt)
+                .addContainerGap(244, Short.MAX_VALUE))
         );
 
         jPanel7.setBackground(new java.awt.Color(96, 96, 96));
@@ -503,15 +581,24 @@ try {
 
     private void PrivatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PrivatActionPerformed
     OF=false;
+    SHARED=false;
     getNotiz();
     zeigeNotiz();
     }//GEN-LAST:event_PrivatActionPerformed
 
     private void OeffentlichActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OeffentlichActionPerformed
     OF=true;
+    SHARED=false;
     getOeffentlicheNotiz();
     zeigeOeffentlicheNotiz();
     }//GEN-LAST:event_OeffentlichActionPerformed
+    
+    private void GeteiltActionPerformed(java.awt.event.ActionEvent evt) {
+    SHARED=true;
+    OF=false;
+    getSharedNotiz();
+    zeigeSharedNotiz();
+    }
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         new GUI_Anmelden().setVisible(true);
@@ -649,6 +736,7 @@ try {
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JLabel name;
     private javax.swing.JButton Oeffentlich;
+    private javax.swing.JButton Geteilt;
     // End of variables declaration//GEN-END:variables
 
 }
