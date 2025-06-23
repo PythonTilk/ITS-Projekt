@@ -37,7 +37,7 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
     static int Notiznr;
     static boolean OF;
     
-    String[] spalten = {"Nummer", "Titel", "Tag"};
+    String[] spalten = {"Nummer", "Titel", "Inhalt"};
     Color Standard = new Color(96, 96, 96);
   
     DefaultTableModel tblModel = new DefaultTableModel(spalten, 0){
@@ -120,7 +120,13 @@ public void zeigeNotiz() {
    
  
     for (Notiz notiz : notizenliste) {
-        Object[] row = { notiz.getNotizid(), notiz.getTitel(), notiz.getTag()};
+        // Display note content instead of tag
+        String inhaltPreview = notiz.getInhalt();
+        // Truncate content if it's too long
+        if (inhaltPreview.length() > 50) {
+            inhaltPreview = inhaltPreview.substring(0, 47) + "...";
+        }
+        Object[] row = { notiz.getNotizid(), notiz.getTitel(), inhaltPreview};
         tblModel.addRow(row);
     }
     Ausgabe.setModel(tblModel);
@@ -131,7 +137,13 @@ public void zeigeNotiz() {
         tblModel.setRowCount(0);
        
     for (OeffentlichNotiz Ofnotiz : oeffentlicheNotiz) {
-        Object[] row = {Ofnotiz.getOID(), Ofnotiz.getTitel(), Ofnotiz.getTag()};
+        // Display note content instead of tag
+        String inhaltPreview = Ofnotiz.getInhalt();
+        // Truncate content if it's too long
+        if (inhaltPreview.length() > 50) {
+            inhaltPreview = inhaltPreview.substring(0, 47) + "...";
+        }
+        Object[] row = {Ofnotiz.getOID(), Ofnotiz.getTitel(), inhaltPreview};
         tblModel.addRow(row);
     }
     Ausgabe.setModel(tblModel);
@@ -141,6 +153,19 @@ public void zeigeNotiz() {
     public void bearbeiten(){
         new GUI_NotizBearbeiten().setVisible(true);
         this.dispose();
+    }
+    
+    /**
+     * Refresh the notes list
+     */
+    public void refreshNotes() {
+        if (OF) {
+            getOeffentlicheNotiz();
+            zeigeOeffentlicheNotiz();
+        } else {
+            getNotiz();
+            zeigeNotiz();
+        }
     }
     
     
@@ -197,6 +222,7 @@ try {
         Ausgabe = new javax.swing.JTable();
         entfernen = new javax.swing.JButton();
         edit = new javax.swing.JButton();
+        share = new javax.swing.JButton();
 
         jTextArea1.setColumns(20);
         jTextArea1.setRows(5);
@@ -383,6 +409,15 @@ try {
                 editActionPerformed(evt);
             }
         });
+        
+        share.setBackground(new java.awt.Color(96, 96, 96));
+        share.setForeground(new java.awt.Color(255, 255, 255));
+        share.setText("Teilen");
+        share.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                shareActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
@@ -397,7 +432,8 @@ try {
                 .addPreferredGap(ComponentPlacement.RELATED)
                 .add(jPanel7Layout.createParallelGroup(Alignment.LEADING)
                     .add(entfernen)
-                    .add(edit))
+                    .add(edit)
+                    .add(share))
                 .add(29, 29, 29))
         );
         jPanel7Layout.setVerticalGroup(
@@ -412,8 +448,10 @@ try {
                         .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .add(edit, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
                         .add(18, 18, 18)
+                        .add(share, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
+                        .add(18, 18, 18)
                         .add(entfernen)
-                        .add(158, 158, 158)))
+                        .add(96, 96, 96)))
                 .add(addbtn, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -507,6 +545,43 @@ try {
             JOptionPane.showMessageDialog(this, "Bitte wählen Sie eine Zeile aus, um sie zu bearbeiten.", "Warnung", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_editActionPerformed
+    
+    private void shareActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_shareActionPerformed
+        int selectedRow = Ausgabe.getSelectedRow();
+        if (selectedRow != -1) {
+            if (!OF) {
+                DefaultTableModel model = (DefaultTableModel) Ausgabe.getModel();
+                int notizId = (Integer) model.getValueAt(selectedRow, 0);
+                
+                // Find the selected note in the list
+                Notiz selectedNotiz = null;
+                for (Notiz notiz : notizenliste) {
+                    if (notiz.getNotizid() == notizId) {
+                        selectedNotiz = notiz;
+                        break;
+                    }
+                }
+                
+                if (selectedNotiz != null) {
+                    // Open the share dialog
+                    GUI_ShareNotiz shareDialog = new GUI_ShareNotiz(selectedNotiz, Nutzer, GUI_Anmelden.AngemeldeterUser);
+                    shareDialog.setVisible(true);
+                    
+                    // Refresh the notes list after dialog is closed
+                    shareDialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                        @Override
+                        public void windowClosed(java.awt.event.WindowEvent e) {
+                            refreshNotes();
+                        }
+                    });
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Öffentliche Notizen können nicht geteilt werden.", "Information", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Bitte wählen Sie eine Notiz aus, um sie zu teilen.", "Warnung", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_shareActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
                 
@@ -560,6 +635,7 @@ try {
     private javax.swing.JButton addbtn;
     private javax.swing.JButton edit;
     private javax.swing.JButton entfernen;
+    private javax.swing.JButton share;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel2;
