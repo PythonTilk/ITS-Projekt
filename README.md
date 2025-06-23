@@ -158,7 +158,7 @@ spring.datasource.password=notizpassword
 - **Dependencies**: JDBC MySQL Connector (included)
 
 #### Web Application (html branch) - **Enhanced Version**
-- **Java**: JDK 11 or higher
+- **Java**: JDK 17 or higher
 - **Database**: MySQL/MariaDB 5.7+ or Docker
 - **Build Tool**: Maven 3.6+
 - **Framework**: Spring Boot 2.7.0
@@ -441,7 +441,7 @@ mysql -u root -p < its-projekt18.6.sql
 
 #### Application Won't Start
 ```bash
-# Check Java version (needs JDK 11+)
+# Check Java version (needs JDK 17+)
 java -version
 
 # Check Maven

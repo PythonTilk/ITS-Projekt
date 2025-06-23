@@ -68,7 +68,7 @@ The `install.sh` script automatically:
 
 1. **System Setup**
    - Updates system packages
-   - Installs Java 11, Maven, Git, MySQL, Nginx, and Certbot
+   - Installs Java 17, Maven, Git, MySQL, Nginx, and Certbot
    - Configures firewall (UFW/firewalld)
 
 2. **Database Configuration**
@@ -193,7 +193,7 @@ If you prefer manual installation or need custom configuration, follow the detai
 ### Software Requirements
 
 - **Operating System**: Ubuntu 20.04 LTS or newer (recommended), CentOS 8+, or Debian 11+
-- **Java**: OpenJDK 11 or higher
+- **Java**: OpenJDK 17 or higher
 - **Database**: MySQL 8.0+ or MariaDB 10.5+
 - **Web Server**: Nginx (recommended) or Apache
 - **Build Tool**: Maven 3.6+
@@ -231,12 +231,12 @@ sudo dnf update -y
 
 ```bash
 # Ubuntu/Debian
-sudo apt install openjdk-11-jdk -y
+sudo apt install openjdk-17-jdk -y
 
 # CentOS/RHEL
-sudo yum install java-11-openjdk-devel -y
+sudo yum install java-17-openjdk-devel -y
 # or
-sudo dnf install java-11-openjdk-devel -y
+sudo dnf install java-17-openjdk-devel -y
 
 # Verify installation
 java -version

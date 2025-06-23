@@ -170,22 +170,53 @@ update_system() {
 
 # Install Java
 install_java() {
-    log "Installing Java 11..."
+    log "Installing Java 17..."
     
     if [[ "$OS" == *"Ubuntu"* ]] || [[ "$OS" == *"Debian"* ]]; then
-        apt install -y openjdk-11-jdk
+        apt install -y openjdk-17-jdk
     elif [[ "$OS" == *"CentOS"* ]] || [[ "$OS" == *"Red Hat"* ]]; then
         if command -v dnf &> /dev/null; then
-            dnf install -y java-11-openjdk-devel
+            dnf install -y java-17-openjdk-devel
         else
-            yum install -y java-11-openjdk-devel
+            yum install -y java-17-openjdk-devel
         fi
     fi
+    
+    # Configure Java alternatives to use Java 17 as default
+    if [[ "$OS" == *"Ubuntu"* ]] || [[ "$OS" == *"Debian"* ]]; then
+        # Set Java 17 as default alternative
+        if [[ -f "/usr/lib/jvm/java-17-openjdk-amd64/bin/java" ]]; then
+            update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-17-openjdk-amd64/bin/java 1
+            update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+        fi
+    fi
+    
+    # Set JAVA_HOME for the session
+    export JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::")
     
     # Verify installation
     if java -version &> /dev/null; then
         success "Java installed successfully"
-        java -version
+        JAVA_VERSION=$(java -version 2>&1 | head -n 1)
+        info "Java version: $JAVA_VERSION"
+        info "JAVA_HOME: $JAVA_HOME"
+        
+        # Verify it's Java 17
+        if java -version 2>&1 | grep -q "17\."; then
+            success "Java 17 confirmed"
+        else
+            warning "Java version might not be 17. This could cause build issues."
+            warning "Attempting to fix Java version..."
+            
+            # Try to find and set Java 17
+            if [[ -f "/usr/lib/jvm/java-17-openjdk-amd64/bin/java" ]]; then
+                export JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
+                export PATH="$JAVA_HOME/bin:$PATH"
+                info "Set JAVA_HOME to: $JAVA_HOME"
+            fi
+            
+            java -version
+        fi
     else
         error "Java installation failed"
         exit 1
@@ -389,9 +420,25 @@ setup_application() {
     # Build application
     cd "$PROJECT_DIR/$PROJECT_NAME"
     info "Building application with Maven..."
-    if ! sudo -u "$PROJECT_USER" mvn clean package -DskipTests; then
+    
+    # Ensure JAVA_HOME is set for the build
+    JAVA_HOME_PATH=$(readlink -f /usr/bin/java | sed "s:bin/java::")
+    info "Using JAVA_HOME: $JAVA_HOME_PATH"
+    
+    # Check Java version before building
+    JAVA_VERSION=$(sudo -u "$PROJECT_USER" java -version 2>&1 | head -n 1)
+    info "Java version for build: $JAVA_VERSION"
+    
+    if ! sudo -u "$PROJECT_USER" JAVA_HOME="$JAVA_HOME_PATH" mvn clean package -DskipTests; then
         error "Maven build failed. Check logs above for details."
-        error "Common issues: Java version, Maven installation, or network connectivity."
+        error "Common issues:"
+        error "  - Java version mismatch (project requires Java 17)"
+        error "  - Maven installation or configuration"
+        error "  - Network connectivity for dependencies"
+        error "  - JAVA_HOME not set correctly"
+        error ""
+        error "Current Java version:"
+        sudo -u "$PROJECT_USER" java -version
         exit 1
     fi
     
@@ -835,7 +882,7 @@ case "${1:-}" in
         echo "  curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash"
         echo ""
         echo "This script will install and configure:"
-        echo "  - Java 11"
+        echo "  - Java 17"
         echo "  - Maven"
         echo "  - MySQL"
         echo "  - Nginx with SSL"
