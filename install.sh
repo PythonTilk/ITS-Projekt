@@ -443,13 +443,21 @@ setup_application() {
     fi
     
     # Verify the JAR file was created
-    JAR_FILE=$(find target -name "notizprojekt-web-*.jar" -type f | head -n 1)
+    JAR_FILE=$(find target -name "*.jar" -type f | head -n 1)
     if [[ -z "$JAR_FILE" ]]; then
         error "JAR file not found in target directory. Build may have failed silently."
-        error "Looking for: target/notizprojekt-web-*.jar"
+        error "Looking for: target/*.jar"
         error "Files in target directory:"
         ls -la target/ || true
+        error "Current working directory: $(pwd)"
         exit 1
+    fi
+    
+    # Additional verification - check if it's the correct JAR
+    if [[ ! "$JAR_FILE" =~ notizprojekt.*\.jar$ ]]; then
+        warning "Found JAR file but name doesn't match expected pattern: $JAR_FILE"
+        warning "Expected pattern: notizprojekt*.jar"
+        warning "Continuing anyway..."
     fi
     
     success "JAR file created: $JAR_FILE"
