@@ -335,11 +335,28 @@ setup_application() {
     # Clone repository as application user
     sudo -u "$PROJECT_USER" git clone "$REPO_URL"
     
+    # Switch to the html branch (web application)
+    cd "$PROJECT_DIR/$PROJECT_NAME"
+    info "Switching to html branch for web application..."
+    sudo -u "$PROJECT_USER" git checkout html
+    success "Switched to html branch"
+    
+    # Verify we have the correct files
+    if [[ ! -f "pom.xml" ]]; then
+        error "pom.xml not found! Make sure you're on the html branch."
+        exit 1
+    fi
+    
+    CURRENT_BRANCH=$(sudo -u "$PROJECT_USER" git branch --show-current)
+    info "Current branch: $CURRENT_BRANCH"
+    
     # Create necessary directories
+    cd "$PROJECT_DIR"
     sudo -u "$PROJECT_USER" mkdir -p logs uploads backups
     
     # Build application
     cd "$PROJECT_DIR/$PROJECT_NAME"
+    info "Building application with Maven..."
     sudo -u "$PROJECT_USER" mvn clean package -DskipTests
     
     success "Application built successfully"
@@ -750,7 +767,13 @@ main() {
 # Handle script arguments
 case "${1:-}" in
     --help|-h)
-        echo "ITS-Projekt Installation Script"
+        echo "ITS-Projekt Web Application Installation Script"
+        echo ""
+        echo "Installs the complete web-based note management system with:"
+        echo "  • User profiles and collaboration features"
+        echo "  • SSL-secured domain with automatic certificate renewal"
+        echo "  • Production-grade security and performance optimizations"
+        echo "  • Automated backup and update system"
         echo ""
         echo "Usage: $0 [OPTIONS]"
         echo ""
