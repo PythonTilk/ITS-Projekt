@@ -62,4 +62,29 @@ public class UserService {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
+    
+    public Optional<User> findById(Integer id) {
+        return userRepository.findById(id);
+    }
+    
+    public User updateProfile(Integer userId, String displayName, String biography, String profilePicture) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setDisplayName(displayName);
+            user.setBiography(biography);
+            if (profilePicture != null && !profilePicture.trim().isEmpty()) {
+                user.setProfilePicture(profilePicture);
+            }
+            return userRepository.save(user);
+        }
+        throw new RuntimeException("User not found");
+    }
+    
+    public String getDisplayName(User user) {
+        if (user.getDisplayName() != null && !user.getDisplayName().trim().isEmpty()) {
+            return user.getDisplayName();
+        }
+        return user.getUsername();
+    }
 }

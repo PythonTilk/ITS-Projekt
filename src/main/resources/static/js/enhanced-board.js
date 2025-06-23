@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const noteForm = document.getElementById('note-form');
     const modalTitle = document.getElementById('modal-title');
     const logoutBtn = document.getElementById('logout-btn');
+    const profileBtn = document.getElementById('profile-btn');
     
     // Form elements
     const noteIdInput = document.getElementById('note-id');
@@ -184,6 +185,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 sharedUsersGroup.style.display = 'none';
             }
         });
+    });
+    
+    // Profile
+    profileBtn.addEventListener('click', async () => {
+        try {
+            const response = await fetch('/api/users/current');
+            const data = await response.json();
+            if (data.success) {
+                window.location.href = `/profile/${data.user.id}`;
+            } else {
+                alert('Error loading profile');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error loading profile');
+        }
     });
     
     // Logout
@@ -463,6 +480,22 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Privacy indicator
         noteElement.querySelector('.note-privacy-indicator').textContent = note.privacyLevel || 'private';
+        
+        // Author information (show only for shared notes)
+        const authorElement = noteElement.querySelector('.note-author');
+        if (note.authorId && note.privacyLevel && note.privacyLevel !== 'private') {
+            authorElement.textContent = `by ${note.authorDisplayName || note.authorUsername}`;
+            authorElement.style.display = 'inline';
+            authorElement.style.cursor = 'pointer';
+            authorElement.style.color = 'var(--primary-color)';
+            authorElement.style.textDecoration = 'underline';
+            authorElement.addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.location.href = `/profile/${note.authorId}`;
+            });
+        } else {
+            authorElement.style.display = 'none';
+        }
         
         // Add event listeners
         addNoteEventListeners(noteElement);

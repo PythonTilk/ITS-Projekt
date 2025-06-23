@@ -53,6 +53,7 @@
             <div class="user-menu">
                 <div class="user-avatar" th:text="${username != null ? username.substring(0,1).toUpperCase() : 'U'}">U</div>
                 <span th:text="${username}">Username</span>
+                <button id="profile-btn" class="btn btn-small">Profile</button>
                 <button id="logout-btn" class="btn btn-small">Logout</button>
             </div>
         </header>
@@ -288,6 +289,7 @@
                     <span class="note-tag"></span>
                     <div class="note-type-indicator text">T</div>
                     <span class="note-privacy-indicator">private</span>
+                    <span class="note-author" style="display: none;"></span>
                 </div>
             </div>
             <div class="note-body">

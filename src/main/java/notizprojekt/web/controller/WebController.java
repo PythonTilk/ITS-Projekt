@@ -6,6 +6,7 @@ import notizprojekt.web.service.NoteService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpSession;
@@ -99,5 +100,17 @@ public class WebController {
             model.addAttribute("username", session.getAttribute("username"));
             return "board";
         }
+    }
+    
+    @GetMapping("/profile/{userId}")
+    public String profile(@PathVariable Integer userId, Model model, HttpSession session) {
+        Integer currentUserId = (Integer) session.getAttribute("userId");
+        if (currentUserId == null) {
+            return "redirect:/login";
+        }
+        
+        model.addAttribute("userId", userId);
+        model.addAttribute("currentUserId", currentUserId);
+        return "profile";
     }
 }

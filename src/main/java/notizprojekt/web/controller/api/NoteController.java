@@ -1,6 +1,7 @@
 package notizprojekt.web.controller.api;
 
 import lombok.RequiredArgsConstructor;
+import notizprojekt.web.dto.NoteDTO;
 import notizprojekt.web.model.Note;
 import notizprojekt.web.service.NoteService;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/notes")
@@ -27,7 +29,10 @@ public class NoteController {
         }
         
         List<Note> notes = noteService.getAllNotesByUser(userId);
-        return ResponseEntity.ok(notes);
+        List<NoteDTO> noteDTOs = notes.stream()
+                .map(NoteDTO::fromNote)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(noteDTOs);
     }
     
     @PostMapping

@@ -30,6 +30,15 @@ public class User {
     @Column(name = "passwort", nullable = false, length = 60)
     private String password;
 
+    @Column(name = "display_name", length = 50)
+    private String displayName;
+
+    @Column(name = "biography", length = 500)
+    private String biography;
+
+    @Column(name = "profile_picture", length = 255)
+    private String profilePicture;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Note> notes = new ArrayList<>();
