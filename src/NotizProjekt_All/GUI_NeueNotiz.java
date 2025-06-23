@@ -309,6 +309,8 @@ public class GUI_NeueNotiz extends javax.swing.JFrame {
         userScrollPane.setBackground(new java.awt.Color(96, 96, 96));
         userList.setBackground(new java.awt.Color(96, 96, 96));
         userList.setForeground(new java.awt.Color(255, 255, 255));
+
+        // Add userScrollPane to the panel
         jPanel1.add(userScrollPane);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -421,12 +423,14 @@ public class GUI_NeueNotiz extends javax.swing.JFrame {
     }//GEN-LAST:event_btnZurueckActionPerformed
 
     private void cbOeffentlich1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbOeffentlich1ActionPerformed
-       Oeffentlich=true;
+       Oeffentlich = cbOeffentlich1.isSelected();
        if (Oeffentlich) {
            cbShared.setSelected(false);
            Shared = false;
            userScrollPane.setVisible(false);
        }
+       revalidate();
+       repaint();
     }//GEN-LAST:event_cbOeffentlich1ActionPerformed
     
     private void cbSharedActionPerformed(java.awt.event.ActionEvent evt) {
