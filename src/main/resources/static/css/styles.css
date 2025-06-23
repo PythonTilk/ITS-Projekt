@@ -279,8 +279,8 @@ body {
 /* Dark mode toggle button */
 .theme-toggle {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    bottom: 20px;
+    left: 20px;
     z-index: 1000;
     background: var(--card-bg);
     border: 2px solid var(--border-color);
@@ -777,6 +777,18 @@ body {
     backdrop-filter: blur(10px);
     overflow: hidden;
     animation: fadeIn 0.5s ease-out;
+}
+
+/* Improved note styles for dark mode */
+[data-theme="dark"] .note {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-color);
+}
+
+/* Ensure note colors are visible in dark mode */
+[data-theme="dark"] .note[style*="background-color"] {
+    color: #000; /* Dark text for colored notes */
+    text-shadow: 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
 .note:hover {
