@@ -127,6 +127,10 @@ public class Notiz {
         return typ;
     }
     
+    public void setTyp(NotizTyp typ) {
+        this.typ = typ;
+    }
+    
     // Getters for shared note fields
     public String getDatum() {
         return datum;

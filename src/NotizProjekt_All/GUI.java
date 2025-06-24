@@ -625,7 +625,7 @@ public class GUI extends JFrame {
             notizIDs.clear();
             
             ResultSet rs = konnektor.fuehreAbfrageAus(
-                "SELECT N_id, Titel, Tag, Inhalt FROM notiz WHERE B_id = " + nutzerID + 
+                "SELECT N_id, Titel, Tag, Inhalt, Typ FROM notiz WHERE B_id = " + nutzerID + 
                 " AND (Titel LIKE '%" + searchText + "%' OR Tag LIKE '%" + searchText + 
                 "%' OR Inhalt LIKE '%" + searchText + "%')");
             
