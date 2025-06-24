@@ -30,8 +30,6 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 public class GUI_MenuTabelle extends javax.swing.JFrame {
     private DBVerbindung konnektor;
     private ArrayList<Notiz> notizenliste;
-    private ArrayList<OeffentlichNotiz> oeffentlicheNotiz;
-    private ArrayList<SharedNotiz> sharedNotizen;
     
     int Nutzer= GUI_Anmelden.NutzerID;
     static int idToDelete;
@@ -85,34 +83,37 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
  
  
  public void getNotiz() {
-        
         try {
-            
-           
             notizenliste.clear();
             ResultSet ergebnis = this.konnektor.fuehreAbfrageAus("SELECT N_id,Titel,Tag,Inhalt from notiz where B_id="+Nutzer+" ");
             while (ergebnis.next()) {
-                Notiz naechsteNotiz= new Notiz (ergebnis.getInt("N_id"),ergebnis.getString("Titel"), ergebnis.getString("Tag"), ergebnis.getString("Inhalt"));
+                Notiz naechsteNotiz = new Notiz(
+                    ergebnis.getInt("N_id"),
+                    ergebnis.getString("Titel"), 
+                    ergebnis.getString("Tag"), 
+                    ergebnis.getString("Inhalt"),
+                    Nutzer
+                );
                 this.notizenliste.add(naechsteNotiz);
             }
-
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(rootPane, "Fehler bei der Abfrage der Datenbank: " + ex);
         }
     }   
+ 
  public void getOeffentlicheNotiz() {
-        
         try {
-            
-          
-           
-           oeffentlicheNotiz.clear();
-            ResultSet ergebnis = this.konnektor.fuehreAbfrageAus("SELECT GN_id,Titel,Tag,Inhalt from geteilte_notizen  ");
+            notizenliste.clear();
+            ResultSet ergebnis = this.konnektor.fuehreAbfrageAus("SELECT GN_id,Titel,Tag,Inhalt from geteilte_notizen");
             while (ergebnis.next()) {
-                OeffentlichNotiz naechsteNotiz= new OeffentlichNotiz (ergebnis.getInt("GN_id"),ergebnis.getString("Titel"), ergebnis.getString("Tag"), ergebnis.getString("Inhalt"));
-                this.oeffentlicheNotiz.add(naechsteNotiz);
+                Notiz naechsteNotiz = new Notiz(
+                    ergebnis.getInt("GN_id"),
+                    ergebnis.getString("Titel"), 
+                    ergebnis.getString("Tag"), 
+                    ergebnis.getString("Inhalt")
+                );
+                this.notizenliste.add(naechsteNotiz);
             }
-
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(rootPane, "Fehler bei der Abfrage der Datenbank: " + ex);
         }
@@ -120,14 +121,14 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
     
     public void getSharedNotiz() {
         try {
-            sharedNotizen.clear();
+            notizenliste.clear();
             // Get notes shared with the current user
             ResultSet ergebnis = this.konnektor.fuehreAbfrageAus(
                 "SELECT GN_id, Titel, Tag, Inhalt, Datum, Uhrzeit, Ort, Mitbenutzer, B_ID " +
                 "FROM geteilte_notizen WHERE FIND_IN_SET(" + Nutzer + ", Mitbenutzer) > 0");
             
             while (ergebnis.next()) {
-                SharedNotiz naechsteNotiz = new SharedNotiz(
+                Notiz naechsteNotiz = new Notiz(
                     ergebnis.getInt("GN_id"),
                     ergebnis.getString("Titel"), 
                     ergebnis.getString("Inhalt"),
@@ -138,9 +139,8 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
                     ergebnis.getString("Mitbenutzer"),
                     ergebnis.getInt("B_ID")
                 );
-                this.sharedNotizen.add(naechsteNotiz);
+                this.notizenliste.add(naechsteNotiz);
             }
-
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(rootPane, "Fehler bei der Abfrage der Datenbank: " + ex);
         }
@@ -149,7 +149,6 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
 public void zeigeNotiz() {
     tblModel.setRowCount(0);
    
- 
     for (Notiz notiz : notizenliste) {
         // Display note content instead of tag
         String inhaltPreview = notiz.getInhalt();
@@ -157,43 +156,44 @@ public void zeigeNotiz() {
         if (inhaltPreview.length() > 50) {
             inhaltPreview = inhaltPreview.substring(0, 47) + "...";
         }
-        Object[] row = { notiz.getNotizid(), notiz.getTitel(), inhaltPreview};
+        Object[] row = { notiz.getId(), notiz.getTitel(), inhaltPreview};
         tblModel.addRow(row);
     }
     Ausgabe.setModel(tblModel);
 }
     
     public void zeigeOeffentlicheNotiz(){
-       
         tblModel.setRowCount(0);
        
-    for (OeffentlichNotiz Ofnotiz : oeffentlicheNotiz) {
-        // Display note content instead of tag
-        String inhaltPreview = Ofnotiz.getInhalt();
-        // Truncate content if it's too long
-        if (inhaltPreview.length() > 50) {
-            inhaltPreview = inhaltPreview.substring(0, 47) + "...";
+        for (Notiz notiz : notizenliste) {
+            // Display note content instead of tag
+            String inhaltPreview = notiz.getInhalt();
+            // Truncate content if it's too long
+            if (inhaltPreview.length() > 50) {
+                inhaltPreview = inhaltPreview.substring(0, 47) + "...";
+            }
+            Object[] row = {notiz.getId(), notiz.getTitel(), inhaltPreview};
+            tblModel.addRow(row);
         }
-        Object[] row = {Ofnotiz.getOID(), Ofnotiz.getTitel(), inhaltPreview};
-        tblModel.addRow(row);
-    }
-    Ausgabe.setModel(tblModel);
+        Ausgabe.setModel(tblModel);
     }
     
     public void zeigeSharedNotiz(){
         tblModel.setRowCount(0);
        
-        for (SharedNotiz sharedNotiz : sharedNotizen) {
-            // Display note content instead of tag
-            String inhaltPreview = sharedNotiz.getInhalt();
-            // Truncate content if it's too long
-            if (inhaltPreview.length() > 50) {
-                inhaltPreview = inhaltPreview.substring(0, 47) + "...";
+        for (Notiz notiz : notizenliste) {
+            if (notiz.getTyp() == Notiz.NotizTyp.GETEILT) {
+                // Display note content instead of tag
+                String inhaltPreview = notiz.getInhalt();
+                // Truncate content if it's too long
+                if (inhaltPreview.length() > 50) {
+                    inhaltPreview = inhaltPreview.substring(0, 47) + "...";
+                }
+                // Get the username of the note creator
+                String creatorName = getUsernameById(notiz.getUserId());
+                Object[] row = {notiz.getId(), notiz.getTitel() + " (geteilt von " + creatorName + ")", inhaltPreview};
+                tblModel.addRow(row);
             }
-            // Get the username of the note creator
-            String creatorName = getUsernameById(sharedNotiz.getUserId());
-            Object[] row = {sharedNotiz.getSharedId(), sharedNotiz.getTitel() + " (geteilt von " + creatorName + ")", inhaltPreview};
-            tblModel.addRow(row);
         }
         Ausgabe.setModel(tblModel);
     }

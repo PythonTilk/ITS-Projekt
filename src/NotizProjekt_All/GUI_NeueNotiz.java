@@ -31,7 +31,6 @@ public class GUI_NeueNotiz extends javax.swing.JFrame {
     static int token;
     private DBVerbindung konnektor;
     private ArrayList<Notiz> notizenliste;
-    private ArrayList<OeffentlichNotiz> oeffentlicheNotiz;
     private ArrayList<User> users;
     private JList<String> userList;
     private DefaultListModel<String> userListModel;

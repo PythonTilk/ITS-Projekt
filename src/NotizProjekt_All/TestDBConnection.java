@@ -1,18 +1,20 @@
 package NotizProjekt_All;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
+/**
+ * Consolidated test class to verify database connection and query functionality
+ */
 public class TestDBConnection {
     public static void main(String[] args) {
         try {
-            // Create a database connection
+            System.out.println("Testing database connection...");
+            
+            // Create connection with the same parameters used in the application
             DBVerbindung dbConnection = new DBVerbindung("localhost", "notizprojekt", "notizuser", "notizpassword");
             dbConnection.open();
             
-            // We don't have direct access to the connection, so we'll use the provided methods
             System.out.println("Successfully connected to the database!");
             
             // Test query to retrieve users
@@ -32,20 +34,63 @@ public class TestDBConnection {
             
             System.out.println("\nNotes in the database:");
             System.out.println("--------------------");
+            boolean hasNotes = false;
             while (rs.next()) {
-                int noteId = rs.getInt("N_ID");
+                hasNotes = true;
+                int noteId = rs.getInt("N_id");
                 String title = rs.getString("Titel");
                 String content = rs.getString("Inhalt");
-                int userId = rs.getInt("B_ID");
-                System.out.println("Note ID: " + noteId + ", Title: " + title + ", Content: " + content + ", User ID: " + userId);
+                String tag = rs.getString("Tag");
+                int userId = rs.getInt("B_id");
+                
+                // Create a Notiz object using our unified class
+                Notiz notiz = new Notiz(noteId, title, tag, content, userId);
+                
+                System.out.println("Note ID: " + notiz.getId() + 
+                                  ", Title: " + notiz.getTitel() + 
+                                  ", Tag: " + notiz.getTag() + 
+                                  ", Content: " + notiz.getInhalt() + 
+                                  ", User ID: " + userId);
             }
             
+            if (!hasNotes) {
+                System.out.println("No notes found in the database.");
+            }
+            
+            // Test shared notes
+            rs = dbConnection.fuehreAbfrageAus("SELECT * FROM geteilte_notizen");
+            
+            System.out.println("\nShared notes in the database:");
+            System.out.println("--------------------");
+            boolean hasSharedNotes = false;
+            while (rs.next()) {
+                hasSharedNotes = true;
+                int noteId = rs.getInt("GN_ID");
+                String title = rs.getString("Titel");
+                String content = rs.getString("Inhalt");
+                String tag = rs.getString("Tag");
+                String date = rs.getString("Datum");
+                String time = rs.getString("Uhrzeit");
+                String location = rs.getString("Ort");
+                String sharedWith = rs.getString("Mitbenutzer");
+                int userId = rs.getInt("B_ID");
+                
+                System.out.println("Shared Note ID: " + noteId + 
+                                  ", Title: " + title + 
+                                  ", Content: " + content + 
+                                  ", Shared with: " + sharedWith);
+            }
+            
+            if (!hasSharedNotes) {
+                System.out.println("No shared notes found in the database.");
+            }
+            
+            // Close connection
             rs.close();
             dbConnection.close();
-        } catch (SQLException e) {
-            System.out.println("Database error: " + e.getMessage());
-            e.printStackTrace();
-        } catch (Exception e) {
+            System.out.println("\nConnection test completed successfully!");
+            
+        } catch (ClassNotFoundException | SQLException e) {
             System.out.println("Error: " + e.getMessage());
             e.printStackTrace();
         }

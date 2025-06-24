@@ -22,7 +22,6 @@ public final class GUI_NotizBearbeiten extends javax.swing.JFrame {
     static int Notiznr=GUI_MenuTabelle.Notiznr;
     private DBVerbindung konnektor;
     private ArrayList<Notiz> notizenliste;
-    private ArrayList<OeffentlichNotiz> oeffentlicheNotiz;
    
     
     String titel;

@@ -234,12 +234,22 @@ public class SimpleGUI_MenuTabelle extends JFrame {
             notizIDs.clear();
             
             ResultSet rs = konnektor.fuehreAbfrageAus(
-                "SELECT N_id, Titel, Tag FROM notiz WHERE B_id = " + nutzerID);
+                "SELECT N_id, Titel, Tag, Inhalt FROM notiz WHERE B_id = " + nutzerID);
             
             while (rs.next()) {
                 int notizID = rs.getInt("N_id");
                 String titel = rs.getString("Titel");
                 String tag = rs.getString("Tag");
+                
+                // Create a Notiz object using our unified class
+                // This isn't strictly necessary for this method but demonstrates the use of the unified class
+                Notiz notiz = new Notiz(
+                    notizID,
+                    titel,
+                    tag,
+                    rs.getString("Inhalt"),
+                    nutzerID
+                );
                 
                 model.addRow(new Object[]{titel, tag});
                 notizIDs.add(notizID);
@@ -256,7 +266,7 @@ public class SimpleGUI_MenuTabelle extends JFrame {
             notizIDs.clear();
             
             ResultSet rs = konnektor.fuehreAbfrageAus(
-                "SELECT N_id, Titel, Tag FROM notiz WHERE B_id = " + nutzerID + 
+                "SELECT N_id, Titel, Tag, Inhalt FROM notiz WHERE B_id = " + nutzerID + 
                 " AND (Titel LIKE '%" + searchText + "%' OR Tag LIKE '%" + searchText + 
                 "%' OR Inhalt LIKE '%" + searchText + "%')");
             
@@ -264,6 +274,15 @@ public class SimpleGUI_MenuTabelle extends JFrame {
                 int notizID = rs.getInt("N_id");
                 String titel = rs.getString("Titel");
                 String tag = rs.getString("Tag");
+                
+                // Create a Notiz object using our unified class
+                Notiz notiz = new Notiz(
+                    notizID,
+                    titel,
+                    tag,
+                    rs.getString("Inhalt"),
+                    nutzerID
+                );
                 
                 model.addRow(new Object[]{titel, tag});
                 notizIDs.add(notizID);

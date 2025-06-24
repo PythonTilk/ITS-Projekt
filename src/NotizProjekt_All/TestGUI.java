@@ -3,12 +3,17 @@ package NotizProjekt_All;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 /**
- * Simple test class to verify GUI functionality without the full GUI components
+ * Consolidated test class to verify GUI functionality
  */
 public class TestGUI {
-    public static void main(String[] args) {
+    
+    /**
+     * Test the application without launching the GUI
+     */
+    public static void testBackend() {
         try {
             // Test database connection
             DBVerbindung db = new DBVerbindung("localhost", "notizprojekt", "notizuser", "notizpassword");
@@ -28,9 +33,18 @@ public class TestGUI {
             ResultSet notes = db.fuehreAbfrageAus("SELECT N_id, Titel, Tag, Inhalt FROM notiz WHERE B_id = 1");
             System.out.println("\nNotes for user with ID 1:");
             while (notes.next()) {
-                System.out.println("Note ID: " + notes.getInt("N_id") + 
-                                  ", Title: " + notes.getString("Titel") +
-                                  ", Tag: " + notes.getString("Tag"));
+                // Create a Notiz object using our unified class
+                Notiz notiz = new Notiz(
+                    notes.getInt("N_id"),
+                    notes.getString("Titel"),
+                    notes.getString("Tag"),
+                    notes.getString("Inhalt"),
+                    1 // User ID
+                );
+                
+                System.out.println("Note ID: " + notiz.getId() + 
+                                  ", Title: " + notiz.getTitel() +
+                                  ", Tag: " + notiz.getTag());
             }
             
             // Test creating a new user
@@ -67,6 +81,37 @@ public class TestGUI {
         } catch (ClassNotFoundException | SQLException ex) {
             System.err.println("Error: " + ex.getMessage());
             ex.printStackTrace();
+        }
+    }
+    
+    /**
+     * Launch the GUI for manual testing
+     */
+    public static void testGUI() {
+        System.out.println("Starting GUI Test");
+        
+        // Start with the login screen
+        SwingUtilities.invokeLater(() -> {
+            GUI_Anmelden loginScreen = new GUI_Anmelden();
+            loginScreen.setVisible(true);
+        });
+        
+        System.out.println("\nGUI Test started");
+        System.out.println("Please test the following functionality:");
+        System.out.println("1. Login with username 'root' and password '420'");
+        System.out.println("2. Create a new note");
+        System.out.println("3. Edit a note");
+        System.out.println("4. Delete a note");
+        System.out.println("5. Search for notes");
+        System.out.println("6. Register a new user");
+    }
+    
+    public static void main(String[] args) {
+        // Check if we should run backend tests or GUI tests
+        if (args.length > 0 && args[0].equals("--no-gui")) {
+            testBackend();
+        } else {
+            testGUI();
         }
     }
 }
