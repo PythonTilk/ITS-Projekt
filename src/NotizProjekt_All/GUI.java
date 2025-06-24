@@ -598,8 +598,36 @@ public class GUI extends JFrame {
             model.setRowCount(0);
             notizIDs.clear();
             
-            ResultSet rs = konnektor.fuehreAbfrageAus(
-                "SELECT N_id, Titel, Tag, Inhalt, Typ FROM notiz WHERE B_id = " + nutzerID);
+            // Prüfen, ob das Feld Typ existiert
+            boolean typExists = false;
+            try {
+                ResultSet columns = konnektor.fuehreAbfrageAus(
+                    "SHOW COLUMNS FROM notiz LIKE 'Typ'");
+                typExists = columns.next();
+            } catch (SQLException e) {
+                System.err.println("Fehler beim Prüfen der Spalte Typ: " + e.getMessage());
+            }
+            
+            // Wenn die Spalte nicht existiert, fügen wir sie hinzu
+            if (!typExists) {
+                try {
+                    konnektor.fuehreVeraenderungAus(
+                        "ALTER TABLE notiz ADD COLUMN Typ varchar(20) DEFAULT 'PRIVAT'");
+                    System.out.println("Spalte Typ wurde zur Tabelle notiz hinzugefügt");
+                    typExists = true;
+                } catch (SQLException e) {
+                    System.err.println("Fehler beim Hinzufügen der Spalte Typ: " + e.getMessage());
+                }
+            }
+            
+            String query;
+            if (typExists) {
+                query = "SELECT N_id, Titel, Tag, Inhalt, Typ FROM notiz WHERE B_id = " + nutzerID;
+            } else {
+                query = "SELECT N_id, Titel, Tag, Inhalt FROM notiz WHERE B_id = " + nutzerID;
+            }
+            
+            ResultSet rs = konnektor.fuehreAbfrageAus(query);
             
             while (rs.next()) {
                 int notizID = rs.getInt("N_id");
@@ -624,10 +652,28 @@ public class GUI extends JFrame {
             model.setRowCount(0);
             notizIDs.clear();
             
-            ResultSet rs = konnektor.fuehreAbfrageAus(
-                "SELECT N_id, Titel, Tag, Inhalt, Typ FROM notiz WHERE B_id = " + nutzerID + 
-                " AND (Titel LIKE '%" + searchText + "%' OR Tag LIKE '%" + searchText + 
-                "%' OR Inhalt LIKE '%" + searchText + "%')");
+            // Prüfen, ob das Feld Typ existiert
+            boolean typExists = false;
+            try {
+                ResultSet columns = konnektor.fuehreAbfrageAus(
+                    "SHOW COLUMNS FROM notiz LIKE 'Typ'");
+                typExists = columns.next();
+            } catch (SQLException e) {
+                System.err.println("Fehler beim Prüfen der Spalte Typ: " + e.getMessage());
+            }
+            
+            String query;
+            if (typExists) {
+                query = "SELECT N_id, Titel, Tag, Inhalt, Typ FROM notiz WHERE B_id = " + nutzerID + 
+                        " AND (Titel LIKE '%" + searchText + "%' OR Tag LIKE '%" + searchText + 
+                        "%' OR Inhalt LIKE '%" + searchText + "%')";
+            } else {
+                query = "SELECT N_id, Titel, Tag, Inhalt FROM notiz WHERE B_id = " + nutzerID + 
+                        " AND (Titel LIKE '%" + searchText + "%' OR Tag LIKE '%" + searchText + 
+                        "%' OR Inhalt LIKE '%" + searchText + "%')";
+            }
+            
+            ResultSet rs = konnektor.fuehreAbfrageAus(query);
             
             while (rs.next()) {
                 int notizID = rs.getInt("N_id");
@@ -834,20 +880,50 @@ public class GUI extends JFrame {
      */
     private void ladeNotiz() {
         try {
-            ResultSet rs = konnektor.fuehreAbfrageAus(
-                "SELECT Titel, Tag, Inhalt, Typ FROM notiz WHERE N_id = " + notizID);
+            // Prüfen, ob das Feld Typ existiert
+            boolean typExists = false;
+            try {
+                ResultSet columns = konnektor.fuehreAbfrageAus(
+                    "SHOW COLUMNS FROM notiz LIKE 'Typ'");
+                typExists = columns.next();
+            } catch (SQLException e) {
+                System.err.println("Fehler beim Prüfen der Spalte Typ: " + e.getMessage());
+            }
+            
+            String query;
+            if (typExists) {
+                query = "SELECT Titel, Tag, Inhalt, Typ FROM notiz WHERE N_id = " + notizID;
+            } else {
+                query = "SELECT Titel, Tag, Inhalt FROM notiz WHERE N_id = " + notizID;
+                
+                // Versuchen, die Spalte Typ hinzuzufügen
+                try {
+                    konnektor.fuehreVeraenderungAus(
+                        "ALTER TABLE notiz ADD COLUMN Typ varchar(20) DEFAULT 'PRIVAT'");
+                    System.out.println("Spalte Typ wurde zur Tabelle notiz hinzugefügt");
+                } catch (SQLException e) {
+                    System.err.println("Fehler beim Hinzufügen der Spalte Typ: " + e.getMessage());
+                }
+            }
+            
+            ResultSet rs = konnektor.fuehreAbfrageAus(query);
             
             if (rs.next()) {
                 String titel = rs.getString("Titel");
                 String tag = rs.getString("Tag");
                 String inhalt = rs.getString("Inhalt");
-                String typStr = rs.getString("Typ");
                 
                 Notiz.NotizTyp typ = Notiz.NotizTyp.PRIVAT; // Default
-                try {
-                    typ = Notiz.NotizTyp.valueOf(typStr);
-                } catch (IllegalArgumentException e) {
-                    System.err.println("Ungültiger Notiztyp: " + typStr);
+                
+                if (typExists) {
+                    String typStr = rs.getString("Typ");
+                    if (typStr != null && !typStr.isEmpty()) {
+                        try {
+                            typ = Notiz.NotizTyp.valueOf(typStr);
+                        } catch (IllegalArgumentException e) {
+                            System.err.println("Ungültiger Notiztyp: " + typStr);
+                        }
+                    }
                 }
                 
                 aktuelleNotiz = new Notiz(notizID, titel, tag, inhalt, nutzerID);
