@@ -31,13 +31,15 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
     private DBVerbindung konnektor;
     private ArrayList<Notiz> notizenliste;
     private ArrayList<OeffentlichNotiz> oeffentlicheNotiz;
+    private ArrayList<SharedNotiz> sharedNotizen;
     
     int Nutzer= GUI_Anmelden.NutzerID;
     static int idToDelete;
     static int Notiznr;
     static boolean OF;
+    static boolean SHARED;
     
-    String[] spalten = {"Nummer", "Titel", "Tag"};
+    String[] spalten = {"Nummer", "Titel", "Inhalt"};
     Color Standard = new Color(96, 96, 96);
   
     DefaultTableModel tblModel = new DefaultTableModel(spalten, 0){
@@ -61,6 +63,7 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
             
             notizenliste = new ArrayList<>();
             oeffentlicheNotiz = new ArrayList<>();
+            sharedNotizen = new ArrayList<>();
           
             
             this.konnektor = new DBVerbindung("localhost", "notizprojekt", "notizuser", "notizpassword");
@@ -114,13 +117,47 @@ public class GUI_MenuTabelle extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(rootPane, "Fehler bei der Abfrage der Datenbank: " + ex);
         }
     }   
+    
+    public void getSharedNotiz() {
+        try {
+            sharedNotizen.clear();
+            // Get notes shared with the current user
+            ResultSet ergebnis = this.konnektor.fuehreAbfrageAus(
+                "SELECT GN_id, Titel, Tag, Inhalt, Datum, Uhrzeit, Ort, Mitbenutzer, B_ID " +
+                "FROM geteilte_notizen WHERE FIND_IN_SET(" + Nutzer + ", Mitbenutzer) > 0");
+            
+            while (ergebnis.next()) {
+                SharedNotiz naechsteNotiz = new SharedNotiz(
+                    ergebnis.getInt("GN_id"),
+                    ergebnis.getString("Titel"), 
+                    ergebnis.getString("Inhalt"),
+                    ergebnis.getString("Tag"), 
+                    ergebnis.getString("Datum"),
+                    ergebnis.getString("Uhrzeit"),
+                    ergebnis.getString("Ort"),
+                    ergebnis.getString("Mitbenutzer"),
+                    ergebnis.getInt("B_ID")
+                );
+                this.sharedNotizen.add(naechsteNotiz);
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(rootPane, "Fehler bei der Abfrage der Datenbank: " + ex);
+        }
+    }
    
 public void zeigeNotiz() {
     tblModel.setRowCount(0);
    
  
     for (Notiz notiz : notizenliste) {
-        Object[] row = { notiz.getNotizid(), notiz.getTitel(), notiz.getTag()};
+        // Display note content instead of tag
+        String inhaltPreview = notiz.getInhalt();
+        // Truncate content if it's too long
+        if (inhaltPreview.length() > 50) {
+            inhaltPreview = inhaltPreview.substring(0, 47) + "...";
+        }
+        Object[] row = { notiz.getNotizid(), notiz.getTitel(), inhaltPreview};
         tblModel.addRow(row);
     }
     Ausgabe.setModel(tblModel);
@@ -131,16 +168,69 @@ public void zeigeNotiz() {
         tblModel.setRowCount(0);
        
     for (OeffentlichNotiz Ofnotiz : oeffentlicheNotiz) {
-        Object[] row = {Ofnotiz.getOID(), Ofnotiz.getTitel(), Ofnotiz.getTag()};
+        // Display note content instead of tag
+        String inhaltPreview = Ofnotiz.getInhalt();
+        // Truncate content if it's too long
+        if (inhaltPreview.length() > 50) {
+            inhaltPreview = inhaltPreview.substring(0, 47) + "...";
+        }
+        Object[] row = {Ofnotiz.getOID(), Ofnotiz.getTitel(), inhaltPreview};
         tblModel.addRow(row);
     }
     Ausgabe.setModel(tblModel);
+    }
+    
+    public void zeigeSharedNotiz(){
+        tblModel.setRowCount(0);
+       
+        for (SharedNotiz sharedNotiz : sharedNotizen) {
+            // Display note content instead of tag
+            String inhaltPreview = sharedNotiz.getInhalt();
+            // Truncate content if it's too long
+            if (inhaltPreview.length() > 50) {
+                inhaltPreview = inhaltPreview.substring(0, 47) + "...";
+            }
+            // Get the username of the note creator
+            String creatorName = getUsernameById(sharedNotiz.getUserId());
+            Object[] row = {sharedNotiz.getSharedId(), sharedNotiz.getTitel() + " (geteilt von " + creatorName + ")", inhaltPreview};
+            tblModel.addRow(row);
+        }
+        Ausgabe.setModel(tblModel);
+    }
+    
+    private String getUsernameById(int userId) {
+        try {
+            ResultSet ergebnis = this.konnektor.fuehreAbfrageAus(
+                "SELECT Benutzername FROM nutzer WHERE B_id = " + userId);
+            if (ergebnis.next()) {
+                return ergebnis.getString("Benutzername");
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(rootPane, "Fehler beim Abrufen des Benutzernamens: " + ex);
+        }
+        return "Unbekannt";
     }
     
     
     public void bearbeiten(){
         new GUI_NotizBearbeiten().setVisible(true);
         this.dispose();
+    }
+    
+    /**
+     * Refresh the notes list
+     */
+    public void refreshNotes() {
+        if (OF) {
+            getOeffentlicheNotiz();
+            zeigeOeffentlicheNotiz();
+        } else if (SHARED) {
+            getSharedNotiz();
+            zeigeSharedNotiz();
+        } else {
+            getNotiz();
+            zeigeNotiz();
+        }
     }
     
     
@@ -191,12 +281,15 @@ try {
         jPanel6 = new javax.swing.JPanel();
         Privat = new javax.swing.JToggleButton();
         Oeffentlich = new javax.swing.JButton();
+        Geteilt = new javax.swing.JButton();
         jPanel7 = new javax.swing.JPanel();
         addbtn = new javax.swing.JButton();
+        addSharedBtn = new javax.swing.JButton();
         jScrollPane5 = new javax.swing.JScrollPane();
         Ausgabe = new javax.swing.JTable();
         entfernen = new javax.swing.JButton();
         edit = new javax.swing.JButton();
+        share = new javax.swing.JButton();
 
         jTextArea1.setColumns(20);
         jTextArea1.setRows(5);
@@ -315,6 +408,15 @@ try {
             }
         });
 
+        Geteilt.setBackground(new java.awt.Color(96, 96, 96));
+        Geteilt.setForeground(new java.awt.Color(255, 255, 255));
+        Geteilt.setText("Geteilt");
+        Geteilt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                GeteiltActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
@@ -323,7 +425,8 @@ try {
                 .addContainerGap()
                 .add(jPanel6Layout.createParallelGroup(Alignment.LEADING)
                     .add(Privat)
-                    .add(Oeffentlich))
+                    .add(Oeffentlich)
+                    .add(Geteilt))
                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel6Layout.setVerticalGroup(
@@ -333,7 +436,9 @@ try {
                 .add(Privat)
                 .add(18, 18, 18)
                 .add(Oeffentlich)
-                .addContainerGap(280, Short.MAX_VALUE))
+                .add(18, 18, 18)
+                .add(Geteilt)
+                .addContainerGap(244, Short.MAX_VALUE))
         );
 
         jPanel7.setBackground(new java.awt.Color(96, 96, 96));
@@ -342,6 +447,17 @@ try {
         addbtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 addbtnActionPerformed(evt);
+            }
+        });
+        
+        addSharedBtn.setBackground(new java.awt.Color(96, 96, 96));
+        addSharedBtn.setForeground(new java.awt.Color(255, 255, 255));
+        addSharedBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/image/image.png")));
+        addSharedBtn.setText("G");
+        addSharedBtn.setToolTipText("Geteilte Notiz erstellen");
+        addSharedBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addSharedBtnActionPerformed(evt);
             }
         });
 
@@ -383,13 +499,24 @@ try {
                 editActionPerformed(evt);
             }
         });
+        
+        share.setBackground(new java.awt.Color(96, 96, 96));
+        share.setForeground(new java.awt.Color(255, 255, 255));
+        share.setText("Teilen");
+        share.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                shareActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
         jPanel7Layout.setHorizontalGroup(
             jPanel7Layout.createParallelGroup(Alignment.LEADING)
             .add(jPanel7Layout.createSequentialGroup()
-                .addContainerGap(563, Short.MAX_VALUE)
+                .addContainerGap(503, Short.MAX_VALUE)
+                .add(addSharedBtn, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(ComponentPlacement.RELATED)
                 .add(addbtn, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
             .add(jPanel7Layout.createSequentialGroup()
@@ -397,7 +524,8 @@ try {
                 .addPreferredGap(ComponentPlacement.RELATED)
                 .add(jPanel7Layout.createParallelGroup(Alignment.LEADING)
                     .add(entfernen)
-                    .add(edit))
+                    .add(edit)
+                    .add(share))
                 .add(29, 29, 29))
         );
         jPanel7Layout.setVerticalGroup(
@@ -412,9 +540,13 @@ try {
                         .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .add(edit, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
                         .add(18, 18, 18)
+                        .add(share, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
+                        .add(18, 18, 18)
                         .add(entfernen)
-                        .add(158, 158, 158)))
-                .add(addbtn, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
+                        .add(96, 96, 96)))
+                .add(jPanel7Layout.createParallelGroup(Alignment.BASELINE)
+                    .add(addbtn, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
+                    .add(addSharedBtn, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -462,18 +594,43 @@ try {
     new GUI_NeueNotiz().setVisible(true);
      this.dispose(); // Removed unnecessary TODO comment
     }//GEN-LAST:event_addbtnActionPerformed
+    
+    private void addSharedBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addSharedBtnActionPerformed
+        // Open the create shared note dialog
+        GUI_CreateSharedNotiz createSharedDialog = new GUI_CreateSharedNotiz(Nutzer, GUI_Anmelden.AngemeldeterUser);
+        createSharedDialog.setVisible(true);
+        
+        // Refresh the notes list after dialog is closed
+        createSharedDialog.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent e) {
+                refreshNotes();
+            }
+        });
+    }//GEN-LAST:event_addSharedBtnActionPerformed
+
+    // This method was removed as it was a duplicate
 
     private void PrivatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PrivatActionPerformed
     OF=false;
+    SHARED=false;
     getNotiz();
     zeigeNotiz();
     }//GEN-LAST:event_PrivatActionPerformed
 
     private void OeffentlichActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OeffentlichActionPerformed
     OF=true;
+    SHARED=false;
     getOeffentlicheNotiz();
     zeigeOeffentlicheNotiz();
     }//GEN-LAST:event_OeffentlichActionPerformed
+    
+    private void GeteiltActionPerformed(java.awt.event.ActionEvent evt) {
+    SHARED=true;
+    OF=false;
+    getSharedNotiz();
+    zeigeSharedNotiz();
+    }
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         new GUI_Anmelden().setVisible(true);
@@ -507,6 +664,43 @@ try {
             JOptionPane.showMessageDialog(this, "Bitte wählen Sie eine Zeile aus, um sie zu bearbeiten.", "Warnung", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_editActionPerformed
+    
+    private void shareActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_shareActionPerformed
+        int selectedRow = Ausgabe.getSelectedRow();
+        if (selectedRow != -1) {
+            if (!OF) {
+                DefaultTableModel model = (DefaultTableModel) Ausgabe.getModel();
+                int notizId = (Integer) model.getValueAt(selectedRow, 0);
+                
+                // Find the selected note in the list
+                Notiz selectedNotiz = null;
+                for (Notiz notiz : notizenliste) {
+                    if (notiz.getNotizid() == notizId) {
+                        selectedNotiz = notiz;
+                        break;
+                    }
+                }
+                
+                if (selectedNotiz != null) {
+                    // Open the share dialog
+                    GUI_ShareNotiz shareDialog = new GUI_ShareNotiz(selectedNotiz, Nutzer, GUI_Anmelden.AngemeldeterUser);
+                    shareDialog.setVisible(true);
+                    
+                    // Refresh the notes list after dialog is closed
+                    shareDialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                        @Override
+                        public void windowClosed(java.awt.event.WindowEvent e) {
+                            refreshNotes();
+                        }
+                    });
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Öffentliche Notizen können nicht geteilt werden.", "Information", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Bitte wählen Sie eine Notiz aus, um sie zu teilen.", "Warnung", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_shareActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
                 
@@ -558,8 +752,10 @@ try {
     private javax.swing.JPanel Name;
     private javax.swing.JToggleButton Privat;
     private javax.swing.JButton addbtn;
+    private javax.swing.JButton addSharedBtn;
     private javax.swing.JButton edit;
     private javax.swing.JButton entfernen;
+    private javax.swing.JButton share;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel2;
@@ -573,6 +769,7 @@ try {
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JLabel name;
     private javax.swing.JButton Oeffentlich;
+    private javax.swing.JButton Geteilt;
     // End of variables declaration//GEN-END:variables
 
 }
