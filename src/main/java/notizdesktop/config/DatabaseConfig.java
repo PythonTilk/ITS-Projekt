@@ -25,9 +25,10 @@ public class DatabaseConfig {
         
         try {
             loadDatabaseProperties();
+            // Set initialized to true BEFORE testing connection to prevent recursion
+            initialized = true;
             // Test connection
             testConnection();
-            initialized = true;
             System.out.println("Database configuration initialized successfully");
         } catch (Exception e) {
             System.err.println("Failed to initialize database configuration: " + e.getMessage());
@@ -74,10 +75,22 @@ public class DatabaseConfig {
     }
     
     private static void testConnection() throws SQLException {
-        try (Connection conn = getConnection()) {
+        // Use createDirectConnection instead of getConnection to avoid recursion
+        try (Connection conn = createDirectConnection()) {
             if (conn != null && !conn.isClosed()) {
                 System.out.println("Database connection test successful");
             }
+        }
+    }
+    
+    // New method: Create connection directly without initialization check
+    private static Connection createDirectConnection() throws SQLException {
+        try {
+            // Load MySQL JDBC driver
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            return DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("MySQL JDBC driver not found", e);
         }
     }
     
@@ -86,13 +99,8 @@ public class DatabaseConfig {
             initialize();
         }
         
-        try {
-            // Load MySQL JDBC driver
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            return DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
-        } catch (ClassNotFoundException e) {
-            throw new SQLException("MySQL JDBC driver not found", e);
-        }
+        // Use the direct connection method
+        return createDirectConnection();
     }
     
     public static String getDatabaseUrl() {
