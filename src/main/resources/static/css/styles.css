@@ -1483,3 +1483,45 @@ body {
     opacity: 0.7;
     font-style: italic;
 }
+
+/* View-only modal styles */
+.view-field {
+    padding: 12px;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    min-height: 20px;
+    color: var(--text-color);
+    font-family: inherit;
+}
+
+.view-content {
+    min-height: 100px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.view-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.view-images img {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+/* View button styling */
+.note-action.view-note {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.note-action.view-note:hover {
+    background-color: var(--primary-hover);
+    transform: scale(1.05);
+}

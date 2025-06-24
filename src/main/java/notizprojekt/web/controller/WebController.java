@@ -66,6 +66,7 @@ public class WebController {
             
             model.addAttribute("notes", notes);
             model.addAttribute("username", session.getAttribute("username"));
+            model.addAttribute("currentUserId", userId);
             
             return "board";
         } catch (Exception e) {
@@ -73,6 +74,7 @@ public class WebController {
             e.printStackTrace();
             model.addAttribute("error", "Failed to load notes: " + e.getMessage());
             model.addAttribute("username", session.getAttribute("username"));
+            model.addAttribute("currentUserId", userId);
             return "board";
         }
     }
@@ -91,6 +93,7 @@ public class WebController {
             model.addAttribute("notes", notes);
             model.addAttribute("searchTerm", searchTerm);
             model.addAttribute("username", session.getAttribute("username"));
+            model.addAttribute("currentUserId", userId);
             
             return "board";
         } catch (Exception e) {
@@ -98,6 +101,7 @@ public class WebController {
             e.printStackTrace();
             model.addAttribute("error", "Failed to search notes: " + e.getMessage());
             model.addAttribute("username", session.getAttribute("username"));
+            model.addAttribute("currentUserId", userId);
             return "board";
         }
     }

@@ -296,6 +296,75 @@ document.addEventListener('DOMContentLoaded', function() {
         showModal();
     }
     
+    function openViewNoteModal(note) {
+        const viewModal = document.getElementById('view-note-modal');
+        const viewModalTitle = document.getElementById('view-modal-title');
+        const viewNoteTitle = document.getElementById('view-note-title');
+        const viewNoteTag = document.getElementById('view-note-tag');
+        const viewNoteContent = document.getElementById('view-note-content');
+        const viewNoteImagesGroup = document.getElementById('view-note-images-group');
+        const viewNoteImages = document.getElementById('view-note-images');
+        const viewNotePrivacy = document.getElementById('view-note-privacy');
+        const viewNoteAuthor = document.getElementById('view-note-author');
+        
+        const noteType = note.dataset.type || 'text';
+        viewModalTitle.textContent = `View ${noteType === 'code' ? 'Code' : 'Text'} Note`;
+        
+        // Fill view fields
+        viewNoteTitle.textContent = note.querySelector('.note-title').textContent;
+        viewNoteTag.textContent = note.querySelector('.note-tag')?.textContent || 'No tag';
+        
+        // Handle content based on type
+        if (noteType === 'code') {
+            viewNoteContent.innerHTML = `<pre><code>${note.querySelector('.note-content').textContent}</code></pre>`;
+        } else {
+            viewNoteContent.innerHTML = note.querySelector('.note-content').innerHTML;
+        }
+        
+        // Privacy level
+        viewNotePrivacy.textContent = note.querySelector('.note-privacy-indicator')?.textContent || 'private';
+        
+        // Author information
+        const authorElement = note.querySelector('.note-author');
+        if (authorElement && authorElement.style.display !== 'none') {
+            viewNoteAuthor.textContent = authorElement.textContent;
+        } else {
+            viewNoteAuthor.textContent = 'You';
+        }
+        
+        // Handle images (if any)
+        const noteImages = note.querySelector('.note-images');
+        if (noteImages && noteImages.children.length > 0) {
+            viewNoteImagesGroup.style.display = 'block';
+            viewNoteImages.innerHTML = noteImages.innerHTML;
+        } else {
+            viewNoteImagesGroup.style.display = 'none';
+        }
+        
+        // Show view modal
+        viewModal.style.display = 'flex';
+        viewModal.classList.add('fade-in');
+        
+        // Add close event listeners
+        const closeBtn = viewModal.querySelector('.close-btn');
+        const viewCloseBtn = document.getElementById('view-close-btn');
+        
+        const closeViewModal = () => {
+            viewModal.style.display = 'none';
+            viewModal.classList.remove('fade-in');
+        };
+        
+        closeBtn.onclick = closeViewModal;
+        viewCloseBtn.onclick = closeViewModal;
+        
+        // Close on outside click
+        viewModal.onclick = (e) => {
+            if (e.target === viewModal) {
+                closeViewModal();
+            }
+        };
+    }
+    
     function showModal() {
         noteModal.style.display = 'flex';
         setTimeout(() => {
@@ -460,6 +529,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         noteElement.dataset.id = note.id;
         noteElement.dataset.type = note.noteType || 'text';
+        noteElement.dataset.authorId = note.authorId;
         noteElement.dataset.jsRendered = 'true';
         noteElement.className = `note ${note.noteType || 'text'}-note`;
         
@@ -497,6 +567,8 @@ document.addEventListener('DOMContentLoaded', function() {
             authorElement.style.display = 'none';
         }
         
+
+        
         // Add event listeners
         addNoteEventListeners(noteElement);
         
@@ -507,27 +579,69 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function addNoteEventListeners(noteElement) {
-        // Double click to edit
+        const noteId = noteElement.dataset.id;
+        const editButton = noteElement.querySelector('.edit-note');
+        const viewButton = noteElement.querySelector('.view-note');
+        const deleteButton = noteElement.querySelector('.delete-note');
+        
+        // Check if current user is the owner
+        const noteAuthorId = parseInt(noteElement.dataset.authorId);
+        const isOwner = noteAuthorId === window.currentUserId;
+        
+        // For JavaScript-rendered notes, set button visibility
+        if (noteElement.dataset.jsRendered === 'true') {
+            if (isOwner) {
+                // Show edit and delete buttons for owner
+                if (editButton) editButton.style.display = 'inline-flex';
+                if (viewButton) viewButton.style.display = 'none';
+                if (deleteButton) deleteButton.style.display = 'inline-flex';
+            } else {
+                // Show only view button for non-owners
+                if (editButton) editButton.style.display = 'none';
+                if (viewButton) viewButton.style.display = 'inline-flex';
+                if (deleteButton) deleteButton.style.display = 'none';
+            }
+        }
+        
+        // Double click behavior - edit for owners, view for non-owners
         noteElement.addEventListener('dblclick', () => {
-            openEditNoteModal(noteElement);
-        });
-        
-        // Edit button
-        noteElement.querySelector('.edit-note').addEventListener('click', (e) => {
-            e.stopPropagation();
-            openEditNoteModal(noteElement);
-        });
-        
-        // Delete button
-        noteElement.querySelector('.delete-note').addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (confirm('Are you sure you want to delete this note?')) {
-                deleteNote(noteElement.dataset.id);
+            if (isOwner) {
+                openEditNoteModal(noteElement);
+            } else {
+                openViewNoteModal(noteElement);
             }
         });
         
-        // Drag functionality
-        noteElement.addEventListener('mousedown', startDrag);
+        // Edit button (only for owners)
+        if (editButton) {
+            editButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openEditNoteModal(noteElement);
+            });
+        }
+        
+        // View button (only for non-owners)
+        if (viewButton) {
+            viewButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openViewNoteModal(noteElement);
+            });
+        }
+        
+        // Delete button (only for owners)
+        if (deleteButton) {
+            deleteButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (confirm('Are you sure you want to delete this note?')) {
+                    deleteNote(noteElement.dataset.id);
+                }
+            });
+        }
+        
+        // Drag functionality (only for owners)
+        if (isOwner) {
+            noteElement.addEventListener('mousedown', startDrag);
+        }
     }
     
     function startDrag(e) {

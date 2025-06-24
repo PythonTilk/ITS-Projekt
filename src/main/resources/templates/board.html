@@ -64,7 +64,7 @@
                 <!-- Pre-render notes from server -->
                 <div th:each="note : ${notes}" 
                      th:class="'note ' + (${note.noteType} != null ? ${note.noteType} + '-note' : 'text-note')" 
-                     th:attr="data-id=${note.id}, data-type=${note.noteType != null ? note.noteType : 'text'}"
+                     th:attr="data-id=${note.id}, data-type=${note.noteType != null ? note.noteType : 'text'}, data-author-id=${note.user != null ? note.user.id : null}"
                      th:style="'background-color:' + ${note.color} + '; left:' + ${note.positionX} + 'px; top:' + ${note.positionY} + 'px;'">
                     <div class="note-header">
                         <h3 class="note-title" th:text="${note.title}">Note Title</h3>
@@ -86,12 +86,21 @@
                     <div class="note-footer">
                         <span class="note-timestamp">Just now</span>
                         <div class="note-actions">
-                            <button class="note-action edit-note" title="Edit">
-                                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                            </button>
-                            <button class="note-action delete-note" title="Delete">
-                                <svg viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/></svg>
-                            </button>
+                            <!-- Show Edit and Delete buttons only for note owner -->
+                            <th:block th:if="${note.user != null && note.user.id == currentUserId}">
+                                <button class="note-action edit-note" title="Edit">
+                                    <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                </button>
+                                <button class="note-action delete-note" title="Delete">
+                                    <svg viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/></svg>
+                                </button>
+                            </th:block>
+                            <!-- Show View button for notes not owned by current user -->
+                            <th:block th:if="${note.user == null || note.user.id != currentUserId}">
+                                <button class="note-action view-note" title="View">
+                                    <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                            </th:block>
                         </div>
                     </div>
                 </div>
@@ -280,6 +289,50 @@
         </div>
     </div>
     
+    <!-- View-Only Note Modal -->
+    <div id="view-note-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn">&times;</button>
+            <h2 id="view-modal-title">View Note</h2>
+            
+            <div class="view-note-content">
+                <div class="form-group">
+                    <label>Title</label>
+                    <div class="view-field" id="view-note-title"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Tag</label>
+                    <div class="view-field" id="view-note-tag"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Content</label>
+                    <div class="view-field view-content" id="view-note-content"></div>
+                </div>
+                
+                <div class="form-group" id="view-note-images-group" style="display: none;">
+                    <label>Images</label>
+                    <div class="view-images" id="view-note-images"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Privacy</label>
+                    <div class="view-field" id="view-note-privacy"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Author</label>
+                    <div class="view-field" id="view-note-author"></div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn" id="view-close-btn">Close</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Templates for rendering notes -->
     <template id="note-template">
         <div class="note" data-id="" data-type="text">
@@ -302,6 +355,9 @@
                     <button class="note-action edit-note" title="Edit">
                         <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </button>
+                    <button class="note-action view-note" title="View" style="display: none;">
+                        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
                     <button class="note-action delete-note" title="Delete">
                         <svg viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/></svg>
                     </button>
@@ -310,6 +366,10 @@
         </div>
     </template>
     
+    <script th:inline="javascript">
+        // Pass current user ID to JavaScript
+        window.currentUserId = /*[[${currentUserId}]]*/ null;
+    </script>
     <script th:src="@{/js/enhanced-board.js}"></script>
 </body>
 </html>
