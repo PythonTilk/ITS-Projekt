@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 @Entity
 @Table(name = "notiz")
@@ -50,7 +52,7 @@ public class Note {
     private NoteType noteType = NoteType.text;
     
     // Privacy level
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = PrivacyLevelConverter.class)
     @Column(name = "privacy_level")
     private PrivacyLevel privacyLevel = PrivacyLevel.private_;
     
@@ -65,8 +67,13 @@ public class Note {
     @Column(name = "image_paths", columnDefinition = "TEXT")
     private String imagePaths;
     
+    // Editing permissions
+    @Enumerated(EnumType.STRING)
+    @Column(name = "editing_permission")
+    private EditingPermission editingPermission = EditingPermission.creator_only;
+    
     public enum NoteType {
-        text, code
+        text, code, rich
     }
     
     public enum PrivacyLevel {
@@ -80,6 +87,44 @@ public class Note {
         
         public String getValue() {
             return value;
+        }
+    }
+    
+    public enum EditingPermission {
+        creator_only("creator_only"), collaborative("collaborative");
+        
+        private final String value;
+        
+        EditingPermission(String value) {
+            this.value = value;
+        }
+        
+        public String getValue() {
+            return value;
+        }
+    }
+    
+    @Converter
+    public static class PrivacyLevelConverter implements AttributeConverter<PrivacyLevel, String> {
+        @Override
+        public String convertToDatabaseColumn(PrivacyLevel privacyLevel) {
+            if (privacyLevel == null) {
+                return null;
+            }
+            return privacyLevel.getValue();
+        }
+
+        @Override
+        public PrivacyLevel convertToEntityAttribute(String value) {
+            if (value == null) {
+                return null;
+            }
+            for (PrivacyLevel level : PrivacyLevel.values()) {
+                if (level.getValue().equals(value)) {
+                    return level;
+                }
+            }
+            throw new IllegalArgumentException("Unknown privacy level: " + value);
         }
     }
 }

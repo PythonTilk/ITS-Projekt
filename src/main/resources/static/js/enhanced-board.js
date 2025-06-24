@@ -56,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
     const noteBoard = document.getElementById('note-board');
     const addNoteBtn = document.getElementById('add-note-btn');
-    const addNoteMenu = document.getElementById('add-note-menu');
     const noteModal = document.getElementById('note-modal');
     const closeBtn = document.querySelector('.close-btn');
     const noteForm = document.getElementById('note-form');
@@ -73,15 +72,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteNoteBtn = document.getElementById('delete-note-btn');
     const cancelBtn = document.getElementById('cancel-btn');
     
-    // Rich text editor elements
-    const richEditorGroup = document.getElementById('rich-editor-group');
+    // Enhanced editor elements
+    const toggleCodeEditorBtn = document.getElementById('toggle-code-editor');
+    const richEditorContainer = document.getElementById('rich-editor-container');
     const richEditorContent = document.getElementById('rich-editor-content');
     const richEditorBtns = document.querySelectorAll('.rich-editor-btn');
-    
-    // Code editor elements
-    const codeEditorGroup = document.getElementById('code-editor-group');
+    const codeEditorContainer = document.getElementById('code-editor-container');
     const codeEditorContent = document.getElementById('code-editor-content');
     const codeLanguage = document.getElementById('code-language');
+    
+    // Editing permissions elements
+    const editingPermissionOptions = document.querySelectorAll('.permission-option');
+    const editingPermissionInputs = document.querySelectorAll('input[name="editing_permission"]');
     
     // File upload elements
     const fileUploadArea = document.getElementById('file-upload-area');
@@ -104,8 +106,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentNote = null;
     let offsetX = 0;
     let offsetY = 0;
-    let isAddMenuOpen = false;
     let uploadedFilesList = [];
+    let isCodeEditorActive = false;
     
     // Initialize
     initializeExistingNotes();
@@ -113,25 +115,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Event Listeners
     
-    // Add note button and menu
+    // Add note button - directly open modal
     addNoteBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        toggleAddNoteMenu();
-    });
-    
-    document.addEventListener('click', (e) => {
-        if (!addNoteMenu.contains(e.target) && !addNoteBtn.contains(e.target)) {
-            closeAddNoteMenu();
-        }
-    });
-    
-    // Add note options
-    document.querySelectorAll('.add-note-option').forEach(option => {
-        option.addEventListener('click', () => {
-            const noteType = option.dataset.type;
-            openAddNoteModal(noteType);
-            closeAddNoteMenu();
-        });
+        openAddNoteModal('text'); // Default to text type, user can toggle to code
     });
     
     // Modal events
@@ -164,6 +151,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     richEditorContent.addEventListener('keyup', updateToolbarState);
     richEditorContent.addEventListener('mouseup', updateToolbarState);
+    
+    // Code editor toggle
+    toggleCodeEditorBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleCodeEditor();
+    });
+    
+    // Editing permissions
+    editingPermissionOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            editingPermissionOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            option.querySelector('input').checked = true;
+        });
+    });
     
     // File upload
     fileUploadArea.addEventListener('click', () => fileInput.click());
@@ -212,30 +214,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Functions
     
-    function toggleAddNoteMenu() {
-        isAddMenuOpen = !isAddMenuOpen;
-        addNoteMenu.classList.toggle('show', isAddMenuOpen);
-        addNoteBtn.style.transform = isAddMenuOpen ? 'rotate(45deg)' : 'rotate(0deg)';
-    }
-    
-    function closeAddNoteMenu() {
-        isAddMenuOpen = false;
-        addNoteMenu.classList.remove('show');
-        addNoteBtn.style.transform = 'rotate(0deg)';
-    }
-    
     function openAddNoteModal(noteType = 'text') {
-        modalTitle.textContent = `Add New ${noteType === 'code' ? 'Code' : 'Text'} Note`;
+        modalTitle.textContent = 'Add New Note';
         noteTypeInput.value = noteType;
         
-        // Show/hide appropriate editor
-        if (noteType === 'code') {
-            richEditorGroup.style.display = 'none';
-            codeEditorGroup.style.display = 'block';
-        } else {
-            richEditorGroup.style.display = 'block';
-            codeEditorGroup.style.display = 'none';
-        }
+        // Reset editor state
+        isCodeEditorActive = false;
+        richEditorContainer.style.display = 'block';
+        codeEditorContainer.style.display = 'none';
+        toggleCodeEditorBtn.classList.remove('active');
         
         // Reset form
         noteForm.reset();
@@ -261,19 +248,61 @@ document.addEventListener('DOMContentLoaded', function() {
         showModal();
     }
     
+    function toggleCodeEditor() {
+        isCodeEditorActive = !isCodeEditorActive;
+        
+        if (isCodeEditorActive) {
+            // Switch to code editor
+            richEditorContainer.style.display = 'none';
+            codeEditorContainer.style.display = 'block';
+            toggleCodeEditorBtn.classList.add('active');
+            
+            // Transfer content if any
+            const richContent = richEditorContent.innerHTML;
+            if (richContent && richContent.trim() !== '') {
+                // Convert HTML to plain text for code editor
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = richContent;
+                codeEditorContent.value = tempDiv.textContent || tempDiv.innerText || '';
+            }
+            
+            // Update note type
+            noteTypeInput.value = 'code';
+        } else {
+            // Switch to rich text editor
+            richEditorContainer.style.display = 'block';
+            codeEditorContainer.style.display = 'none';
+            toggleCodeEditorBtn.classList.remove('active');
+            
+            // Transfer content if any
+            const codeContent = codeEditorContent.value;
+            if (codeContent && codeContent.trim() !== '') {
+                // Convert plain text to HTML for rich editor
+                richEditorContent.innerHTML = codeContent.replace(/\n/g, '<br>');
+            }
+            
+            // Update note type
+            noteTypeInput.value = 'text';
+        }
+    }
+    
     function openEditNoteModal(note) {
         const noteType = note.dataset.type || 'text';
-        modalTitle.textContent = `Edit ${noteType === 'code' ? 'Code' : 'Text'} Note`;
+        modalTitle.textContent = 'Edit Note';
         noteTypeInput.value = noteType;
         
-        // Show/hide appropriate editor
+        // Set editor state based on note type
         if (noteType === 'code') {
-            richEditorGroup.style.display = 'none';
-            codeEditorGroup.style.display = 'block';
+            isCodeEditorActive = true;
+            richEditorContainer.style.display = 'none';
+            codeEditorContainer.style.display = 'block';
+            toggleCodeEditorBtn.classList.add('active');
             codeEditorContent.value = note.querySelector('.note-content').textContent;
         } else {
-            richEditorGroup.style.display = 'block';
-            codeEditorGroup.style.display = 'none';
+            isCodeEditorActive = false;
+            richEditorContainer.style.display = 'block';
+            codeEditorContainer.style.display = 'none';
+            toggleCodeEditorBtn.classList.remove('active');
             richEditorContent.innerHTML = note.querySelector('.note-content').innerHTML;
         }
         
@@ -454,15 +483,18 @@ document.addEventListener('DOMContentLoaded', function() {
             color: noteColorInput.value,
             noteType: noteTypeInput.value,
             privacyLevel: document.querySelector('input[name="privacy"]:checked').value,
-            sharedWith: selectedUsers.map(user => user.username).join(',')
+            sharedWith: selectedUsers.map(user => user.username).join(','),
+            editingPermission: document.querySelector('input[name="editing_permission"]:checked').value
         };
         
-        // Get content based on note type
-        if (noteTypeInput.value === 'code') {
+        // Get content based on current editor state
+        if (isCodeEditorActive) {
             noteData.content = codeEditorContent.value;
             noteData.language = codeLanguage.value;
+            noteData.noteType = 'code';
         } else {
             noteData.content = richEditorContent.innerHTML;
+            noteData.noteType = 'text';
         }
         
         // Add images
