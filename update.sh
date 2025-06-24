@@ -11,15 +11,19 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Configuration
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BACKUP_DIR="$PROJECT_DIR/backups"
+PROJECT_USER="notizprojekt"
+PROJECT_NAME="ITS-Projekt"
+SERVICE_NAME="notizprojekt"
+BACKUP_DIR="/opt/notizprojekt/backups"
 LOG_FILE="$PROJECT_DIR/update.log"
-PID_FILE="$PROJECT_DIR/app.pid"
-JAR_FILE="$PROJECT_DIR/target/notizprojekt-0.0.1-SNAPSHOT.jar"
-JAVA_OPTS="-Xmx512m -Xms256m"
+JAR_FILE="$PROJECT_DIR/target/notizprojekt-web-*.jar"
+JAVA_OPTS="-Xmx1g -Xms512m -XX:+UseG1GC"
 
 # Functions
 log() {
@@ -36,6 +40,21 @@ success() {
 
 warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1" | tee -a "$LOG_FILE"
+}
+
+info() {
+    echo -e "${CYAN}[INFO]${NC} $1" | tee -a "$LOG_FILE"
+}
+
+# Detect if running in production (systemd service) or development mode
+detect_mode() {
+    if systemctl is-active --quiet "$SERVICE_NAME" 2>/dev/null; then
+        PRODUCTION_MODE=true
+        info "Running in production mode (systemd service detected)"
+    else
+        PRODUCTION_MODE=false
+        info "Running in development mode"
+    fi
 }
 
 # Check if running as root
@@ -98,36 +117,49 @@ create_backup() {
 stop_application() {
     log "Stopping application..."
     
-    if [[ -f "$PID_FILE" ]]; then
-        PID=$(cat "$PID_FILE")
-        if ps -p "$PID" > /dev/null 2>&1; then
-            log "Stopping application with PID $PID..."
-            kill "$PID"
-            
-            # Wait for graceful shutdown
-            for i in {1..30}; do
-                if ! ps -p "$PID" > /dev/null 2>&1; then
-                    success "Application stopped gracefully."
-                    rm -f "$PID_FILE"
-                    return 0
-                fi
-                sleep 1
-            done
-            
-            # Force kill if still running
-            warning "Forcing application shutdown..."
-            kill -9 "$PID" 2>/dev/null || true
-            rm -f "$PID_FILE"
+    if [[ "$PRODUCTION_MODE" == "true" ]]; then
+        # Production mode: use systemd
+        if systemctl is-active --quiet "$SERVICE_NAME"; then
+            log "Stopping systemd service: $SERVICE_NAME"
+            systemctl stop "$SERVICE_NAME"
+            success "Application stopped via systemd"
         else
-            warning "PID file exists but process is not running."
-            rm -f "$PID_FILE"
+            info "Service is already stopped"
         fi
     else
-        log "No PID file found. Application may not be running."
+        # Development mode: use PID file
+        PID_FILE="$PROJECT_DIR/app.pid"
+        if [[ -f "$PID_FILE" ]]; then
+            PID=$(cat "$PID_FILE")
+            if ps -p "$PID" > /dev/null 2>&1; then
+                log "Stopping application with PID $PID..."
+                kill "$PID"
+                
+                # Wait for graceful shutdown
+                for i in {1..30}; do
+                    if ! ps -p "$PID" > /dev/null 2>&1; then
+                        success "Application stopped gracefully."
+                        rm -f "$PID_FILE"
+                        return 0
+                    fi
+                    sleep 1
+                done
+                
+                # Force kill if still running
+                warning "Forcing application shutdown..."
+                kill -9 "$PID" 2>/dev/null || true
+                rm -f "$PID_FILE"
+            else
+                warning "PID file exists but process is not running."
+                rm -f "$PID_FILE"
+            fi
+        else
+            log "No PID file found. Application may not be running."
+        fi
+        
+        # Kill any remaining Java processes for this project
+        pkill -f "notizprojekt" || true
     fi
-    
-    # Kill any remaining Java processes for this project
-    pkill -f "notizprojekt" || true
 }
 
 # Update source code
@@ -164,9 +196,31 @@ build_application() {
     
     cd "$PROJECT_DIR"
     
-    # Clean and build
-    if mvn clean package -DskipTests; then
+    # Ensure we're on the correct branch
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    if [[ "$CURRENT_BRANCH" != "html" ]]; then
+        log "Switching to html branch..."
+        git checkout html
+    fi
+    
+    # Set JAVA_HOME if needed
+    if [[ -z "$JAVA_HOME" ]]; then
+        export JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::")
+        info "Set JAVA_HOME to: $JAVA_HOME"
+    fi
+    
+    # Clean and build with production profile
+    if mvn clean package -DskipTests -Pprod; then
         success "Application built successfully."
+        
+        # Find the built JAR file
+        BUILT_JAR=$(find target -name "*.jar" -not -name "*sources*" -not -name "*javadoc*" | head -n 1)
+        if [[ -n "$BUILT_JAR" ]]; then
+            info "Built JAR: $BUILT_JAR"
+        else
+            error "No JAR file found after build"
+            exit 1
+        fi
     else
         error "Failed to build application."
         exit 1
@@ -177,29 +231,54 @@ build_application() {
 start_application() {
     log "Starting application..."
     
-    cd "$PROJECT_DIR"
-    
-    if [[ ! -f "$JAR_FILE" ]]; then
-        error "JAR file not found: $JAR_FILE"
+    if [[ "$PRODUCTION_MODE" == "true" ]]; then
+        # Production mode: use systemd
+        log "Starting systemd service: $SERVICE_NAME"
+        systemctl start "$SERVICE_NAME"
+        
+        # Wait for service to be active
+        for i in {1..30}; do
+            if systemctl is-active --quiet "$SERVICE_NAME"; then
+                success "Application started via systemd"
+                return 0
+            fi
+            log "Waiting for service to start... ($i/30)"
+            sleep 2
+        done
+        
+        error "Failed to start application via systemd"
+        systemctl status "$SERVICE_NAME" || true
         exit 1
-    fi
-    
-    # Start application in background
-    nohup java $JAVA_OPTS -jar "$JAR_FILE" > "$PROJECT_DIR/app.log" 2>&1 &
-    APP_PID=$!
-    
-    # Save PID
-    echo "$APP_PID" > "$PID_FILE"
-    
-    # Wait a moment and check if application started successfully
-    sleep 5
-    if ps -p "$APP_PID" > /dev/null 2>&1; then
-        success "Application started successfully with PID $APP_PID"
-        log "Application logs: $PROJECT_DIR/app.log"
-        log "Application should be available at: http://localhost:8080"
     else
-        error "Failed to start application. Check logs for details."
-        exit 1
+        # Development mode: start manually
+        cd "$PROJECT_DIR"
+        
+        # Find JAR file
+        ACTUAL_JAR=$(find target -name "*.jar" -not -name "*sources*" -not -name "*javadoc*" | head -n 1)
+        if [[ ! -f "$ACTUAL_JAR" ]]; then
+            error "JAR file not found in target directory"
+            exit 1
+        fi
+        
+        PID_FILE="$PROJECT_DIR/app.pid"
+        
+        # Start application in background
+        nohup java $JAVA_OPTS -jar "$ACTUAL_JAR" --spring.profiles.active=prod > "$PROJECT_DIR/app.log" 2>&1 &
+        APP_PID=$!
+        
+        # Save PID
+        echo "$APP_PID" > "$PID_FILE"
+        
+        # Wait a moment and check if application started successfully
+        sleep 5
+        if ps -p "$APP_PID" > /dev/null 2>&1; then
+            success "Application started successfully with PID $APP_PID"
+            log "Application logs: $PROJECT_DIR/app.log"
+            log "Application should be available at: http://localhost:12000"
+        else
+            error "Failed to start application. Check logs for details."
+            exit 1
+        fi
     fi
 }
 
@@ -209,7 +288,7 @@ health_check() {
     
     # Wait for application to be ready
     for i in {1..30}; do
-        if curl -s -f http://localhost:8080/login > /dev/null 2>&1; then
+        if curl -s -f http://localhost:12000/login > /dev/null 2>&1; then
             success "Application is healthy and responding."
             return 0
         fi
@@ -218,7 +297,11 @@ health_check() {
     done
     
     warning "Health check failed. Application may not be fully ready yet."
-    log "Check application logs: $PROJECT_DIR/app.log"
+    if [[ "$PRODUCTION_MODE" == "true" ]]; then
+        log "Check systemd logs: sudo journalctl -u $SERVICE_NAME -f"
+    else
+        log "Check application logs: $PROJECT_DIR/app.log"
+    fi
 }
 
 # Cleanup old logs
@@ -241,6 +324,7 @@ main() {
     log "Starting automatic update process..."
     log "Project directory: $PROJECT_DIR"
     
+    detect_mode
     check_permissions
     check_prerequisites
     create_backup
@@ -255,8 +339,14 @@ main() {
     log "Update process finished at $(date)"
     echo ""
     echo -e "${GREEN}✓ Update completed successfully!${NC}"
-    echo -e "${BLUE}ℹ Application is running at: http://localhost:8080${NC}"
-    echo -e "${BLUE}ℹ Logs: $PROJECT_DIR/app.log${NC}"
+    if [[ "$PRODUCTION_MODE" == "true" ]]; then
+        echo -e "${BLUE}ℹ Application is running via systemd service: $SERVICE_NAME${NC}"
+        echo -e "${BLUE}ℹ Check logs with: sudo journalctl -u $SERVICE_NAME -f${NC}"
+        echo -e "${BLUE}ℹ Service status: sudo systemctl status $SERVICE_NAME${NC}"
+    else
+        echo -e "${BLUE}ℹ Application is running at: http://localhost:12000${NC}"
+        echo -e "${BLUE}ℹ Logs: $PROJECT_DIR/app.log${NC}"
+    fi
     echo -e "${BLUE}ℹ Update log: $LOG_FILE${NC}"
 }
 
@@ -283,38 +373,60 @@ case "${1:-}" in
         exit 0
         ;;
     --stop)
+        detect_mode
         log "Stopping application..."
         stop_application
         success "Application stopped."
         exit 0
         ;;
     --start)
+        detect_mode
         log "Starting application..."
         start_application
         success "Application started."
         exit 0
         ;;
     --status)
-        if [[ -f "$PID_FILE" ]]; then
-            PID=$(cat "$PID_FILE")
-            if ps -p "$PID" > /dev/null 2>&1; then
-                echo -e "${GREEN}✓ Application is running (PID: $PID)${NC}"
+        detect_mode
+        if [[ "$PRODUCTION_MODE" == "true" ]]; then
+            if systemctl is-active --quiet "$SERVICE_NAME"; then
+                echo -e "${GREEN}✓ Application is running (systemd service: $SERVICE_NAME)${NC}"
+                systemctl status "$SERVICE_NAME" --no-pager -l
                 exit 0
             else
-                echo -e "${RED}✗ Application is not running (stale PID file)${NC}"
+                echo -e "${RED}✗ Application is not running${NC}"
+                systemctl status "$SERVICE_NAME" --no-pager -l || true
                 exit 1
             fi
         else
-            echo -e "${RED}✗ Application is not running${NC}"
-            exit 1
+            PID_FILE="$PROJECT_DIR/app.pid"
+            if [[ -f "$PID_FILE" ]]; then
+                PID=$(cat "$PID_FILE")
+                if ps -p "$PID" > /dev/null 2>&1; then
+                    echo -e "${GREEN}✓ Application is running (PID: $PID)${NC}"
+                    exit 0
+                else
+                    echo -e "${RED}✗ Application is not running (stale PID file)${NC}"
+                    exit 1
+                fi
+            else
+                echo -e "${RED}✗ Application is not running${NC}"
+                exit 1
+            fi
         fi
         ;;
     --logs)
-        if [[ -f "$PROJECT_DIR/app.log" ]]; then
-            tail -f "$PROJECT_DIR/app.log"
+        detect_mode
+        if [[ "$PRODUCTION_MODE" == "true" ]]; then
+            echo "Following systemd logs for $SERVICE_NAME..."
+            journalctl -u "$SERVICE_NAME" -f
         else
-            error "Application log file not found: $PROJECT_DIR/app.log"
-            exit 1
+            if [[ -f "$PROJECT_DIR/app.log" ]]; then
+                tail -f "$PROJECT_DIR/app.log"
+            else
+                error "Application log file not found: $PROJECT_DIR/app.log"
+                exit 1
+            fi
         fi
         ;;
     "")

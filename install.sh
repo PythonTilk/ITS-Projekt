@@ -475,7 +475,7 @@ configure_application() {
     # Create production properties file
     cat > "$PROJECT_DIR/$PROJECT_NAME/src/main/resources/application-prod.properties" << EOF
 # Server configuration
-server.port=8080
+server.port=12000
 server.address=127.0.0.1
 
 # Database configuration
@@ -615,7 +615,7 @@ server {
     
     # Redirect HTTP to HTTPS (will be enabled after SSL setup)
     location / {
-        proxy_pass http://127.0.0.1:8080;
+        proxy_pass http://127.0.0.1:12000;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -692,7 +692,7 @@ server {
     
     # Proxy settings
     location / {
-        proxy_pass http://127.0.0.1:8080;
+        proxy_pass http://127.0.0.1:12000;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -713,7 +713,7 @@ server {
     
     # Static files caching
     location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)\$ {
-        proxy_pass http://127.0.0.1:8080;
+        proxy_pass http://127.0.0.1:12000;
         proxy_set_header Host \$host;
         expires 1y;
         add_header Cache-Control "public, immutable";
@@ -804,7 +804,7 @@ final_setup() {
     fi
     
     # Check if application responds
-    if curl -s -f "http://localhost:8080/login" > /dev/null; then
+    if curl -s -f "http://localhost:12000/login" > /dev/null; then
         success "Application is responding"
     else
         warning "Application may not be fully ready yet"

@@ -1,10 +1,23 @@
 # ITS-Projekt - Advanced Note Management System
 
-A comprehensive, modern note-taking application with user profiles, collaborative features, and production-ready deployment tools.
+A comprehensive, modern note-taking application with user profiles, collaborative features, and production-ready deployment tools. Perfect for individuals and teams who want to organize their thoughts and share knowledge efficiently.
+
+## 📋 Table of Contents
+
+- [🚀 Quick Production Setup](#-quick-production-setup)
+- [Overview](#overview)
+- [✨ Enhanced Features](#-enhanced-features)
+- [Technical Details](#technical-details)
+- [🚀 Getting Started](#-getting-started)
+- [📖 Usage Guide](#-usage-guide)
+- [🔄 Update Management](#-update-management)
+- [Testing](#testing)
+- [🔧 Troubleshooting](#-troubleshooting)
+- [License](#license)
 
 ## 🚀 Quick Production Setup
 
-Deploy the complete application to your server with the automated installation script:
+Deploy the complete application to your server with the automated [installation script](install.sh):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh -o install.sh
@@ -14,16 +27,14 @@ sudo ./install.sh
 
 **Automated Setup (No Prompts):**
 ```bash
-# Download script first
+# One-liner installation with environment variables
+sudo DOMAIN="notes.example.com" EMAIL="admin@example.com" DB_PASSWORD="your-secure-password" SKIP_PROMPTS="true" \
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh)"
+
+# Or download first, then run
 curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh -o install.sh
 chmod +x install.sh
-
-# Run with environment variables
-DOMAIN="notes.example.com" \
-EMAIL="admin@example.com" \
-DB_PASSWORD="your-secure-password" \
-SKIP_PROMPTS="true" \
-sudo ./install.sh
+sudo DOMAIN="notes.example.com" EMAIL="admin@example.com" DB_PASSWORD="your-secure-password" SKIP_PROMPTS="true" ./install.sh
 ```
 
 📖 **[Complete Setup Guide](server-setup.md)** | 🚀 **[Quick Deployment Guide](DEPLOYMENT_GUIDE.md)**
@@ -32,8 +43,8 @@ sudo ./install.sh
 
 ITS-Projekt is a comprehensive note-taking application that allows users to create, edit, organize, and share notes with advanced features. The application uses a MySQL/MariaDB database and is available in two versions:
 
-1. **Desktop Application**: A Java Swing-based desktop application (main branch)
-2. **Web Application**: A modern Spring Boot-based web application with enhanced features (html branch)
+1. **Desktop Application**: A Java Swing-based desktop application ([main branch](https://github.com/PythonTilk/ITS-Projekt/tree/main))
+2. **Web Application**: A modern Spring Boot-based web application with enhanced features ([html branch](https://github.com/PythonTilk/ITS-Projekt/tree/html))
 
 ## ✨ Enhanced Features
 
@@ -137,8 +148,8 @@ spring.datasource.password=notizpassword
 
 #### Desktop Application (main branch)
 - `src/NotizProjekt_All/` - Contains all Java source files
-  - [`NotizProjekt.java`](src/NotizProjekt_All/NotizProjekt.java) - Main application entry point
-  - [`DBVerbindung.java`](src/NotizProjekt_All/DBVerbindung.java) - Database connection handler
+  - `NotizProjekt.java` - Main application entry point
+  - `DBVerbindung.java` - Database connection handler
   - `GUI_*.java` - User interface components
 - [`build.xml`](build.xml) - Ant build file for compiling the project
 - `nbproject/` - NetBeans project configuration
@@ -154,7 +165,7 @@ spring.datasource.password=notizpassword
 - `src/main/resources/` - Contains resources
   - `static/` - Static web assets (CSS, JavaScript)
   - `templates/` - Thymeleaf HTML templates
-- `pom.xml` - Maven project configuration
+- [`pom.xml`](pom.xml) - Maven project configuration
 
 ### 🛠️ Requirements
 
@@ -176,15 +187,15 @@ spring.datasource.password=notizpassword
 
 ### 🌟 **Production Deployment (Recommended)**
 
-For production servers, use the automated installation:
+For production servers, we've made deployment incredibly easy with our automated installation script:
 
 ```bash
 # Interactive installation
 curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash
 
-# Or automated installation
-DOMAIN="your-domain.com" EMAIL="admin@example.com" DB_PASSWORD="secure-password" \
-curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh | sudo bash
+# Or automated installation (no prompts)
+sudo DOMAIN="your-domain.com" EMAIL="admin@example.com" DB_PASSWORD="secure-password" SKIP_PROMPTS="true" \
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/PythonTilk/ITS-Projekt/html/install.sh)"
 ```
 
 This will automatically:
@@ -302,7 +313,7 @@ After setup, you should see:
 4. **Author Discovery**: Explore other users' profiles through shared notes
 
 #### 🛠️ **Server Management** (Production)
-1. **Updates**: Use `./update.sh` for automatic updates
+1. **Updates**: Use [`./update.sh`](update.sh) for automatic updates
 2. **Monitoring**: Check logs with `sudo journalctl -u notizprojekt -f`
 3. **Backups**: Automated backups are created before updates
 4. **Health Checks**: Built-in health monitoring and alerts
@@ -372,12 +383,12 @@ sudo -u notizprojekt /opt/notizprojekt/ITS-Projekt/update.sh
 
 ### Desktop Application Tests
 
-The desktop project includes several test classes to verify database connectivity and functionality:
+The desktop project (main branch) includes several test classes to verify database connectivity and functionality:
 
-- [`TestDBConnection.java`](src/NotizProjekt_All/TestDBConnection.java) - Tests basic database connection and retrieves users and notes
-- [`TestLogin.java`](src/NotizProjekt_All/TestLogin.java) - Tests user authentication functionality
-- [`TestNoteCreation.java`](src/NotizProjekt_All/TestNoteCreation.java) - Tests creating new notes in the database
-- [`TestNoteSharing.java`](src/NotizProjekt_All/TestNoteSharing.java) - Tests sharing notes between users
+- `TestDBConnection.java` - Tests basic database connection and retrieves users and notes
+- `TestLogin.java` - Tests user authentication functionality
+- `TestNoteCreation.java` - Tests creating new notes in the database
+- `TestNoteSharing.java` - Tests sharing notes between users
 
 To run the desktop tests:
 
@@ -441,7 +452,7 @@ DESCRIBE notiz;
 DESCRIBE nutzer;
 
 -- Re-import if needed
-mysql -u root -p < its-projekt18.6.sql
+-- mysql -u root -p < its-projekt18.6.sql
 ```
 
 ### 🌐 **Web Application Issues**
@@ -542,7 +553,7 @@ ls -la /opt/notizprojekt/backups/
 
 ### 📞 **Getting Help**
 
-If you're still experiencing issues:
+If you're still experiencing issues, don't worry! Here are some steps to help you get back on track:
 
 1. **Check Logs**: Look for error messages in application logs
 2. **Verify Setup**: Ensure all requirements are met
@@ -571,3 +582,7 @@ sudo -u notizprojekt /opt/notizprojekt/ITS-Projekt/update.sh --status
 ## License
 
 This project is licensed under the terms included in the [LICENSE](LICENSE) file.
+
+---
+
+[⬆ Back to top](#its-projekt---advanced-note-management-system)
