@@ -47,9 +47,9 @@ public class DatabaseConfig {
                 props.load(input);
                 
                 DB_URL = props.getProperty("spring.datasource.url", 
-                    "jdbc:mysql://localhost:3306/its_projekt?useSSL=false&serverTimezone=UTC");
-                DB_USERNAME = props.getProperty("spring.datasource.username", "root");
-                DB_PASSWORD = props.getProperty("spring.datasource.password", "");
+                    "jdbc:mysql://localhost:3306/notizprojekt?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true");
+                DB_USERNAME = props.getProperty("spring.datasource.username", "notizuser");
+                DB_PASSWORD = props.getProperty("spring.datasource.password", "notizpassword");
             } else {
                 setDefaultConfiguration();
             }
@@ -57,10 +57,11 @@ public class DatabaseConfig {
     }
     
     private static void setDefaultConfiguration() {
-        DB_URL = "jdbc:mysql://localhost:3306/its_projekt?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
-        DB_USERNAME = "root";
-        DB_PASSWORD = "";
-        System.out.println("Using default database configuration");
+        // Use the database and user created by the SQL setup script
+        DB_URL = "jdbc:mysql://localhost:3306/notizprojekt?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+        DB_USERNAME = "notizuser";
+        DB_PASSWORD = "notizpassword";
+        System.out.println("Using default database configuration with application user");
     }
     
     private static void testConnection() throws SQLException {
