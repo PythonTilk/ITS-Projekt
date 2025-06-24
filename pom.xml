@@ -9,6 +9,14 @@
     <name>Notiz Desktop Application</name>
     <description>Java Swing desktop application for note-taking with drag-and-drop functionality</description>
     
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/PythonTilk/ITS-Projekt</url>
+        </repository>
+    </distributionManagement>
+    
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
