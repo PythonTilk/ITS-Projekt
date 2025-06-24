@@ -1,8 +1,8 @@
-# ITS-Projekt
+# NoteGO - Notizprojekt
 
-## Overview
+## Overview (Aktualisiert)
 
-ITS-Projekt is a Java-based note-taking application that allows users to create, edit, and share notes. The application uses a MySQL database to store user information and notes.
+NoteGO (ITS-Projekt) is a Java-based note-taking application that allows users to create, edit, and share notes. The application uses a MySQL database to store user information and notes.
 
 ## Features
 
@@ -19,7 +19,6 @@ The project uses a MySQL database. You can find the database schema in the [`its
 
 - `nutzer` table for user information
 - `notiz` table for personal notes
-- `geteilte_notizen` table for shared notes
 
 You can run MySQL directly on your machine or use Docker for a containerized setup:
 
@@ -35,10 +34,14 @@ jdbc:mysql://localhost:3306/notizprojekt
 
 ### Project Structure
 
+The project has been significantly simplified from 25 classes to just 5 core classes:
+
 - `src/NotizProjekt_All/` - Contains all Java source files
   - [`NotizProjekt.java`](src/NotizProjekt_All/NotizProjekt.java) - Main application entry point
   - [`DBVerbindung.java`](src/NotizProjekt_All/DBVerbindung.java) - Database connection handler
-  - `GUI_*.java` - User interface components
+  - [`GUI.java`](src/NotizProjekt_All/GUI.java) - Consolidated GUI class containing all UI functionality
+  - [`Notiz.java`](src/NotizProjekt_All/Notiz.java) - Unified note model class
+  - [`User.java`](src/NotizProjekt_All/User.java) - User model class
 - [`build.xml`](build.xml) - Ant build file for compiling the project
 - `nbproject/` - NetBeans project configuration
 - `lib/` - External libraries (JDBC driver)
@@ -87,23 +90,30 @@ DBVerbindung dbConnection = new DBVerbindung("localhost", "notizprojekt", "notiz
 dbConnection.open();
 ```
 
-## Testing
+## Project Simplification
 
-The project includes several test classes to verify database connectivity and functionality:
+The project has been significantly simplified:
 
-- [`TestDBConnection.java`](src/NotizProjekt_All/TestDBConnection.java) - Tests basic database connection and retrieves users and notes
-- [`TestLogin.java`](src/NotizProjekt_All/TestLogin.java) - Tests user authentication functionality
-- [`TestNoteCreation.java`](src/NotizProjekt_All/TestNoteCreation.java) - Tests creating new notes in the database
-- [`TestNoteSharing.java`](src/NotizProjekt_All/TestNoteSharing.java) - Tests sharing notes between users
+1. **Reduced Class Count**: From 25 classes to just 5 core classes
+2. **Consolidated GUI**: All GUI functionality is now in a single class
+3. **Unified Note Model**: All note types are now handled by a single class with a type attribute
+4. **Removed Test Classes**: Test classes have been removed as they're not needed for the application's functionality
 
-To run the tests:
+### Changes Made
+
+- **GUI Consolidation**: All GUI classes (GUI_Anmelden, SimpleGUI_MenuTabelle, etc.) have been merged into a single GUI class
+- **Model Simplification**: The note model classes have been unified into a single Notiz class with a NotizTyp enum
+- **Test Removal**: All test classes have been removed to simplify the codebase
+- **Code Cleanup**: Redundant code has been removed and the remaining code has been optimized
+
+### Running the Application
 
 ```bash
-# Compile the test classes
-javac -d build/classes -cp lib/mysql-connector-java-8.0.28.jar src/NotizProjekt_All/DBVerbindung.java src/NotizProjekt_All/Test*.java
+# Compile the project
+javac -d build/classes -cp lib/mysql-connector-java-8.0.28.jar src/NotizProjekt_All/*.java
 
-# Run a specific test
-java -cp build/classes:lib/mysql-connector-java-8.0.28.jar NotizProjekt_All.TestDBConnection
+# Run the application
+java -cp build/classes:lib/mysql-connector-java-8.0.28.jar NotizProjekt_All.NotizProjekt
 ```
 
 ## Troubleshooting

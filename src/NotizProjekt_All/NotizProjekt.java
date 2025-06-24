@@ -1,25 +1,16 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package NotizProjekt_All;
 
-import NotizProjekt_All.GUI_Anmelden;
-
 /**
- *
- * @author firas.dali
+ * Hauptklasse des NotizProjekts
  */
 public class NotizProjekt {
 
     /**
-     * @param args the command line arguments
+     * Hauptmethode zum Starten der Anwendung
+     * @param args Kommandozeilenargumente
      */
     public static void main(String[] args) {
-        GUI_Anmelden gui = new GUI_Anmelden();
+        GUI gui = new GUI(GUI.ANMELDEN);
         gui.setVisible(true);
     }
-
 }

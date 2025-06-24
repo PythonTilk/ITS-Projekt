@@ -60,18 +60,19 @@ CREATE TABLE IF NOT EXISTS `notiz` (
   `Tag` varchar(15) NOT NULL,
   `Inhalt` varchar(2000) NOT NULL,
   `N_id` int(11) NOT NULL,
-  `B_id` int(11) NOT NULL
+  `B_id` int(11) NOT NULL,
+  `Typ` varchar(20) DEFAULT 'PRIVAT'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Daten für Tabelle `notiz`
 --
 
-INSERT INTO `notiz` (`Titel`, `Tag`, `Inhalt`, `N_id`, `B_id`) VALUES
-('Notiz1', 'test', 'Es tanzt ein Bi-Ba-Butzemann in unserem Haus herum Fideldum.', 1, 0),
-('Du', 'Hs', 'geh jetzt', 3, 1),
-('Du ', 'gehst', 'Jetzt endlich', 4, 2),
-('Tiana', 'gute', 'Frage', 5, 1);
+INSERT INTO `notiz` (`Titel`, `Tag`, `Inhalt`, `N_id`, `B_id`, `Typ`) VALUES
+('Notiz1', 'test', 'Es tanzt ein Bi-Ba-Butzemann in unserem Haus herum Fideldum.', 1, 0, 'PRIVAT'),
+('Du', 'Hs', 'geh jetzt', 3, 1, 'PRIVAT'),
+('Du ', 'gehst', 'Jetzt endlich', 4, 2, 'PRIVAT'),
+('Tiana', 'gute', 'Frage', 5, 1, 'PRIVAT');
 
 -- --------------------------------------------------------
 
