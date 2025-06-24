@@ -49,11 +49,11 @@ ITS-Projekt is a comprehensive note-taking application that allows users to crea
 ## ✨ Enhanced Features
 
 ### 👤 **User Profile System**
-- **Custom Profile Pictures**: Upload and manage profile pictures with drag-and-drop support
-- **Display Names**: Set custom display names separate from usernames
-- **User Biographies**: Add personal descriptions and information
-- **Profile Pages**: Dedicated profile pages for each user
-- **Author Links**: Click on author names in shared notes to view their profiles
+- **Custom Profile Pictures**: Upload and manage profile pictures with intuitive drag-and-drop support
+- **Display Names**: Set custom display names separate from usernames for personalization
+- **User Biographies**: Add personal descriptions and information to share with others
+- **Profile Pages**: Dedicated profile pages for each user with public notes showcase
+- **Author Links**: Click on author names in shared notes to view their profiles and public notes
 
 ### 🎨 **Visual & Interface Enhancements**
 - **Dark Mode Toggle**: Switch between light and dark themes for comfortable viewing
@@ -278,11 +278,12 @@ After setup, you should see:
 3. **Security**: Passwords are encrypted with BCrypt
 
 #### 👤 **User Profile Management**
-1. **Profile Setup**: Click "Profile" in the user menu to access your profile
-2. **Profile Picture**: Upload custom profile pictures with drag-and-drop support
-3. **Display Name**: Set a custom display name different from your username
-4. **Biography**: Add a personal description or bio
-5. **View Profiles**: Click on author names in shared notes to view their profiles
+1. **Profile Setup**: Click "Profile" in the user menu to access your personal profile page
+2. **Profile Picture**: Upload custom profile pictures with easy drag-and-drop support
+3. **Display Name**: Set a custom display name different from your username for personalization
+4. **Biography**: Add a personal description or bio to share with the community
+5. **Public Notes**: Share your favorite notes publicly for others to discover
+6. **View Profiles**: Click on author names in shared notes to explore their profiles and public notes
 
 #### 📝 **Creating and Managing Notes**
 1. **Add Note**: Click the "+" button to create a new note

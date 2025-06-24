@@ -199,4 +199,27 @@ public class UserController {
             return ResponseEntity.status(500).body(response);
         }
     }
+
+    @GetMapping("/profile/{userId}/public-notes")
+    public ResponseEntity<?> getUserPublicNotes(@PathVariable Integer userId, HttpSession session) {
+        Integer currentUserId = (Integer) session.getAttribute("userId");
+        if (currentUserId == null) {
+            return ResponseEntity.status(401).body("Not authenticated");
+        }
+
+        try {
+            // Get public notes for the specified user
+            var publicNotes = noteService.getPublicNotesByUserId(userId);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("notes", publicNotes);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error fetching public notes: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
 }

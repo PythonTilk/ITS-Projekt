@@ -231,9 +231,25 @@
     </style>
 </head>
 <body>
-    <div class="theme-toggle" onclick="toggleTheme()">
-        <span class="theme-icon">🌙</span>
-    </div>
+    <!-- Dark mode toggle -->
+    <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">
+        <svg class="sun-icon" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2"/>
+            <path d="M12 20v2"/>
+            <path d="m4.93 4.93 1.41 1.41"/>
+            <path d="m17.66 17.66 1.41 1.41"/>
+            <path d="M2 12h2"/>
+            <path d="M20 12h2"/>
+            <path d="m6.34 17.66-1.41 1.41"/>
+            <path d="m19.07 4.93-1.41 1.41"/>
+        </svg>
+        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" style="display: none;">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+            <path d="M19 3v4"/>
+            <path d="M21 5h-4"/>
+        </svg>
+    </button>
 
     <div class="profile-container">
         <a href="/board" class="back-link">
@@ -455,6 +471,60 @@
             }
         });
 
+        // Load public notes
+        async function loadPublicNotes() {
+            const userId = getUserIdFromUrl();
+            if (!userId) {
+                showError('Invalid user ID');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/users/profile/${userId}/public-notes`);
+                const data = await response.json();
+
+                if (data.success) {
+                    displayPublicNotes(data.notes);
+                    document.getElementById('notesSection').classList.remove('hidden');
+                } else {
+                    showError(data.message || 'Failed to load public notes');
+                }
+            } catch (error) {
+                showError('Error loading public notes: ' + error.message);
+            }
+        }
+
+        // Display public notes
+        function displayPublicNotes(notes) {
+            const notesList = document.getElementById('notesList');
+            
+            if (notes.length === 0) {
+                notesList.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">No public notes found.</p>';
+                return;
+            }
+
+            notesList.innerHTML = notes.map(note => `
+                <div class="note-item" style="border-left-color: ${note.color};">
+                    <h3>${escapeHtml(note.title)}</h3>
+                    <div class="note-meta">
+                        <span>Tag: ${escapeHtml(note.tag)}</span>
+                        ${note.hasImages ? ' • <span>📷 Has images</span>' : ''}
+                    </div>
+                    <div style="margin-top: 10px; color: var(--text-color);">
+                        ${escapeHtml(note.content).substring(0, 200)}${note.content.length > 200 ? '...' : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Utility function to escape HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         // Event listeners
         document.getElementById('editProfileBtn').addEventListener('click', () => {
             document.getElementById('editForm').classList.remove('hidden');
@@ -470,9 +540,8 @@
             }
         });
 
-        document.getElementById('viewNotesBtn').addEventListener('click', () => {
-            // TODO: Implement public notes viewing
-            showSuccess('Public notes feature coming soon!');
+        document.getElementById('viewNotesBtn').addEventListener('click', async () => {
+            await loadPublicNotes();
         });
 
         // Initialize

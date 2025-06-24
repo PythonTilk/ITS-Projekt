@@ -35,11 +35,29 @@ public class UserService {
     }
     
     public boolean checkCredentials(String username, String password) {
+        System.out.println("Checking credentials for username: " + username);
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            // For compatibility with existing database, we're using plain text password comparison
-            return password.equals(user.getPassword());
+            System.out.println("Found user: " + user.getUsername());
+            System.out.println("Stored password: " + user.getPassword());
+            System.out.println("Input password: " + password);
+            
+            // Check if password is BCrypt encoded (starts with $2a$, $2b$, or $2y$)
+            if (user.getPassword().startsWith("$2")) {
+                System.out.println("Using BCrypt password matching");
+                boolean matches = passwordEncoder.matches(password, user.getPassword());
+                System.out.println("BCrypt match result: " + matches);
+                return matches;
+            } else {
+                // For backward compatibility with plain text passwords
+                System.out.println("Using plain text password matching");
+                boolean matches = password.equals(user.getPassword());
+                System.out.println("Plain text match result: " + matches);
+                return matches;
+            }
+        } else {
+            System.out.println("User not found: " + username);
         }
         return false;
     }

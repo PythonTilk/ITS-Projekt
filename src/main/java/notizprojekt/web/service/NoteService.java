@@ -331,4 +331,36 @@ public class NoteService {
             throw new RuntimeException("Error saving image: " + e.getMessage());
         }
     }
+
+    public List<Map<String, Object>> getPublicNotesByUserId(Integer userId) {
+        String sql = "SELECT n.N_id, n.Titel, n.Tag, n.Inhalt, n.B_id, n.position_x, n.position_y, n.color, " +
+                     "n.note_type, n.privacy_level, n.shared_with, n.has_images, n.image_paths, u.benutzername " +
+                     "FROM notiz n " +
+                     "JOIN nutzer u ON n.B_id = u.id " +
+                     "WHERE n.B_id = ? AND n.privacy_level = 'public' " +
+                     "ORDER BY n.N_id DESC";
+        
+        RowMapper<Map<String, Object>> rowMapper = (rs, rowNum) -> {
+            Map<String, Object> noteData = new java.util.HashMap<>();
+            noteData.put("id", rs.getInt("N_id"));
+            noteData.put("title", rs.getString("Titel"));
+            noteData.put("tag", rs.getString("Tag"));
+            noteData.put("content", rs.getString("Inhalt"));
+            noteData.put("color", rs.getString("color") != null ? rs.getString("color") : "#fef3c7");
+            noteData.put("noteType", rs.getString("note_type") != null ? rs.getString("note_type") : "text");
+            noteData.put("privacyLevel", rs.getString("privacy_level"));
+            noteData.put("hasImages", rs.getBoolean("has_images"));
+            noteData.put("imagePaths", rs.getString("image_paths"));
+            noteData.put("authorUsername", rs.getString("benutzername"));
+            
+            return noteData;
+        };
+        
+        try {
+            return jdbcTemplate.query(sql, rowMapper, userId);
+        } catch (Exception e) {
+            System.err.println("Error executing public notes SQL query: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
 }
