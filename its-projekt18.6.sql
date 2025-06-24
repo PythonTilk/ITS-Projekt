@@ -74,6 +74,7 @@ CREATE TABLE IF NOT EXISTS `notiz` (
   `shared_with` text,
   `has_images` bit(1) DEFAULT b'0',
   `image_paths` text,
+  `editing_permission` varchar(255) DEFAULT 'creator_only',
   PRIMARY KEY (`n_id`),
   KEY `fk_notiz_nutzer` (`b_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -217,6 +217,15 @@ public class NoteService {
             
             note.setSharedWith((String) noteData.get("sharedWith"));
             
+            // Set editing permission
+            String editingPermissionStr = (String) noteData.getOrDefault("editingPermission", "creator_only");
+            for (Note.EditingPermission permission : Note.EditingPermission.values()) {
+                if (permission.getValue().equals(editingPermissionStr)) {
+                    note.setEditingPermission(permission);
+                    break;
+                }
+            }
+            
             // Handle images
             @SuppressWarnings("unchecked")
             List<Map<String, String>> images = (List<Map<String, String>>) noteData.get("images");
@@ -263,6 +272,17 @@ public class NoteService {
             }
             
             note.setSharedWith((String) noteData.get("sharedWith"));
+            
+            // Update editing permission
+            String editingPermissionStr = (String) noteData.get("editingPermission");
+            if (editingPermissionStr != null) {
+                for (Note.EditingPermission permission : Note.EditingPermission.values()) {
+                    if (permission.getValue().equals(editingPermissionStr)) {
+                        note.setEditingPermission(permission);
+                        break;
+                    }
+                }
+            }
             
             // Handle images
             @SuppressWarnings("unchecked")

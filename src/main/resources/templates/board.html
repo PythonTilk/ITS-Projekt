@@ -97,18 +97,8 @@
                 </div>
             </div>
             
-            <!-- Floating add button with menu -->
+            <!-- Floating add button -->
             <button id="add-note-btn" class="floating-btn" title="Add new note">+</button>
-            <div id="add-note-menu" class="add-note-menu">
-                <div class="add-note-option" data-type="text">
-                    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
-                    Text Note
-                </div>
-                <div class="add-note-option" data-type="code">
-                    <svg viewBox="0 0 24 24"><polyline points="16,18 22,12 16,6"/><polyline points="8,6 2,12 8,18"/></svg>
-                    Code Note
-                </div>
-            </div>
         </main>
         
         <!-- Enhanced Note Modal -->
@@ -131,10 +121,23 @@
                         <input type="text" id="note-tag" name="tag" placeholder="Add a tag...">
                     </div>
                     
-                    <!-- Rich Text Editor for text notes -->
-                    <div class="form-group" id="rich-editor-group">
-                        <label>Content</label>
-                        <div class="rich-editor">
+                    <!-- Enhanced Content Editor -->
+                    <div class="form-group">
+                        <div class="content-editor-header">
+                            <label>Content</label>
+                            <div class="editor-controls">
+                                <button type="button" id="toggle-code-editor" class="btn btn-small editor-toggle" title="Toggle Code Editor">
+                                    <svg viewBox="0 0 24 24" width="16" height="16">
+                                        <polyline points="16,18 22,12 16,6"/>
+                                        <polyline points="8,6 2,12 8,18"/>
+                                    </svg>
+                                    Code
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Rich Text Editor -->
+                        <div class="rich-editor" id="rich-editor-container">
                             <div class="rich-editor-toolbar">
                                 <button type="button" class="rich-editor-btn" data-command="bold" title="Bold">
                                     <strong>B</strong>
@@ -149,6 +152,33 @@
                                     <s>S</s>
                                 </button>
                                 <span style="border-left: 1px solid var(--border-color); height: 20px; margin: 0 8px;"></span>
+                                <button type="button" class="rich-editor-btn" data-command="insertUnorderedList" title="Bullet List">
+                                    <svg viewBox="0 0 24 24" width="16" height="16">
+                                        <line x1="8" y1="6" x2="21" y2="6"/>
+                                        <line x1="8" y1="12" x2="21" y2="12"/>
+                                        <line x1="8" y1="18" x2="21" y2="18"/>
+                                        <line x1="3" y1="6" x2="3.01" y2="6"/>
+                                        <line x1="3" y1="12" x2="3.01" y2="12"/>
+                                        <line x1="3" y1="18" x2="3.01" y2="18"/>
+                                    </svg>
+                                </button>
+                                <button type="button" class="rich-editor-btn" data-command="insertOrderedList" title="Numbered List">
+                                    <svg viewBox="0 0 24 24" width="16" height="16">
+                                        <line x1="10" y1="6" x2="21" y2="6"/>
+                                        <line x1="10" y1="12" x2="21" y2="12"/>
+                                        <line x1="10" y1="18" x2="21" y2="18"/>
+                                        <line x1="4" y1="6" x2="4" y2="6"/>
+                                        <line x1="4" y1="12" x2="4" y2="12"/>
+                                        <line x1="4" y1="18" x2="4" y2="18"/>
+                                    </svg>
+                                </button>
+                                <button type="button" class="rich-editor-btn" data-command="createLink" title="Insert Link">
+                                    <svg viewBox="0 0 24 24" width="16" height="16">
+                                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                                    </svg>
+                                </button>
+                                <span style="border-left: 1px solid var(--border-color); height: 20px; margin: 0 8px;"></span>
                                 <button type="button" class="rich-editor-btn" data-command="formatBlock" data-value="h1" title="Heading 1">
                                     H1
                                 </button>
@@ -158,6 +188,34 @@
                                 <button type="button" class="rich-editor-btn" data-command="formatBlock" data-value="h3" title="Heading 3">
                                     H3
                                 </button>
+                                <button type="button" class="rich-editor-btn" data-command="formatBlock" data-value="p" title="Paragraph">
+                                    P
+                                </button>
+                                <span style="border-left: 1px solid var(--border-color); height: 20px; margin: 0 8px;"></span>
+                                <button type="button" class="rich-editor-btn" data-command="justifyLeft" title="Align Left">
+                                    <svg viewBox="0 0 24 24" width="16" height="16">
+                                        <line x1="17" y1="10" x2="3" y2="10"/>
+                                        <line x1="21" y1="6" x2="3" y2="6"/>
+                                        <line x1="21" y1="14" x2="3" y2="14"/>
+                                        <line x1="17" y1="18" x2="3" y2="18"/>
+                                    </svg>
+                                </button>
+                                <button type="button" class="rich-editor-btn" data-command="justifyCenter" title="Align Center">
+                                    <svg viewBox="0 0 24 24" width="16" height="16">
+                                        <line x1="18" y1="10" x2="6" y2="10"/>
+                                        <line x1="21" y1="6" x2="3" y2="6"/>
+                                        <line x1="21" y1="14" x2="3" y2="14"/>
+                                        <line x1="18" y1="18" x2="6" y2="18"/>
+                                    </svg>
+                                </button>
+                                <button type="button" class="rich-editor-btn" data-command="justifyRight" title="Align Right">
+                                    <svg viewBox="0 0 24 24" width="16" height="16">
+                                        <line x1="21" y1="10" x2="7" y2="10"/>
+                                        <line x1="21" y1="6" x2="3" y2="6"/>
+                                        <line x1="21" y1="14" x2="3" y2="14"/>
+                                        <line x1="21" y1="18" x2="7" y2="18"/>
+                                    </svg>
+                                </button>
                                 <span style="border-left: 1px solid var(--border-color); height: 20px; margin: 0 8px;"></span>
                                 <button type="button" class="rich-editor-btn" data-command="hiliteColor" data-value="yellow" title="Highlight">
                                     <span style="background: yellow; padding: 2px 4px;">H</span>
@@ -165,16 +223,20 @@
                                 <button type="button" class="rich-editor-btn" data-command="foreColor" data-value="#3b82f6" title="Text Color">
                                     <span style="color: #3b82f6;">A</span>
                                 </button>
+                                <button type="button" class="rich-editor-btn" data-command="removeFormat" title="Clear Formatting">
+                                    <svg viewBox="0 0 24 24" width="16" height="16">
+                                        <path d="M4 7V4h16v3"/>
+                                        <path d="M5 20h6"/>
+                                        <path d="M13 4l3 16"/>
+                                    </svg>
+                                </button>
                             </div>
                             <div class="rich-editor-content" id="rich-editor-content" contenteditable="true" 
                                  placeholder="Start typing your note..."></div>
                         </div>
-                    </div>
-                    
-                    <!-- Code Editor for code notes -->
-                    <div class="form-group" id="code-editor-group" style="display: none;">
-                        <label>Code</label>
-                        <div class="code-editor">
+                        
+                        <!-- Code Editor (hidden by default) -->
+                        <div class="code-editor" id="code-editor-container" style="display: none;">
                             <div class="code-editor-header">
                                 <span>Language:</span>
                                 <select class="code-editor-language" id="code-language">
@@ -188,12 +250,19 @@
                                     <option value="json">JSON</option>
                                     <option value="xml">XML</option>
                                     <option value="markdown">Markdown</option>
+                                    <option value="php">PHP</option>
+                                    <option value="cpp">C++</option>
+                                    <option value="csharp">C#</option>
+                                    <option value="go">Go</option>
+                                    <option value="rust">Rust</option>
+                                    <option value="typescript">TypeScript</option>
                                 </select>
                             </div>
                             <textarea class="code-editor-content" id="code-editor-content" 
                                       placeholder="Enter your code here..."></textarea>
                         </div>
                     </div>
+
                     
                     <!-- Image Upload -->
                     <div class="form-group">
@@ -211,6 +280,33 @@
                         </div>
                         <input type="file" id="file-input" multiple accept="image/*" style="display: none;">
                         <div class="uploaded-files" id="uploaded-files"></div>
+                    </div>
+                    
+                    <!-- Editing Permissions -->
+                    <div class="form-group">
+                        <label>Editing Permissions</label>
+                        <div class="editing-permissions">
+                            <label class="permission-option selected" data-value="creator_only">
+                                <input type="radio" name="editing_permission" value="creator_only" checked>
+                                <div class="permission-option-content">
+                                    <div class="permission-option-icon">🔒</div>
+                                    <div class="permission-option-details">
+                                        <div class="permission-option-title">Only Creator</div>
+                                        <div class="permission-option-description">Only you can edit this note</div>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="permission-option" data-value="collaborative">
+                                <input type="radio" name="editing_permission" value="collaborative">
+                                <div class="permission-option-content">
+                                    <div class="permission-option-icon">👥</div>
+                                    <div class="permission-option-details">
+                                        <div class="permission-option-title">Collaborative</div>
+                                        <div class="permission-option-description">Anyone with access can edit</div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
                     </div>
                     
                     <!-- Privacy Settings -->

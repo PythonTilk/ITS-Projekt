@@ -22,6 +22,7 @@ public class NoteDTO {
     private String sharedWith;
     private Boolean hasImages;
     private String imagePaths;
+    private String editingPermission;
     
     // Author information
     private Integer authorId;
@@ -43,6 +44,7 @@ public class NoteDTO {
         dto.setSharedWith(note.getSharedWith());
         dto.setHasImages(note.getHasImages());
         dto.setImagePaths(note.getImagePaths());
+        dto.setEditingPermission(note.getEditingPermission() != null ? note.getEditingPermission().getValue() : "creator_only");
         
         // Set author information
         if (note.getUser() != null) {
