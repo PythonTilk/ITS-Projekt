@@ -1,6 +1,6 @@
 # NoteGO - Notizprojekt
 
-## Overview
+## Overview (Aktualisiert)
 
 NoteGO (ITS-Projekt) is a Java-based note-taking application that allows users to create, edit, and share notes. The application uses a MySQL database to store user information and notes.
 
