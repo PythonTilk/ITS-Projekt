@@ -2,6 +2,20 @@
 
 ## Quick Setup
 
+### Windows
+1. **Install MySQL** (if not already installed)
+   - Download from: https://dev.mysql.com/downloads/mysql/
+   - Or use MySQL Installer: https://dev.mysql.com/downloads/installer/
+2. **Run the SQL script** to create the database and user:
+   ```cmd
+   mysql -u root -p < its-projekt18.6.sql
+   ```
+   Or using PowerShell:
+   ```powershell
+   Get-Content its-projekt18.6.sql | mysql -u root -p
+   ```
+
+### Linux/Mac
 1. **Install MySQL** (if not already installed)
 2. **Run the SQL script** to create the database and user:
    ```bash
@@ -62,9 +76,60 @@ If you prefer to set up the database manually:
 
 4. Run the rest of the SQL script to create tables and sample data.
 
+## Running the Application
+
+### Windows
+Use one of these methods:
+
+1. **Batch file (recommended):**
+   ```cmd
+   run-windows.bat
+   ```
+
+2. **PowerShell script:**
+   ```powershell
+   .\run-windows.ps1
+   ```
+
+3. **Manual (Command Prompt):**
+   ```cmd
+   mvn clean compile
+   java -Dfile.encoding=UTF-8 -cp "target/classes;target/dependency/*" notizdesktop.NotizDesktopApplication
+   ```
+
+4. **Manual (PowerShell):**
+   ```powershell
+   mvn clean compile
+   java -Dfile.encoding=UTF-8 -cp "target/classes;target/dependency/*" notizdesktop.NotizDesktopApplication
+   ```
+
+### Linux/Mac
+```bash
+mvn clean compile exec:java
+```
+
 ## Troubleshooting
 
-### Connection Issues
+### Windows-Specific Issues
+
+#### High DPI Display Issues
+- The application automatically detects Windows and applies DPI scaling fixes
+- If text appears too small/large, check your Windows display scaling settings
+
+#### Font Rendering Issues
+- The application uses Windows-specific font smoothing
+- Make sure ClearType is enabled in Windows settings
+
+#### MySQL Connection Issues on Windows
+- Ensure MySQL service is running: `services.msc` → MySQL80 (or your version)
+- Check Windows Firewall settings for MySQL (port 3306)
+- Try connecting with: `mysql -u notizuser -p -h localhost notizprojekt`
+
+#### Path Issues
+- Make sure Java and Maven are in your Windows PATH
+- Use `java -version` and `mvn -version` to verify
+
+### General Connection Issues
 - Ensure MySQL is running
 - Check that the `notizuser` was created successfully
 - Verify the database `notizprojekt` exists
@@ -77,3 +142,4 @@ If you prefer to set up the database manually:
 ### Configuration Changes
 - Modify `src/main/resources/application.properties` to change database settings
 - The application will fall back to these defaults if the properties file is not found
+- Windows uses UTF-8 encoding by default in the configuration

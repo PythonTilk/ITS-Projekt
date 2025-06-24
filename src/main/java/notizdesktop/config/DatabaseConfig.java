@@ -47,7 +47,7 @@ public class DatabaseConfig {
                 props.load(input);
                 
                 DB_URL = props.getProperty("spring.datasource.url", 
-                    "jdbc:mysql://localhost:3306/notizprojekt?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true");
+                    "jdbc:mysql://localhost:3306/notizprojekt?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&autoReconnect=true");
                 DB_USERNAME = props.getProperty("spring.datasource.username", "notizuser");
                 DB_PASSWORD = props.getProperty("spring.datasource.password", "notizpassword");
             } else {
@@ -58,10 +58,19 @@ public class DatabaseConfig {
     
     private static void setDefaultConfiguration() {
         // Use the database and user created by the SQL setup script
-        DB_URL = "jdbc:mysql://localhost:3306/notizprojekt?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+        // Windows-compatible connection string with additional parameters
+        DB_URL = "jdbc:mysql://localhost:3306/notizprojekt?" +
+                "useSSL=false&" +
+                "serverTimezone=UTC&" +
+                "allowPublicKeyRetrieval=true&" +
+                "useUnicode=true&" +
+                "characterEncoding=UTF-8&" +
+                "autoReconnect=true&" +
+                "failOverReadOnly=false&" +
+                "maxReconnects=3";
         DB_USERNAME = "notizuser";
         DB_PASSWORD = "notizpassword";
-        System.out.println("Using default database configuration with application user");
+        System.out.println("Using default database configuration with application user (Windows-compatible)");
     }
     
     private static void testConnection() throws SQLException {
