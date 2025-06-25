@@ -226,9 +226,11 @@ public class LoginFrame extends JFrame implements ThemeManager.ThemeChangeListen
         JTextField field = new JTextField();
         field.setPreferredSize(new Dimension(0, 44));
         field.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ThemeManager.getBorderColor(), 1),
+            BorderFactory.createLineBorder(ThemeManager.isDarkMode() ? 
+                Color.WHITE : Color.BLACK, 2),
             BorderFactory.createEmptyBorder(8, 12, 8, 12)
         ));
+        field.setFont(new Font("Inter", Font.BOLD, 14));
         return field;
     }
     
@@ -236,19 +238,31 @@ public class LoginFrame extends JFrame implements ThemeManager.ThemeChangeListen
         JPasswordField field = new JPasswordField();
         field.setPreferredSize(new Dimension(0, 44));
         field.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ThemeManager.getBorderColor(), 1),
+            BorderFactory.createLineBorder(ThemeManager.isDarkMode() ? 
+                Color.WHITE : Color.BLACK, 2),
             BorderFactory.createEmptyBorder(8, 12, 8, 12)
         ));
+        field.setFont(new Font("Inter", Font.BOLD, 14));
         return field;
     }
     
     private JButton createStyledButton(String text, Color backgroundColor) {
         JButton button = new JButton(text);
         button.setPreferredSize(new Dimension(0, 44));
-        button.setFont(new Font("Inter", Font.PLAIN, 14));
+        button.setFont(new Font("Inter", Font.BOLD, 16));
         button.setBackground(backgroundColor);
         button.setForeground(Color.WHITE);
-        button.setBorder(BorderFactory.createEmptyBorder(12, 24, 12, 24));
+        
+        // Add a visible border
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Color.WHITE, 2),
+            BorderFactory.createEmptyBorder(10, 24, 10, 24)
+        ));
+        
+        // Make sure button shows its background color
+        button.setContentAreaFilled(true);
+        button.setOpaque(true);
+        
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
@@ -270,13 +284,27 @@ public class LoginFrame extends JFrame implements ThemeManager.ThemeChangeListen
     
     private JButton createThemeToggleButton() {
         JButton button = new JButton();
-        button.setPreferredSize(new Dimension(40, 40));
-        button.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        button.setPreferredSize(new Dimension(44, 44));
+        button.setBorder(BorderFactory.createLineBorder(ThemeManager.isDarkMode() ? 
+            Color.WHITE : Color.BLACK, 2));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setToolTipText("Toggle dark mode");
         
+        // Make sure button shows its background color
+        button.setContentAreaFilled(true);
+        button.setOpaque(true);
+        
+        // Set initial colors
+        button.setBackground(ThemeManager.isDarkMode() ? 
+            ThemeManager.DARK_PRIMARY_COLOR : ThemeManager.LIGHT_PRIMARY_COLOR);
+        button.setForeground(Color.WHITE);
+        
         updateThemeToggleIcon(button);
+        
+        button.addActionListener(e -> {
+            ThemeManager.toggleTheme();
+        });
         
         return button;
     }
@@ -285,33 +313,53 @@ public class LoginFrame extends JFrame implements ThemeManager.ThemeChangeListen
         // Create simple sun/moon icon
         String iconText = ThemeManager.isDarkMode() ? "☀" : "🌙";
         button.setText(iconText);
-        button.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
+        button.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
     }
     
     private void applyTheme() {
         mainPanel.setBackground(ThemeManager.getBackgroundColor());
         
+        // Text elements
         titleLabel.setForeground(ThemeManager.getTextColor());
-        subtitleLabel.setForeground(ThemeManager.getTextColor().darker());
+        subtitleLabel.setForeground(ThemeManager.getTextColor());
         usernameLabel.setForeground(ThemeManager.getTextColor());
         passwordLabel.setForeground(ThemeManager.getTextColor());
         
+        // Input fields
         usernameField.setBackground(ThemeManager.getInputBackground());
         usernameField.setForeground(ThemeManager.getTextColor());
         usernameField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ThemeManager.getBorderColor(), 1),
+            BorderFactory.createLineBorder(ThemeManager.isDarkMode() ? 
+                Color.WHITE : Color.BLACK, 2),
             BorderFactory.createEmptyBorder(8, 12, 8, 12)
         ));
         
         passwordField.setBackground(ThemeManager.getInputBackground());
         passwordField.setForeground(ThemeManager.getTextColor());
         passwordField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ThemeManager.getBorderColor(), 1),
+            BorderFactory.createLineBorder(ThemeManager.isDarkMode() ? 
+                Color.WHITE : Color.BLACK, 2),
             BorderFactory.createEmptyBorder(8, 12, 8, 12)
         ));
         
-        themeToggleButton.setBackground(ThemeManager.getCardBackground());
-        themeToggleButton.setForeground(ThemeManager.getTextColor());
+        // Buttons
+        loginButton.setBackground(ThemeManager.getPrimaryColor());
+        loginButton.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Color.WHITE, 2),
+            BorderFactory.createEmptyBorder(10, 24, 10, 24)
+        ));
+        
+        registerButton.setBackground(ThemeManager.getSecondaryColor());
+        registerButton.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Color.WHITE, 2),
+            BorderFactory.createEmptyBorder(10, 24, 10, 24)
+        ));
+        
+        // Theme toggle
+        themeToggleButton.setBackground(ThemeManager.getPrimaryColor());
+        themeToggleButton.setForeground(Color.WHITE);
+        themeToggleButton.setBorder(BorderFactory.createLineBorder(ThemeManager.isDarkMode() ? 
+            Color.WHITE : Color.BLACK, 2));
         updateThemeToggleIcon(themeToggleButton);
         
         repaint();
