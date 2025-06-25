@@ -19,20 +19,20 @@ public class ThemeManager {
     private static final List<ThemeChangeListener> listeners = new ArrayList<>();
     private static final Preferences prefs = Preferences.userNodeForPackage(ThemeManager.class);
     
-    // Light theme colors with improved contrast
-    public static final Color LIGHT_BG_COLOR = new Color(245, 247, 250);
-    public static final Color LIGHT_TEXT_COLOR = new Color(10, 20, 30);
+    // Light theme colors with maximum contrast
+    public static final Color LIGHT_BG_COLOR = new Color(240, 245, 250);
+    public static final Color LIGHT_TEXT_COLOR = new Color(0, 0, 0);
     public static final Color LIGHT_CARD_BG = Color.WHITE;
-    public static final Color LIGHT_BORDER_COLOR = new Color(200, 210, 220);
-    public static final Color LIGHT_PRIMARY_COLOR = new Color(25, 100, 230);
-    public static final Color LIGHT_SECONDARY_COLOR = new Color(120, 70, 230);
-    public static final Color LIGHT_ACCENT_COLOR = new Color(0, 160, 200);
-    public static final Color LIGHT_SUCCESS_COLOR = new Color(0, 160, 100);
-    public static final Color LIGHT_WARNING_COLOR = new Color(230, 140, 0);
-    public static final Color LIGHT_DANGER_COLOR = new Color(220, 40, 40);
+    public static final Color LIGHT_BORDER_COLOR = new Color(180, 190, 200);
+    public static final Color LIGHT_PRIMARY_COLOR = new Color(0, 90, 200);
+    public static final Color LIGHT_SECONDARY_COLOR = new Color(100, 50, 200);
+    public static final Color LIGHT_ACCENT_COLOR = new Color(0, 140, 180);
+    public static final Color LIGHT_SUCCESS_COLOR = new Color(0, 140, 80);
+    public static final Color LIGHT_WARNING_COLOR = new Color(200, 120, 0);
+    public static final Color LIGHT_DANGER_COLOR = new Color(200, 30, 30);
     public static final Color LIGHT_NOTE_BG = new Color(255, 245, 200);
     public static final Color LIGHT_INPUT_BG = Color.WHITE;
-    public static final Color LIGHT_BUTTON_HOVER = new Color(230, 240, 250);
+    public static final Color LIGHT_BUTTON_HOVER = new Color(220, 230, 240);
     
     // Dark theme colors with improved contrast
     public static final Color DARK_BG_COLOR = new Color(20, 25, 40);

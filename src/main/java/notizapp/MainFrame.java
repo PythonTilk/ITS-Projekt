@@ -299,13 +299,17 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
     
     private JButton createHeaderButton(String text) {
         JButton button = new JButton(text);
-        button.setFont(new Font("Inter", Font.BOLD, 13));
+        button.setFont(new Font("Inter", Font.BOLD, 14));
         button.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ThemeManager.getBorderColor(), 1),
+            BorderFactory.createLineBorder(Color.WHITE, 2),
             BorderFactory.createEmptyBorder(8, 16, 8, 16)
         ));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        // Make sure button shows its background color
+        button.setContentAreaFilled(true);
+        button.setOpaque(true);
         
         // Set initial colors
         button.setBackground(ThemeManager.isDarkMode() ? 
@@ -317,20 +321,20 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
     
     private JButton createFloatingActionButton() {
         JButton button = new JButton("+");
-        button.setFont(new Font("Inter", Font.BOLD, 28));
+        button.setFont(new Font("Inter", Font.BOLD, 32));
         button.setPreferredSize(new Dimension(60, 60));
-        button.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+        button.setBorder(BorderFactory.createLineBorder(Color.WHITE, 3));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setToolTipText("Add new note");
         
-        // Make it circular
-        button.setContentAreaFilled(false);
+        // Make it circular but ensure background is visible
+        button.setContentAreaFilled(true);
         button.setOpaque(true);
         
-        // Set initial colors
+        // Set initial colors - using primary color for better visibility
         button.setBackground(ThemeManager.isDarkMode() ? 
-            ThemeManager.DARK_ACCENT_COLOR : ThemeManager.LIGHT_ACCENT_COLOR);
+            ThemeManager.DARK_PRIMARY_COLOR : ThemeManager.LIGHT_PRIMARY_COLOR);
         button.setForeground(Color.WHITE);
         
         return button;
@@ -338,18 +342,22 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
     
     private JButton createThemeToggleButton() {
         JButton button = new JButton();
-        button.setPreferredSize(new Dimension(36, 36));
+        button.setPreferredSize(new Dimension(40, 40));
         button.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ThemeManager.getBorderColor(), 1),
+            BorderFactory.createLineBorder(Color.WHITE, 2),
             BorderFactory.createEmptyBorder(4, 4, 4, 4)
         ));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setToolTipText("Toggle dark mode");
         
-        // Set initial colors
+        // Make sure button shows its background color
+        button.setContentAreaFilled(true);
+        button.setOpaque(true);
+        
+        // Set initial colors - using primary color for consistency
         button.setBackground(ThemeManager.isDarkMode() ? 
-            ThemeManager.DARK_SECONDARY_COLOR : ThemeManager.LIGHT_SECONDARY_COLOR);
+            ThemeManager.DARK_PRIMARY_COLOR : ThemeManager.LIGHT_PRIMARY_COLOR);
         button.setForeground(Color.WHITE);
         
         updateThemeToggleIcon(button);
@@ -359,7 +367,7 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
     private void updateThemeToggleIcon(JButton button) {
         String iconText = ThemeManager.isDarkMode() ? "☀" : "🌙";
         button.setText(iconText);
-        button.setFont(new Font("Segoe UI Emoji", Font.BOLD, 16));
+        button.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
     }
     
     private JLabel createUserAvatar() {
@@ -400,36 +408,45 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
             BorderFactory.createEmptyBorder(8, 12, 8, 12)
         ));
         
-        // Buttons
+        // Buttons - use primary color for all buttons for consistency
         Color buttonBg = ThemeManager.isDarkMode() ? 
             ThemeManager.DARK_PRIMARY_COLOR : ThemeManager.LIGHT_PRIMARY_COLOR;
         
+        // Make sure buttons show their background color
+        profileButton.setContentAreaFilled(true);
+        profileButton.setOpaque(true);
+        logoutButton.setContentAreaFilled(true);
+        logoutButton.setOpaque(true);
+        themeToggleButton.setContentAreaFilled(true);
+        themeToggleButton.setOpaque(true);
+        addNoteButton.setContentAreaFilled(true);
+        addNoteButton.setOpaque(true);
+        
+        // Apply consistent styling to all buttons
         profileButton.setBackground(buttonBg);
         profileButton.setForeground(Color.WHITE);
         profileButton.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.WHITE, 1),
+            BorderFactory.createLineBorder(Color.WHITE, 2),
             BorderFactory.createEmptyBorder(8, 16, 8, 16)
         ));
         
         logoutButton.setBackground(buttonBg);
         logoutButton.setForeground(Color.WHITE);
         logoutButton.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.WHITE, 1),
+            BorderFactory.createLineBorder(Color.WHITE, 2),
             BorderFactory.createEmptyBorder(8, 16, 8, 16)
         ));
         
-        // Floating button
-        addNoteButton.setBackground(ThemeManager.isDarkMode() ? 
-            ThemeManager.DARK_ACCENT_COLOR : ThemeManager.LIGHT_ACCENT_COLOR);
+        // Floating button - also use primary color for consistency
+        addNoteButton.setBackground(buttonBg);
         addNoteButton.setForeground(Color.WHITE);
-        addNoteButton.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+        addNoteButton.setBorder(BorderFactory.createLineBorder(Color.WHITE, 3));
         
-        // Theme toggle
-        themeToggleButton.setBackground(ThemeManager.isDarkMode() ? 
-            ThemeManager.DARK_SECONDARY_COLOR : ThemeManager.LIGHT_SECONDARY_COLOR);
+        // Theme toggle - also use primary color for consistency
+        themeToggleButton.setBackground(buttonBg);
         themeToggleButton.setForeground(Color.WHITE);
         themeToggleButton.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.WHITE, 1),
+            BorderFactory.createLineBorder(Color.WHITE, 2),
             BorderFactory.createEmptyBorder(4, 4, 4, 4)
         ));
         updateThemeToggleIcon(themeToggleButton);
