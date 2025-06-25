@@ -1,4 +1,4 @@
-package notizdesktop.util;
+package notizapp;
 
 import javax.swing.*;
 import java.awt.*;

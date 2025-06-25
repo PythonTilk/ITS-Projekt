@@ -1,8 +1,8 @@
-package notizdesktop.ui;
+package notizapp;
 
-import notizdesktop.model.DesktopUser;
-import notizdesktop.service.UserService;
-import notizdesktop.util.ThemeManager;
+import notizapp.DesktopUser;
+import notizapp.UserService;
+import notizapp.ThemeManager;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

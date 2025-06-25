@@ -1,7 +1,7 @@
-package notizdesktop.service;
+package notizapp;
 
-import notizdesktop.config.DatabaseConfig;
-import notizdesktop.model.DesktopUser;
+import notizapp.DatabaseConfig;
+import notizapp.DesktopUser;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.sql.*;

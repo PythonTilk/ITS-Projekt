@@ -1,4 +1,4 @@
-package notizdesktop.config;
+package notizapp;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

@@ -2,12 +2,19 @@
 
 This guide will help you run the NotizDesktop application in NetBeans IDE.
 
+## Package Structure
+
+The application now uses a single package structure:
+
+- All classes are in the `notizapp` package
+- No sub-packages are used, making it easier to navigate and run
+
 ## Main Class
 
 The main class for the application is:
 
 ```
-notizdesktop.NotizDesktopApplication
+notizapp.NotizDesktopApplication
 ```
 
 ## Running the Application in NetBeans
@@ -20,7 +27,7 @@ notizdesktop.NotizDesktopApplication
 
 ### Method 2: Run File
 
-1. Navigate to `src/main/java/notizdesktop/NotizDesktopApplication.java` in the Projects panel
+1. Navigate to `src/main/java/notizapp/NotizDesktopApplication.java` in the Projects panel
 2. Right-click on the file
 3. Select "Run File" or press Shift+F6
 
@@ -31,7 +38,7 @@ If NetBeans doesn't recognize the main class:
 1. Right-click on the project in the Projects panel
 2. Select "Properties"
 3. Go to "Run" category
-4. Set "Main Class" to `notizdesktop.NotizDesktopApplication`
+4. Set "Main Class" to `notizapp.NotizDesktopApplication`
 5. Click "OK"
 6. Now you can run the project with F6
 
@@ -41,7 +48,7 @@ If NetBeans doesn't recognize the main class:
 
 If you see too many source packages and don't know which one to run:
 
-1. Look for the package named `notizdesktop` (not any sub-packages)
+1. Look for the package named `notizapp` (not any sub-packages)
 2. Find the class `NotizDesktopApplication.java` within that package
 3. Right-click on this file and select "Run File"
 

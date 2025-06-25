@@ -41,7 +41,7 @@ NotizDesktop/
 ├── manifest.mf                # JAR manifest file
 ├── src/                       # Source code
 │   ├── main/
-│   │   ├── java/notizdesktop/
+│   │   ├── java/notizapp/
 │   │   │   ├── NotizDesktopApplication.java    # Main application entry point
 │   │   │   ├── config/
 │   │   │   │   └── DatabaseConfig.java        # Database connection configuration

@@ -13,7 +13,7 @@ set CLASSPATH=%CLASSPATH%;lib\logback-classic-1.2.12.jar
 set CLASSPATH=%CLASSPATH%;lib\logback-core-1.2.12.jar
 
 REM Run the application
-java -cp %CLASSPATH% notizdesktop.NotizDesktopApplication
+java -cp %CLASSPATH% notizapp.NotizDesktopApplication
 
 REM Pause to see any error messages
 pause

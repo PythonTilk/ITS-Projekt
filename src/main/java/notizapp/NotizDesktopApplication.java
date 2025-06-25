@@ -1,8 +1,8 @@
-package notizdesktop;
+package notizapp;
 
-import notizdesktop.config.DatabaseConfig;
-import notizdesktop.ui.LoginFrame;
-import notizdesktop.util.ThemeManager;
+import notizapp.DatabaseConfig;
+import notizapp.LoginFrame;
+import notizapp.ThemeManager;
 
 import javax.swing.*;
 import java.awt.*;

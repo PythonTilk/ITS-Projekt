@@ -13,4 +13,4 @@ CLASSPATH="$CLASSPATH:lib/logback-classic-1.2.12.jar"
 CLASSPATH="$CLASSPATH:lib/logback-core-1.2.12.jar"
 
 # Run the application
-java -cp "$CLASSPATH" notizdesktop.NotizDesktopApplication
+java -cp "$CLASSPATH" notizapp.NotizDesktopApplication
