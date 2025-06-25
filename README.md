@@ -1,6 +1,6 @@
-# Notiz Desktop Application
+# Notiz Desktop Application (Ant Build)
 
-A Java Swing desktop application for note-taking with drag-and-drop functionality, rich text editing, and comprehensive note management features. This application provides a native desktop experience with modern UI design and robust database integration.
+A Java Swing desktop application for note-taking with drag-and-drop functionality, rich text editing, and comprehensive note management features. This application provides a native desktop experience with modern UI design and robust database integration. This version uses Apache Ant for building and is compatible with NetBeans IDE.
 
 ## Features
 
@@ -31,37 +31,58 @@ A Java Swing desktop application for note-taking with drag-and-drop functionalit
 - **Swing/AWT**: GUI framework
 - **MySQL**: Database (shared with web application)
 - **Spring Security BCrypt**: Password encryption
-- **Maven**: Build and dependency management
+- **Apache Ant**: Build and dependency management
+- **NetBeans IDE**: Recommended development environment
 
 ### Project Structure
 ```
-src/main/java/notizdesktop/
-├── NotizDesktopApplication.java    # Main application entry point
-├── config/
-│   └── DatabaseConfig.java        # Database connection configuration
-├── model/
-│   ├── DesktopNote.java           # Note data model
-│   └── DesktopUser.java           # User data model
-├── service/
-│   ├── NoteService.java           # Note business logic
-│   └── UserService.java           # User business logic
-├── ui/
-│   ├── LoginFrame.java            # Login window
-│   ├── RegisterDialog.java        # User registration dialog
-│   ├── MainFrame.java             # Main application window
-│   ├── NoteBoardPanel.java        # Note board with drag-and-drop
-│   ├── NoteEditDialog.java        # Note creation/editing dialog
-│   ├── NoteViewDialog.java        # Read-only note viewer
-│   └── ProfileDialog.java         # User profile management
-└── util/
-    └── ThemeManager.java          # Theme management system
+NotizDesktop/
+├── build.xml                  # Main Ant build file
+├── manifest.mf                # JAR manifest file
+├── src/                       # Source code
+│   ├── main/
+│   │   ├── java/notizdesktop/
+│   │   │   ├── NotizDesktopApplication.java    # Main application entry point
+│   │   │   ├── config/
+│   │   │   │   └── DatabaseConfig.java        # Database connection configuration
+│   │   │   ├── model/
+│   │   │   │   ├── DesktopNote.java           # Note data model
+│   │   │   │   └── DesktopUser.java           # User data model
+│   │   │   ├── service/
+│   │   │   │   ├── NoteService.java           # Note business logic
+│   │   │   │   └── UserService.java           # User business logic
+│   │   │   ├── ui/
+│   │   │   │   ├── LoginFrame.java            # Login window
+│   │   │   │   ├── RegisterDialog.java        # User registration dialog
+│   │   │   │   ├── MainFrame.java             # Main application window
+│   │   │   │   ├── NoteBoardPanel.java        # Note board with drag-and-drop
+│   │   │   │   ├── NoteEditDialog.java        # Note creation/editing dialog
+│   │   │   │   ├── NoteViewDialog.java        # Read-only note viewer
+│   │   │   │   └── ProfileDialog.java         # User profile management
+│   │   │   └── util/
+│   │   │       └── ThemeManager.java          # Theme management system
+│   │   └── resources/         # Resource files (properties, etc.)
+│   └── test/                  # Test source files
+├── lib/                       # External libraries
+│   ├── mysql-connector-java-8.0.23.jar
+│   ├── spring-security-crypto-5.7.2.jar
+│   ├── slf4j-api-1.7.36.jar
+│   ├── logback-classic-1.2.12.jar
+│   └── logback-core-1.2.12.jar
+├── nbproject/                 # NetBeans project files
+│   ├── project.xml
+│   ├── project.properties
+│   └── build-impl.xml
+└── build/                     # Compiled classes (generated)
+└── dist/                      # Distribution JARs (generated)
 ```
 
 ## Installation and Setup
 
 ### Prerequisites
 - Java 17 or higher
-- Maven 3.6+
+- Apache Ant 1.10.0 or higher
+- NetBeans IDE 12.0 or higher (optional)
 - MySQL database server
 - Network connectivity for database access
 
@@ -79,21 +100,40 @@ git clone <repository-url>
 cd ITS-Projekt
 
 # Build the application
-mvn clean compile
+ant compile
 
 # Run the application
-mvn exec:java
-
-# Or run with explicit main class
-mvn exec:java -Dexec.mainClass="notizdesktop.NotizDesktopApplication"
+ant run
 
 # Create executable JAR
-mvn clean package
-java -jar target/notiz-desktop-1.0.0-jar-with-dependencies.jar
+ant jar
+java -jar dist/NotizDesktop.jar
+
+# Create executable JAR with all dependencies
+ant fatjar
+java -jar dist/NotizDesktop-with-dependencies.jar
+
+# Generate JavaDoc documentation
+ant javadoc
+
+# Clean the project
+ant clean
+
+# Build everything (clean, compile, test, jar, javadoc)
+ant all
 ```
 
 ### Configuration
-Update the database connection settings in `DatabaseConfig.java`:
+Update the database connection settings in `src/main/resources/application.properties`:
+```properties
+# Database Connection Settings
+spring.datasource.url=jdbc:mysql://localhost:3306/notizprojekt?useSSL=false&serverTimezone=UTC
+spring.datasource.username=notizuser
+spring.datasource.password=notizpassword
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+```
+
+Alternatively, you can modify the connection settings in `DatabaseConfig.java`:
 ```java
 private static final String URL = "jdbc:mysql://localhost:3306/your_database";
 private static final String USERNAME = "your_username";
@@ -183,11 +223,17 @@ private static final String PASSWORD = "your_password";
 2. **Java Version**: Ensure Java 17+ is installed and configured
 3. **Theme Issues**: Restart application if theme switching doesn't work properly
 4. **Note Positioning**: If drag-and-drop isn't working, check mouse event handling
+5. **Ant Build Errors**: Make sure all required libraries are in the `lib` directory
+6. **NetBeans Integration**: Ensure NetBeans can find the Ant installation
 
 ### Performance Tips
 - **Large Datasets**: Application handles hundreds of notes efficiently
 - **Memory Usage**: Restart application if memory usage becomes high
 - **Database Performance**: Ensure proper database indexing for search operations
+- **Build Performance**: Use `ant clean` before rebuilding if you encounter strange build issues
+
+### Stack Overflow Fix
+The project previously had a stack overflow issue in `DatabaseConfig.java` where the `testDatabaseConnection()` method was calling itself recursively. This has been fixed by modifying the method to use `createDirectConnection()` instead of calling itself.
 
 ## Contributing
 
@@ -204,10 +250,11 @@ private static final String PASSWORD = "your_password";
 - Validate form inputs and error handling
 
 ### Pull Requests
-- Create feature branches from `GUI-HTML`
+- Create feature branches from `GUI-HTML-Ant`
 - Include comprehensive testing
 - Update documentation as needed
 - Follow existing code patterns
+- Ensure Ant build files are updated if necessary
 
 ## License
 
@@ -216,3 +263,21 @@ This project is part of the ITS-Projekt coursework. Please refer to the main pro
 ## Support
 
 For issues, questions, or contributions, please refer to the main project repository or contact the development team.
+
+## NetBeans Integration
+
+### Opening in NetBeans
+1. Start NetBeans IDE
+2. Select File > Open Project
+3. Navigate to the project directory and select it
+4. The project should open with all the Ant targets available
+
+### Running in NetBeans
+1. Right-click on the project in the Projects panel
+2. Select "Run" or press F6
+3. Alternatively, select specific Ant targets from the Navigator panel
+
+### Debugging in NetBeans
+1. Set breakpoints in your code
+2. Right-click on the project and select "Debug" or press Ctrl+F5
+3. Use the NetBeans debugger to step through code and inspect variables
