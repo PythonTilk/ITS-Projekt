@@ -1,4 +1,4 @@
-package notizdesktop.util;
+package notizapp;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,35 +19,35 @@ public class ThemeManager {
     private static final List<ThemeChangeListener> listeners = new ArrayList<>();
     private static final Preferences prefs = Preferences.userNodeForPackage(ThemeManager.class);
     
-    // Light theme colors (matching CSS variables)
-    public static final Color LIGHT_BG_COLOR = new Color(248, 250, 252);
-    public static final Color LIGHT_TEXT_COLOR = new Color(30, 41, 59);
+    // Simple theme with standard blue buttons
+    public static final Color LIGHT_BG_COLOR = new Color(240, 240, 245);
+    public static final Color LIGHT_TEXT_COLOR = new Color(0, 0, 0);
     public static final Color LIGHT_CARD_BG = Color.WHITE;
-    public static final Color LIGHT_BORDER_COLOR = new Color(226, 232, 240);
-    public static final Color LIGHT_PRIMARY_COLOR = new Color(59, 130, 246);
-    public static final Color LIGHT_SECONDARY_COLOR = new Color(139, 92, 246);
-    public static final Color LIGHT_ACCENT_COLOR = new Color(6, 182, 212);
-    public static final Color LIGHT_SUCCESS_COLOR = new Color(16, 185, 129);
-    public static final Color LIGHT_WARNING_COLOR = new Color(245, 158, 11);
-    public static final Color LIGHT_DANGER_COLOR = new Color(239, 68, 68);
-    public static final Color LIGHT_NOTE_BG = new Color(254, 243, 199);
+    public static final Color LIGHT_BORDER_COLOR = new Color(0, 0, 0);
+    public static final Color LIGHT_PRIMARY_COLOR = new Color(0, 102, 204);  // Standard blue
+    public static final Color LIGHT_SECONDARY_COLOR = new Color(0, 102, 204); // Same blue
+    public static final Color LIGHT_ACCENT_COLOR = new Color(0, 102, 204);   // Same blue
+    public static final Color LIGHT_SUCCESS_COLOR = new Color(0, 102, 204);  // Same blue
+    public static final Color LIGHT_WARNING_COLOR = new Color(0, 102, 204);  // Same blue
+    public static final Color LIGHT_DANGER_COLOR = new Color(0, 102, 204);   // Same blue
+    public static final Color LIGHT_NOTE_BG = new Color(255, 255, 255);      // White
     public static final Color LIGHT_INPUT_BG = Color.WHITE;
-    public static final Color LIGHT_BUTTON_HOVER = new Color(241, 245, 249);
+    public static final Color LIGHT_BUTTON_HOVER = new Color(0, 102, 204);   // Same blue
     
-    // Dark theme colors (matching CSS variables)
-    public static final Color DARK_BG_COLOR = new Color(15, 23, 42);
-    public static final Color DARK_TEXT_COLOR = new Color(248, 250, 252);
-    public static final Color DARK_CARD_BG = new Color(30, 41, 59);
-    public static final Color DARK_BORDER_COLOR = new Color(71, 85, 105);
-    public static final Color DARK_PRIMARY_COLOR = new Color(96, 165, 250);
-    public static final Color DARK_SECONDARY_COLOR = new Color(167, 139, 250);
-    public static final Color DARK_ACCENT_COLOR = new Color(34, 211, 238);
-    public static final Color DARK_SUCCESS_COLOR = new Color(52, 211, 153);
-    public static final Color DARK_WARNING_COLOR = new Color(251, 191, 36);
-    public static final Color DARK_DANGER_COLOR = new Color(248, 113, 113);
-    public static final Color DARK_NOTE_BG = new Color(71, 85, 105);
-    public static final Color DARK_INPUT_BG = new Color(51, 65, 85);
-    public static final Color DARK_BUTTON_HOVER = new Color(51, 65, 85);
+    // Dark theme with same blue buttons
+    public static final Color DARK_BG_COLOR = new Color(33, 37, 41);         // Dark gray
+    public static final Color DARK_TEXT_COLOR = new Color(255, 255, 255);    // White
+    public static final Color DARK_CARD_BG = new Color(52, 58, 64);          // Medium gray
+    public static final Color DARK_BORDER_COLOR = new Color(255, 255, 255);  // White border
+    public static final Color DARK_PRIMARY_COLOR = new Color(0, 102, 204);   // Standard blue
+    public static final Color DARK_SECONDARY_COLOR = new Color(0, 102, 204); // Same blue
+    public static final Color DARK_ACCENT_COLOR = new Color(0, 102, 204);    // Same blue
+    public static final Color DARK_SUCCESS_COLOR = new Color(0, 102, 204);   // Same blue
+    public static final Color DARK_WARNING_COLOR = new Color(0, 102, 204);   // Same blue
+    public static final Color DARK_DANGER_COLOR = new Color(0, 102, 204);    // Same blue
+    public static final Color DARK_NOTE_BG = new Color(52, 58, 64);          // Medium gray
+    public static final Color DARK_INPUT_BG = new Color(73, 80, 87);         // Light gray
+    public static final Color DARK_BUTTON_HOVER = new Color(0, 102, 204);    // Same blue
     
     public interface ThemeChangeListener {
         void onThemeChanged(boolean isDarkMode);

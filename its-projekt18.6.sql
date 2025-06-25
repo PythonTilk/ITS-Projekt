@@ -117,9 +117,13 @@ INSERT INTO `notiz` (`titel`, `tag`, `inhalt`, `n_id`, `b_id`, `position_x`, `po
 
 CREATE TABLE IF NOT EXISTS `nutzer` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `b_id` int(11) DEFAULT 0,
   `benutzername` varchar(255) NOT NULL UNIQUE,
   `passwort` varchar(255) NOT NULL,
   `email` varchar(255),
+  `display_name` varchar(255) DEFAULT NULL,
+  `biography` text DEFAULT NULL,
+  `profile_picture` varchar(255) DEFAULT NULL,
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   `last_login` timestamp NULL DEFAULT NULL,
   `is_active` bit(1) DEFAULT b'1',
@@ -131,10 +135,10 @@ CREATE TABLE IF NOT EXISTS `nutzer` (
 -- Sample users for testing (passwords are encoded using BCrypt in the application)
 --
 
-INSERT INTO `nutzer` (`benutzername`, `passwort`, `email`, `id`) VALUES
-('testuser123', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z2EuHWDdaJE8jkjKoXEQmqAy', 'testuser@example.com', 1),
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z2EuHWDdaJE8jkjKoXEQmqAy', 'admin@example.com', 2),
-('demo', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z2EuHWDdaJE8jkjKoXEQmqAy', 'demo@example.com', 3);
+INSERT INTO `nutzer` (`benutzername`, `passwort`, `email`, `display_name`, `id`, `b_id`) VALUES
+('testuser123', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z2EuHWDdaJE8jkjKoXEQmqAy', 'testuser@example.com', 'Test User', 1, 0),
+('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z2EuHWDdaJE8jkjKoXEQmqAy', 'admin@example.com', 'Administrator', 2, 0),
+('demo', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z2EuHWDdaJE8jkjKoXEQmqAy', 'demo@example.com', 'Demo User', 3, 0);
 
 -- Note: All sample users have the password "password123" (BCrypt encoded)
 

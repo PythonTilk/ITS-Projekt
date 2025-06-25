@@ -94,13 +94,13 @@ Use one of these methods:
 3. **Manual (Command Prompt):**
    ```cmd
    mvn clean compile
-   java -Dfile.encoding=UTF-8 -cp "target/classes;target/dependency/*" notizdesktop.NotizDesktopApplication
+   java -Dfile.encoding=UTF-8 -cp "target/classes;target/dependency/*" notizapp.NotizDesktopApplication
    ```
 
 4. **Manual (PowerShell):**
    ```powershell
    mvn clean compile
-   java -Dfile.encoding=UTF-8 -cp "target/classes;target/dependency/*" notizdesktop.NotizDesktopApplication
+   java -Dfile.encoding=UTF-8 -cp "target/classes;target/dependency/*" notizapp.NotizDesktopApplication
    ```
 
 ### Linux/Mac

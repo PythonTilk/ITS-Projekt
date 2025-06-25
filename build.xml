@@ -102,9 +102,22 @@
     
     <!-- Create JAR target -->
     <target name="jar" depends="compile" description="Create the JAR file">
+        <!-- Create the manifest classpath -->
+        <pathconvert property="manifest.classpath" pathsep=" ">
+            <path>
+                <fileset dir="${lib.dir}" includes="*.jar"/>
+            </path>
+            <mapper>
+                <chainedmapper>
+                    <flattenmapper/>
+                    <globmapper from="*" to="lib/*"/>
+                </chainedmapper>
+            </mapper>
+        </pathconvert>
+        
         <jar destfile="${dist.dir}/NotizDesktop.jar" basedir="${build.dir}">
             <manifest>
-                <attribute name="Main-Class" value="notizdesktop.NotizDesktopApplication"/>
+                <attribute name="Main-Class" value="notizapp.NotizDesktopApplication"/>
                 <attribute name="Class-Path" value="${manifest.classpath}"/>
             </manifest>
         </jar>
@@ -120,7 +133,7 @@
     <target name="fatjar" depends="compile" description="Create a single JAR with all dependencies">
         <jar destfile="${dist.dir}/NotizDesktop-with-dependencies.jar">
             <manifest>
-                <attribute name="Main-Class" value="notizdesktop.NotizDesktopApplication"/>
+                <attribute name="Main-Class" value="notizapp.NotizDesktopApplication"/>
             </manifest>
             <fileset dir="${build.dir}"/>
             <zipgroupfileset dir="${lib.dir}" includes="**/*.jar"/>
@@ -137,9 +150,10 @@
     
     <!-- Run the application -->
     <target name="run" depends="jar" description="Run the application">
-        <java jar="${dist.dir}/NotizDesktop.jar" fork="true">
+        <java classname="notizapp.NotizDesktopApplication" fork="true">
             <classpath>
                 <path refid="compile.classpath"/>
+                <pathelement location="${build.dir}"/>
                 <pathelement location="${dist.dir}/NotizDesktop.jar"/>
             </classpath>
         </java>

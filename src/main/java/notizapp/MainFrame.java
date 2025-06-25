@@ -1,9 +1,9 @@
-package notizdesktop.ui;
+package notizapp;
 
-import notizdesktop.model.DesktopNote;
-import notizdesktop.model.DesktopUser;
-import notizdesktop.service.NoteService;
-import notizdesktop.util.ThemeManager;
+import notizapp.DesktopNote;
+import notizapp.DesktopUser;
+import notizapp.NoteService;
+import notizapp.ThemeManager;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -113,14 +113,32 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
         
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         
-        // Floating add button
-        JLayeredPane layeredPane = new JLayeredPane();
-        layeredPane.setLayout(new BorderLayout());
-        layeredPane.add(mainPanel, BorderLayout.CENTER);
+        // Create a panel to hold everything
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.add(mainPanel, BorderLayout.CENTER);
         
-        // Position floating button
+        // Create a panel for the floating button with null layout
+        JPanel buttonPanel = new JPanel(null);
+        buttonPanel.setOpaque(false);
+        
+        // Add the button to the panel
         addNoteButton.setBounds(0, 0, 60, 60);
-        layeredPane.add(addNoteButton, JLayeredPane.PALETTE_LAYER);
+        buttonPanel.add(addNoteButton);
+        
+        // Create a layered pane with absolute positioning
+        JLayeredPane layeredPane = new JLayeredPane() {
+            @Override
+            public void doLayout() {
+                // Make all components take the full size of the layered pane
+                for (Component c : getComponents()) {
+                    c.setBounds(0, 0, getWidth(), getHeight());
+                }
+            }
+        };
+        
+        // Add both panels to the layered pane
+        layeredPane.add(contentPanel, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(buttonPanel, JLayeredPane.PALETTE_LAYER);
         
         // Layout main frame
         setLayout(new BorderLayout());
@@ -233,9 +251,14 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
         if (addNoteButton != null) {
             Container parent = addNoteButton.getParent();
             if (parent != null) {
-                int x = parent.getWidth() - 80;
-                int y = parent.getHeight() - 80;
-                addNoteButton.setBounds(x, y, 60, 60);
+                Container grandparent = parent.getParent();
+                if (grandparent != null) {
+                    int x = grandparent.getWidth() - 80;
+                    int y = grandparent.getHeight() - 80;
+                    addNoteButton.setBounds(x, y, 60, 60);
+                    parent.revalidate();
+                    parent.repaint();
+                }
             }
         }
     }
@@ -276,59 +299,84 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
     
     private JButton createHeaderButton(String text) {
         JButton button = new JButton(text);
-        button.setFont(new Font("Inter", Font.PLAIN, 12));
-        button.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        button.setFont(new Font("Inter", Font.BOLD, 14));
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Color.WHITE, 2),
+            BorderFactory.createEmptyBorder(8, 16, 8, 16)
+        ));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        // Make sure button shows its background color
+        button.setContentAreaFilled(true);
+        button.setOpaque(true);
+        
+        // Set initial colors
+        button.setBackground(ThemeManager.isDarkMode() ? 
+            ThemeManager.DARK_PRIMARY_COLOR : ThemeManager.LIGHT_PRIMARY_COLOR);
+        button.setForeground(Color.WHITE);
+        
         return button;
     }
     
     private JButton createFloatingActionButton() {
-        JButton button = new JButton("+");
-        button.setFont(new Font("Inter", Font.BOLD, 24));
-        button.setPreferredSize(new Dimension(60, 60));
-        button.setBorder(null);
+        JButton button = new JButton("Add Note");
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setPreferredSize(new Dimension(100, 40));
+        button.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setToolTipText("Add new note");
         
-        // Make it circular
-        button.setContentAreaFilled(false);
+        // Make sure background is visible
+        button.setContentAreaFilled(true);
         button.setOpaque(true);
+        
+        // Set colors - WHITE with BLACK text
+        button.setBackground(Color.WHITE);
+        button.setForeground(Color.BLACK);
         
         return button;
     }
     
     private JButton createThemeToggleButton() {
         JButton button = new JButton();
-        button.setPreferredSize(new Dimension(36, 36));
-        button.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
+        button.setPreferredSize(new Dimension(40, 40));
+        button.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setToolTipText("Toggle dark mode");
         
+        // Make sure button shows its background color
+        button.setContentAreaFilled(true);
+        button.setOpaque(true);
+        
+        // Set colors - WHITE with BLACK text
+        button.setBackground(Color.WHITE);
+        button.setForeground(Color.BLACK);
+        
         updateThemeToggleIcon(button);
+        
         return button;
     }
     
     private void updateThemeToggleIcon(JButton button) {
+        // Create simple sun/moon icon
         String iconText = ThemeManager.isDarkMode() ? "☀" : "🌙";
         button.setText(iconText);
-        button.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 14));
+        button.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
     }
     
     private JLabel createUserAvatar() {
         JLabel avatar = new JLabel(currentUser.getInitials(), SwingConstants.CENTER);
-        avatar.setPreferredSize(new Dimension(32, 32));
-        avatar.setFont(new Font("Inter", Font.BOLD, 12));
+        avatar.setPreferredSize(new Dimension(30, 30));
+        avatar.setFont(new Font("Arial", Font.BOLD, 14));
         avatar.setOpaque(true);
-        avatar.setBorder(BorderFactory.createEmptyBorder());
         
-        // Make it circular (approximation)
-        avatar.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ThemeManager.getBorderColor(), 1),
-            BorderFactory.createEmptyBorder(6, 6, 6, 6)
-        ));
+        // Simple border
+        avatar.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        
+        // Set colors - standard blue
+        avatar.setBackground(new Color(0, 102, 204));
+        avatar.setForeground(Color.WHITE);
         
         return avatar;
     }
@@ -337,7 +385,9 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
         // Header
         headerPanel.setBackground(ThemeManager.getCardBackground());
         titleLabel.setForeground(ThemeManager.getTextColor());
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         userLabel.setForeground(ThemeManager.getTextColor());
+        userLabel.setFont(new Font("Arial", Font.BOLD, 14));
         
         // Search field
         searchField.setBackground(ThemeManager.getInputBackground());
@@ -345,27 +395,62 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
             searchField.setForeground(ThemeManager.getTextColor());
         }
         searchField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ThemeManager.getBorderColor(), 1),
+            BorderFactory.createLineBorder(Color.BLACK, 1),
             BorderFactory.createEmptyBorder(8, 12, 8, 12)
         ));
         
-        // Buttons
-        profileButton.setBackground(ThemeManager.getCardBackground());
-        profileButton.setForeground(ThemeManager.getTextColor());
-        logoutButton.setBackground(ThemeManager.getCardBackground());
-        logoutButton.setForeground(ThemeManager.getTextColor());
+        // WHITE buttons with BLACK text
+        Color buttonBg = Color.WHITE;
+        Color textColor = Color.BLACK;
+        
+        // Make sure buttons show their background color
+        profileButton.setContentAreaFilled(true);
+        profileButton.setOpaque(true);
+        logoutButton.setContentAreaFilled(true);
+        logoutButton.setOpaque(true);
+        themeToggleButton.setContentAreaFilled(true);
+        themeToggleButton.setOpaque(true);
+        addNoteButton.setContentAreaFilled(true);
+        addNoteButton.setOpaque(true);
+        
+        // Apply consistent styling to all buttons
+        profileButton.setBackground(buttonBg);
+        profileButton.setForeground(textColor);
+        profileButton.setFont(new Font("Arial", Font.BOLD, 14));
+        profileButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        
+        logoutButton.setBackground(buttonBg);
+        logoutButton.setForeground(textColor);
+        logoutButton.setFont(new Font("Arial", Font.BOLD, 14));
+        logoutButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         
         // Floating button
-        addNoteButton.setBackground(ThemeManager.getPrimaryColor());
-        addNoteButton.setForeground(Color.WHITE);
+        addNoteButton.setBackground(buttonBg);
+        addNoteButton.setForeground(textColor);
+        addNoteButton.setFont(new Font("Arial", Font.BOLD, 14));
+        addNoteButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         
         // Theme toggle
-        themeToggleButton.setBackground(ThemeManager.getCardBackground());
-        themeToggleButton.setForeground(ThemeManager.getTextColor());
+        themeToggleButton.setBackground(buttonBg);
+        themeToggleButton.setForeground(textColor);
+        themeToggleButton.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         updateThemeToggleIcon(themeToggleButton);
+        
+        // User avatar - keep this blue with white text for contrast
+        JLabel avatar = (JLabel) ((JPanel) headerPanel.getComponent(2)).getComponent(0);
+        avatar.setBackground(new Color(0, 102, 204));
+        avatar.setForeground(Color.WHITE);
+        avatar.setFont(new Font("Arial", Font.BOLD, 14));
+        avatar.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         
         // Main panel
         mainPanel.setBackground(ThemeManager.getBackgroundColor());
+        
+        // Update note board panel
+        if (noteBoardPanel != null) {
+            noteBoardPanel.setBackground(ThemeManager.getBackgroundColor());
+            noteBoardPanel.repaint();
+        }
         
         repaint();
     }

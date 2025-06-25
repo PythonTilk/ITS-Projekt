@@ -1,4 +1,4 @@
-package notizdesktop.model;
+package notizapp;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

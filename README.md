@@ -41,26 +41,21 @@ NotizDesktop/
 ├── manifest.mf                # JAR manifest file
 ├── src/                       # Source code
 │   ├── main/
-│   │   ├── java/notizdesktop/
+│   │   ├── java/notizapp/     # Single package structure
 │   │   │   ├── NotizDesktopApplication.java    # Main application entry point
-│   │   │   ├── config/
-│   │   │   │   └── DatabaseConfig.java        # Database connection configuration
-│   │   │   ├── model/
-│   │   │   │   ├── DesktopNote.java           # Note data model
-│   │   │   │   └── DesktopUser.java           # User data model
-│   │   │   ├── service/
-│   │   │   │   ├── NoteService.java           # Note business logic
-│   │   │   │   └── UserService.java           # User business logic
-│   │   │   ├── ui/
-│   │   │   │   ├── LoginFrame.java            # Login window
-│   │   │   │   ├── RegisterDialog.java        # User registration dialog
-│   │   │   │   ├── MainFrame.java             # Main application window
-│   │   │   │   ├── NoteBoardPanel.java        # Note board with drag-and-drop
-│   │   │   │   ├── NoteEditDialog.java        # Note creation/editing dialog
-│   │   │   │   ├── NoteViewDialog.java        # Read-only note viewer
-│   │   │   │   └── ProfileDialog.java         # User profile management
-│   │   │   └── util/
-│   │   │       └── ThemeManager.java          # Theme management system
+│   │   │   ├── DatabaseConfig.java            # Database connection configuration
+│   │   │   ├── DesktopNote.java               # Note data model
+│   │   │   ├── DesktopUser.java               # User data model
+│   │   │   ├── NoteService.java               # Note business logic
+│   │   │   ├── UserService.java               # User business logic
+│   │   │   ├── LoginFrame.java                # Login window
+│   │   │   ├── RegisterDialog.java            # User registration dialog
+│   │   │   ├── MainFrame.java                 # Main application window
+│   │   │   ├── NoteBoardPanel.java            # Note board with drag-and-drop
+│   │   │   ├── NoteEditDialog.java            # Note creation/editing dialog
+│   │   │   ├── NoteViewDialog.java            # Read-only note viewer
+│   │   │   ├── ProfileDialog.java             # User profile management
+│   │   │   └── ThemeManager.java              # Theme management system
 │   │   └── resources/         # Resource files (properties, etc.)
 │   └── test/                  # Test source files
 ├── lib/                       # External libraries
@@ -76,6 +71,8 @@ NotizDesktop/
 └── build/                     # Compiled classes (generated)
 └── dist/                      # Distribution JARs (generated)
 ```
+
+> **Note:** The project now uses a flat package structure with all classes in a single `notizapp` package. This simplifies navigation and makes it easier to run the application in NetBeans.
 
 ## Installation and Setup
 
@@ -93,6 +90,12 @@ The application requires a MySQL database with the following tables:
 
 Use the provided SQL script `its-projekt18.6.sql` to create the database schema.
 
+The database schema includes the following user profile columns:
+- `display_name` - User's display name (defaults to username if not provided)
+- `biography` - User's biography text
+- `profile_picture` - Path to user's profile picture
+- `b_id` - Business ID for integration with other systems
+
 ### Building the Application
 ```bash
 # Clone the repository
@@ -102,12 +105,23 @@ cd ITS-Projekt
 # Build the application
 ant compile
 
-# Run the application
+# Run the application (Linux/macOS)
+./run.sh
+
+# Run the application (Windows)
+run.bat
+
+# Alternative: Run with Ant
 ant run
 
 # Create executable JAR
 ant jar
-java -jar dist/NotizDesktop.jar
+
+# Run the JAR (Linux/macOS)
+java -cp "dist/NotizDesktop.jar:lib/*" notizapp.NotizDesktopApplication
+
+# Run the JAR (Windows)
+java -cp "dist/NotizDesktop.jar;lib/*" notizapp.NotizDesktopApplication
 
 # Create executable JAR with all dependencies
 ant fatjar
@@ -122,6 +136,39 @@ ant clean
 # Build everything (clean, compile, test, jar, javadoc)
 ant all
 ```
+
+### Troubleshooting Library Issues
+
+If you encounter errors about missing libraries:
+
+1. **MySQL JDBC Driver**: Make sure `mysql-connector-java-8.0.23.jar` is in the `lib` directory
+2. **Spring Security**: Make sure `spring-security-crypto-5.7.2.jar` is in the `lib` directory
+3. **Apache Commons Logging**: Make sure `commons-logging-1.2.jar` is in the `lib` directory (required by Spring Security)
+4. **Logging Libraries**: Make sure `slf4j-api-1.7.36.jar`, `logback-classic-1.2.12.jar`, and `logback-core-1.2.12.jar` are in the `lib` directory
+
+If any libraries are missing, you can download them from Maven Central Repository:
+
+```bash
+# MySQL Connector
+wget https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.23/mysql-connector-java-8.0.23.jar -P lib/
+
+# Spring Security Crypto
+wget https://repo1.maven.org/maven2/org/springframework/security/spring-security-crypto/5.7.2/spring-security-crypto-5.7.2.jar -P lib/
+
+# Apache Commons Logging
+wget https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar -P lib/
+
+# SLF4J API
+wget https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar -P lib/
+
+# Logback Classic
+wget https://repo1.maven.org/maven2/ch/qos/logback/logback-classic/1.2.12/logback-classic-1.2.12.jar -P lib/
+
+# Logback Core
+wget https://repo1.maven.org/maven2/ch/qos/logback/logback-core/1.2.12/logback-core-1.2.12.jar -P lib/
+```
+
+After downloading the missing libraries, rebuild the application with `ant clean jar`.
 
 ### Configuration
 Update the database connection settings in `src/main/resources/application.properties`:
@@ -235,6 +282,17 @@ private static final String PASSWORD = "your_password";
 ### Stack Overflow Fix
 The project previously had a stack overflow issue in `DatabaseConfig.java` where the `testDatabaseConnection()` method was calling itself recursively. This has been fixed by modifying the method to use `createDirectConnection()` instead of calling itself.
 
+### Package Structure Simplification
+The project has been restructured from a multi-package hierarchy to a single package structure:
+
+- **Original Structure**: Used nested packages (`notizdesktop.config`, `notizdesktop.model`, etc.)
+- **New Structure**: All classes are in a single `notizapp` package
+- **Benefits**: 
+  - Easier to navigate in NetBeans
+  - Simplified import statements
+  - Reduced complexity for finding the main class
+  - Eliminated package-related stack overflow issues
+
 ## Contributing
 
 ### Code Style
@@ -266,6 +324,14 @@ For issues, questions, or contributions, please refer to the main project reposi
 
 ## NetBeans Integration
 
+### Single Package Structure
+The application has been restructured to use a single package structure for easier navigation and execution in NetBeans:
+
+- **All classes are in one package**: `notizapp`
+- **No sub-packages**: Eliminates confusion when looking for the main class
+- **Simplified imports**: All classes reference each other directly within the same package
+- **Easier to run**: Main class is immediately visible in the package explorer
+
 ### Opening in NetBeans
 1. Start NetBeans IDE
 2. Select File > Open Project
@@ -277,7 +343,27 @@ For issues, questions, or contributions, please refer to the main project reposi
 2. Select "Run" or press F6
 3. Alternatively, select specific Ant targets from the Navigator panel
 
+#### Running the Main Class Directly
+1. Navigate to `src/main/java/notizapp/NotizDesktopApplication.java` in the Projects panel
+2. Right-click on the file and select "Run File" (Shift+F6)
+
 ### Debugging in NetBeans
 1. Set breakpoints in your code
 2. Right-click on the project and select "Debug" or press Ctrl+F5
 3. Use the NetBeans debugger to step through code and inspect variables
+
+### Troubleshooting NetBeans Execution
+If you have trouble running the application in NetBeans:
+
+1. Verify the main class is set correctly:
+   - Right-click on the project and select "Properties"
+   - Go to "Run" category
+   - Ensure "Main Class" is set to `notizapp.NotizDesktopApplication`
+
+2. Check build configuration:
+   - Make sure all libraries in the `lib` directory are properly referenced
+   - Verify the project.properties file has the correct main.class setting
+
+3. Clean and rebuild:
+   - Right-click on the project and select "Clean and Build"
+   - Then try running again

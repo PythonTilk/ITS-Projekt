@@ -1,8 +1,8 @@
-package notizdesktop.service;
+package notizapp;
 
-import notizdesktop.config.DatabaseConfig;
-import notizdesktop.model.DesktopNote;
-import notizdesktop.model.DesktopUser;
+import notizapp.DatabaseConfig;
+import notizapp.DesktopNote;
+import notizapp.DesktopUser;
 
 import java.sql.*;
 import java.time.LocalDateTime;
