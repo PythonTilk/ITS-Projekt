@@ -99,12 +99,23 @@ cd ITS-Projekt
 # Build the application
 ant compile
 
-# Run the application
+# Run the application (Linux/macOS)
+./run.sh
+
+# Run the application (Windows)
+run.bat
+
+# Alternative: Run with Ant
 ant run
 
 # Create executable JAR
 ant jar
-java -jar dist/NotizDesktop.jar
+
+# Run the JAR (Linux/macOS)
+java -cp "dist/NotizDesktop.jar:lib/*" notizapp.NotizDesktopApplication
+
+# Run the JAR (Windows)
+java -cp "dist/NotizDesktop.jar;lib/*" notizapp.NotizDesktopApplication
 
 # Create executable JAR with all dependencies
 ant fatjar
@@ -119,6 +130,16 @@ ant clean
 # Build everything (clean, compile, test, jar, javadoc)
 ant all
 ```
+
+### Troubleshooting Library Issues
+
+If you encounter errors about missing libraries:
+
+1. **MySQL JDBC Driver**: Make sure `mysql-connector-java-8.0.23.jar` is in the `lib` directory
+2. **Spring Security**: Make sure `spring-security-crypto-5.7.2.jar` is in the `lib` directory
+3. **Logging Libraries**: Make sure `slf4j-api-1.7.36.jar`, `logback-classic-1.2.12.jar`, and `logback-core-1.2.12.jar` are in the `lib` directory
+
+If any libraries are missing, download them and place them in the `lib` directory, then rebuild the application.
 
 ### Configuration
 Update the database connection settings in `src/main/resources/application.properties`:
