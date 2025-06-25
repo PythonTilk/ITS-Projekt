@@ -90,15 +90,7 @@ The application requires a MySQL database with the following tables:
 
 Use the provided SQL script `its-projekt18.6.sql` to create the database schema.
 
-#### Database Schema Update
-
-If you're using an older version of the database schema, you may need to update it to include new columns. You can use the provided update script:
-
-```bash
-mysql -u root -p < update-schema.sql
-```
-
-This will add the following columns to the `nutzer` table:
+The database schema includes the following user profile columns:
 - `display_name` - User's display name (defaults to username if not provided)
 - `biography` - User's biography text
 - `profile_picture` - Path to user's profile picture
