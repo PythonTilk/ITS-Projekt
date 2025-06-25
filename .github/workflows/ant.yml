@@ -1,11 +1,11 @@
 # This workflow will build a Java project with Ant for a NetBeans project
-# Optimized for the ITS-Projekt
+# Optimized for the ITS-Projekt NotizDesktop application
 
 name: Java CI with Ant
 
 on:
   push:
-    branches: [ "main", "AI" ]
+    branches: [ "main", "GUI-HTML-Ant" ]
   pull_request:
     branches: [ "main" ]
 
@@ -22,18 +22,21 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     
-    - name: Install MySQL JDBC Driver
+    - name: Download dependencies
       run: |
         mkdir -p lib
-        wget -O lib/mysql-connector-java-8.0.28.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.28/mysql-connector-java-8.0.28.jar
+        wget -O lib/mysql-connector-java-8.0.23.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.23/mysql-connector-java-8.0.23.jar
+        wget -O lib/spring-security-crypto-5.7.2.jar https://repo1.maven.org/maven2/org/springframework/security/spring-security-crypto/5.7.2/spring-security-crypto-5.7.2.jar
+        wget -O lib/slf4j-api-1.7.36.jar https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar
+        wget -O lib/logback-classic-1.2.12.jar https://repo1.maven.org/maven2/ch/qos/logback/logback-classic/1.2.12/logback-classic-1.2.12.jar
+        wget -O lib/logback-core-1.2.12.jar https://repo1.maven.org/maven2/ch/qos/logback/logback-core/1.2.12/logback-core-1.2.12.jar
     
-    - name: Create build directory
-      run: mkdir -p build/classes
+    - name: Build with Ant
+      run: ant clean compile jar
     
-    - name: Compile Java files
+    - name: List compiled artifacts
       run: |
-        javac -d build/classes -cp lib/mysql-connector-java-8.0.28.jar $(find src -name "*.java")
-      continue-on-error: true
-    
-    - name: List compiled classes
-      run: find build/classes -name "*.class" | sort
+        echo "=== Compiled Classes ==="
+        find build -name "*.class" | sort
+        echo "=== Generated JARs ==="
+        find dist -name "*.jar" | sort
