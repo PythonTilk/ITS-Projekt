@@ -80,6 +80,9 @@ public class DatabaseConfig {
             if (conn != null && !conn.isClosed()) {
                 System.out.println("Database connection test successful");
             }
+        } catch (SQLException e) {
+            System.err.println("Database connection test failed: " + e.getMessage());
+            throw e;
         }
     }
     
@@ -119,7 +122,7 @@ public class DatabaseConfig {
      * Test if database connection is available
      */
     public static boolean testDatabaseConnection() {
-        try (Connection conn = getConnection()) {
+        try (Connection conn = createDirectConnection()) {
             return conn != null && !conn.isClosed();
         } catch (SQLException e) {
             System.err.println("Database connection test failed: " + e.getMessage());

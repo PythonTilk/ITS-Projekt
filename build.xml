@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Ant build file for ITS-Projekt -->
+<project name="NotizDesktop" default="jar" basedir=".">
+    <description>
+        Ant build file for NotizDesktop application
+    </description>
+    
+    <!-- Global properties -->
+    <property name="src.dir" location="src/main/java"/>
+    <property name="resources.dir" location="src/main/resources"/>
+    <property name="build.dir" location="build"/>
+    <property name="dist.dir" location="dist"/>
+    <property name="lib.dir" location="lib"/>
+    <property name="test.src.dir" location="src/test/java"/>
+    <property name="test.build.dir" location="build/test"/>
+    <property name="test.reports.dir" location="test-reports"/>
+    <property name="javadoc.dir" location="javadoc"/>
+    
+    <!-- Classpath for compilation -->
+    <path id="compile.classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+    
+    <!-- Classpath for testing -->
+    <path id="test.classpath">
+        <path refid="compile.classpath"/>
+        <pathelement location="${build.dir}"/>
+        <pathelement location="${test.build.dir}"/>
+    </path>
+    
+    <!-- Initialize target -->
+    <target name="init">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+        <mkdir dir="${lib.dir}"/>
+        <mkdir dir="${test.build.dir}"/>
+        <mkdir dir="${test.reports.dir}"/>
+        <mkdir dir="${javadoc.dir}"/>
+        
+        <!-- MySQL connector already in lib directory -->
+        <!-- <copy file="/workspace/mysql-connector-java-8.0.23.jar" todir="${lib.dir}" failonerror="false"/> -->
+        
+        <!-- Copy other dependencies from Maven to lib directory -->
+        <copy todir="${lib.dir}" failonerror="false">
+            <fileset dir="${user.home}/.m2/repository/org/springframework/security/spring-security-crypto/5.7.2/">
+                <include name="**/*.jar"/>
+            </fileset>
+            <fileset dir="${user.home}/.m2/repository/org/slf4j/slf4j-api/1.7.36/">
+                <include name="**/*.jar"/>
+            </fileset>
+            <fileset dir="${user.home}/.m2/repository/ch/qos/logback/logback-classic/1.2.12/">
+                <include name="**/*.jar"/>
+            </fileset>
+            <fileset dir="${user.home}/.m2/repository/ch/qos/logback/logback-core/1.2.12/">
+                <include name="**/*.jar"/>
+            </fileset>
+        </copy>
+    </target>
+    
+    <!-- Clean target -->
+    <target name="clean" description="Clean up build and distribution directories">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+        <delete dir="${test.reports.dir}"/>
+        <delete dir="${javadoc.dir}"/>
+    </target>
+    
+    <!-- Compile target -->
+    <target name="compile" depends="init" description="Compile the source code">
+        <javac srcdir="${src.dir}" destdir="${build.dir}" includeantruntime="false" debug="true" encoding="UTF-8">
+            <classpath refid="compile.classpath"/>
+        </javac>
+        
+        <!-- Copy resources if they exist -->
+        <copy todir="${build.dir}" failonerror="false">
+            <fileset dir="${resources.dir}"/>
+        </copy>
+    </target>
+    
+    <!-- Compile tests target -->
+    <target name="compile-tests" depends="compile" description="Compile the test source code">
+        <javac srcdir="${test.src.dir}" destdir="${test.build.dir}" includeantruntime="false" debug="true" encoding="UTF-8">
+            <classpath refid="test.classpath"/>
+        </javac>
+    </target>
+    
+    <!-- Run tests target -->
+    <target name="test" depends="compile-tests" description="Run the tests">
+        <junit printsummary="yes" haltonfailure="no" fork="true">
+            <classpath refid="test.classpath"/>
+            <formatter type="plain"/>
+            <formatter type="xml"/>
+            <batchtest todir="${test.reports.dir}">
+                <fileset dir="${test.src.dir}">
+                    <include name="**/*Test.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+    
+    <!-- Create JAR target -->
+    <target name="jar" depends="compile" description="Create the JAR file">
+        <jar destfile="${dist.dir}/NotizDesktop.jar" basedir="${build.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="notizdesktop.NotizDesktopApplication"/>
+                <attribute name="Class-Path" value="${manifest.classpath}"/>
+            </manifest>
+        </jar>
+        
+        <!-- Copy dependencies to dist/lib -->
+        <mkdir dir="${dist.dir}/lib"/>
+        <copy todir="${dist.dir}/lib">
+            <fileset dir="${lib.dir}"/>
+        </copy>
+    </target>
+    
+    <!-- Create executable JAR with dependencies -->
+    <target name="fatjar" depends="compile" description="Create a single JAR with all dependencies">
+        <jar destfile="${dist.dir}/NotizDesktop-with-dependencies.jar">
+            <manifest>
+                <attribute name="Main-Class" value="notizdesktop.NotizDesktopApplication"/>
+            </manifest>
+            <fileset dir="${build.dir}"/>
+            <zipgroupfileset dir="${lib.dir}" includes="**/*.jar"/>
+        </jar>
+    </target>
+    
+    <!-- Generate JavaDoc -->
+    <target name="javadoc" depends="compile" description="Generate JavaDoc">
+        <javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" classpathref="compile.classpath" encoding="UTF-8">
+            <doctitle><![CDATA[<h1>NotizDesktop API Documentation</h1>]]></doctitle>
+            <bottom><![CDATA[<i>Copyright &#169; 2025 ITS-Projekt. All Rights Reserved.</i>]]></bottom>
+        </javadoc>
+    </target>
+    
+    <!-- Run the application -->
+    <target name="run" depends="jar" description="Run the application">
+        <java jar="${dist.dir}/NotizDesktop.jar" fork="true">
+            <classpath>
+                <path refid="compile.classpath"/>
+                <pathelement location="${dist.dir}/NotizDesktop.jar"/>
+            </classpath>
+        </java>
+    </target>
+    
+    <!-- Build everything -->
+    <target name="all" depends="clean, jar, test, javadoc" description="Clean, build, test, and generate documentation"/>
+</project>
