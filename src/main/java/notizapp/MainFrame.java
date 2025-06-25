@@ -113,14 +113,32 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
         
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         
-        // Floating add button
-        JLayeredPane layeredPane = new JLayeredPane();
-        layeredPane.setLayout(new BorderLayout());
-        layeredPane.add(mainPanel, BorderLayout.CENTER);
+        // Create a panel to hold everything
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.add(mainPanel, BorderLayout.CENTER);
         
-        // Position floating button
+        // Create a panel for the floating button with null layout
+        JPanel buttonPanel = new JPanel(null);
+        buttonPanel.setOpaque(false);
+        
+        // Add the button to the panel
         addNoteButton.setBounds(0, 0, 60, 60);
-        layeredPane.add(addNoteButton, Integer.valueOf(JLayeredPane.PALETTE_LAYER));
+        buttonPanel.add(addNoteButton);
+        
+        // Create a layered pane with absolute positioning
+        JLayeredPane layeredPane = new JLayeredPane() {
+            @Override
+            public void doLayout() {
+                // Make all components take the full size of the layered pane
+                for (Component c : getComponents()) {
+                    c.setBounds(0, 0, getWidth(), getHeight());
+                }
+            }
+        };
+        
+        // Add both panels to the layered pane
+        layeredPane.add(contentPanel, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(buttonPanel, JLayeredPane.PALETTE_LAYER);
         
         // Layout main frame
         setLayout(new BorderLayout());
@@ -233,9 +251,14 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
         if (addNoteButton != null) {
             Container parent = addNoteButton.getParent();
             if (parent != null) {
-                int x = parent.getWidth() - 80;
-                int y = parent.getHeight() - 80;
-                addNoteButton.setBounds(x, y, 60, 60);
+                Container grandparent = parent.getParent();
+                if (grandparent != null) {
+                    int x = grandparent.getWidth() - 80;
+                    int y = grandparent.getHeight() - 80;
+                    addNoteButton.setBounds(x, y, 60, 60);
+                    parent.revalidate();
+                    parent.repaint();
+                }
             }
         }
     }
