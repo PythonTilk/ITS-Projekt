@@ -52,22 +52,44 @@ public class UserService {
             return false;
         }
         
-        String sql = "INSERT INTO nutzer (benutzername, passwort, display_name, b_id) VALUES (?, ?, ?, ?)";
-        
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        // Try the full insert first (with all columns)
+        try {
+            String sql = "INSERT INTO nutzer (benutzername, passwort, display_name, b_id) VALUES (?, ?, ?, ?)";
             
-            stmt.setString(1, username);
-            stmt.setString(2, passwordEncoder.encode(password));
-            stmt.setString(3, displayName != null ? displayName : username);
-            stmt.setInt(4, 0);
-            
-            int rowsAffected = stmt.executeUpdate();
-            return rowsAffected > 0;
-            
+            try (Connection conn = DatabaseConfig.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                
+                stmt.setString(1, username);
+                stmt.setString(2, passwordEncoder.encode(password));
+                stmt.setString(3, displayName != null ? displayName : username);
+                stmt.setInt(4, 0);
+                
+                int rowsAffected = stmt.executeUpdate();
+                return rowsAffected > 0;
+            }
         } catch (SQLException e) {
-            System.err.println("Error registering user: " + e.getMessage());
-            return false;
+            // If the first attempt fails (likely due to missing columns), try a simpler insert
+            if (e.getMessage().contains("display_name") || e.getMessage().contains("b_id")) {
+                try {
+                    String simpleSql = "INSERT INTO nutzer (benutzername, passwort) VALUES (?, ?)";
+                    
+                    try (Connection conn = DatabaseConfig.getConnection();
+                         PreparedStatement stmt = conn.prepareStatement(simpleSql)) {
+                        
+                        stmt.setString(1, username);
+                        stmt.setString(2, passwordEncoder.encode(password));
+                        
+                        int rowsAffected = stmt.executeUpdate();
+                        return rowsAffected > 0;
+                    }
+                } catch (SQLException e2) {
+                    System.err.println("Error registering user (fallback method): " + e2.getMessage());
+                    return false;
+                }
+            } else {
+                System.err.println("Error registering user: " + e.getMessage());
+                return false;
+            }
         }
     }
     
@@ -141,23 +163,46 @@ public class UserService {
      * Update user profile
      */
     public boolean updateUserProfile(DesktopUser user) {
-        String sql = "UPDATE nutzer SET email = ?, display_name = ?, biography = ?, profile_picture = ? WHERE id = ?";
-        
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try {
+            // Try with all columns first
+            String sql = "UPDATE nutzer SET email = ?, display_name = ?, biography = ?, profile_picture = ? WHERE id = ?";
             
-            stmt.setString(1, user.getEmail());
-            stmt.setString(2, user.getDisplayName());
-            stmt.setString(3, user.getBiography());
-            stmt.setString(4, user.getProfilePicture());
-            stmt.setInt(5, user.getId());
-            
-            int rowsAffected = stmt.executeUpdate();
-            return rowsAffected > 0;
-            
+            try (Connection conn = DatabaseConfig.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                
+                stmt.setString(1, user.getEmail());
+                stmt.setString(2, user.getDisplayName());
+                stmt.setString(3, user.getBiography());
+                stmt.setString(4, user.getProfilePicture());
+                stmt.setInt(5, user.getId());
+                
+                int rowsAffected = stmt.executeUpdate();
+                return rowsAffected > 0;
+            }
         } catch (SQLException e) {
-            System.err.println("Error updating user profile: " + e.getMessage());
-            return false;
+            // If the first attempt fails, try with just email
+            if (e.getMessage().contains("display_name") || e.getMessage().contains("biography") || 
+                e.getMessage().contains("profile_picture")) {
+                try {
+                    String simpleSql = "UPDATE nutzer SET email = ? WHERE id = ?";
+                    
+                    try (Connection conn = DatabaseConfig.getConnection();
+                         PreparedStatement stmt = conn.prepareStatement(simpleSql)) {
+                        
+                        stmt.setString(1, user.getEmail());
+                        stmt.setInt(2, user.getId());
+                        
+                        int rowsAffected = stmt.executeUpdate();
+                        return rowsAffected > 0;
+                    }
+                } catch (SQLException e2) {
+                    System.err.println("Error updating user profile (fallback method): " + e2.getMessage());
+                    return false;
+                }
+            } else {
+                System.err.println("Error updating user profile: " + e.getMessage());
+                return false;
+            }
         }
     }
     
@@ -171,22 +216,45 @@ public class UserService {
             return false;
         }
         
-        String sql = "UPDATE nutzer SET email = ?, display_name = ?, passwort = ? WHERE id = ?";
-        
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try {
+            // Try with all columns first
+            String sql = "UPDATE nutzer SET email = ?, display_name = ?, passwort = ? WHERE id = ?";
             
-            stmt.setString(1, user.getEmail());
-            stmt.setString(2, user.getDisplayName());
-            stmt.setString(3, passwordEncoder.encode(newPassword));
-            stmt.setInt(4, user.getId());
-            
-            int rowsAffected = stmt.executeUpdate();
-            return rowsAffected > 0;
-            
+            try (Connection conn = DatabaseConfig.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                
+                stmt.setString(1, user.getEmail());
+                stmt.setString(2, user.getDisplayName());
+                stmt.setString(3, passwordEncoder.encode(newPassword));
+                stmt.setInt(4, user.getId());
+                
+                int rowsAffected = stmt.executeUpdate();
+                return rowsAffected > 0;
+            }
         } catch (SQLException e) {
-            System.err.println("Error updating user profile with password: " + e.getMessage());
-            return false;
+            // If the first attempt fails, try with just email and password
+            if (e.getMessage().contains("display_name")) {
+                try {
+                    String simpleSql = "UPDATE nutzer SET email = ?, passwort = ? WHERE id = ?";
+                    
+                    try (Connection conn = DatabaseConfig.getConnection();
+                         PreparedStatement stmt = conn.prepareStatement(simpleSql)) {
+                        
+                        stmt.setString(1, user.getEmail());
+                        stmt.setString(2, passwordEncoder.encode(newPassword));
+                        stmt.setInt(3, user.getId());
+                        
+                        int rowsAffected = stmt.executeUpdate();
+                        return rowsAffected > 0;
+                    }
+                } catch (SQLException e2) {
+                    System.err.println("Error updating user profile with password (fallback method): " + e2.getMessage());
+                    return false;
+                }
+            } else {
+                System.err.println("Error updating user profile with password: " + e.getMessage());
+                return false;
+            }
         }
     }
     
@@ -222,22 +290,49 @@ public class UserService {
      */
     public List<DesktopUser> searchUsers(String searchTerm, int limit) {
         List<DesktopUser> users = new ArrayList<>();
-        String sql = "SELECT * FROM nutzer WHERE benutzername LIKE ? OR display_name LIKE ? LIMIT ?";
         
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try {
+            // Try with display_name first
+            String sql = "SELECT * FROM nutzer WHERE benutzername LIKE ? OR display_name LIKE ? LIMIT ?";
             
-            String searchPattern = "%" + searchTerm + "%";
-            stmt.setString(1, searchPattern);
-            stmt.setString(2, searchPattern);
-            stmt.setInt(3, limit);
-            
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                users.add(mapResultSetToUser(rs));
+            try (Connection conn = DatabaseConfig.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                
+                String searchPattern = "%" + searchTerm + "%";
+                stmt.setString(1, searchPattern);
+                stmt.setString(2, searchPattern);
+                stmt.setInt(3, limit);
+                
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()) {
+                    users.add(mapResultSetToUser(rs));
+                }
+                return users;
             }
         } catch (SQLException e) {
-            System.err.println("Error searching users: " + e.getMessage());
+            // If the first attempt fails, try with just username
+            if (e.getMessage().contains("display_name")) {
+                try {
+                    String simpleSql = "SELECT * FROM nutzer WHERE benutzername LIKE ? LIMIT ?";
+                    
+                    try (Connection conn = DatabaseConfig.getConnection();
+                         PreparedStatement stmt = conn.prepareStatement(simpleSql)) {
+                        
+                        String searchPattern = "%" + searchTerm + "%";
+                        stmt.setString(1, searchPattern);
+                        stmt.setInt(2, limit);
+                        
+                        ResultSet rs = stmt.executeQuery();
+                        while (rs.next()) {
+                            users.add(mapResultSetToUser(rs));
+                        }
+                    }
+                } catch (SQLException e2) {
+                    System.err.println("Error searching users (fallback method): " + e2.getMessage());
+                }
+            } else {
+                System.err.println("Error searching users: " + e.getMessage());
+            }
         }
         
         return users;
@@ -266,16 +361,49 @@ public class UserService {
     private DesktopUser mapResultSetToUser(ResultSet rs) throws SQLException {
         DesktopUser user = new DesktopUser();
         user.setId(rs.getInt("id"));
-        user.setBId(rs.getInt("b_id"));
+        
+        // Handle optional columns that might not exist in older database schemas
+        try {
+            user.setBId(rs.getInt("b_id"));
+        } catch (SQLException e) {
+            user.setBId(0); // Default value
+        }
+        
         user.setUsername(rs.getString("benutzername"));
         user.setPassword(rs.getString("passwort"));
-        user.setDisplayName(rs.getString("display_name"));
-        user.setBiography(rs.getString("biography"));
-        user.setProfilePicture(rs.getString("profile_picture"));
         
-        Timestamp lastLogin = rs.getTimestamp("last_login");
-        if (lastLogin != null) {
-            user.setLastLogin(lastLogin.toLocalDateTime());
+        try {
+            user.setEmail(rs.getString("email"));
+        } catch (SQLException e) {
+            // Email is optional
+        }
+        
+        try {
+            String displayName = rs.getString("display_name");
+            user.setDisplayName(displayName != null ? displayName : user.getUsername());
+        } catch (SQLException e) {
+            user.setDisplayName(user.getUsername()); // Default to username
+        }
+        
+        try {
+            user.setBiography(rs.getString("biography"));
+        } catch (SQLException e) {
+            // Biography is optional
+        }
+        
+        try {
+            user.setProfilePicture(rs.getString("profile_picture"));
+        } catch (SQLException e) {
+            // Profile picture is optional
+        }
+        
+        try {
+            Timestamp lastLogin = rs.getTimestamp("last_login");
+            if (lastLogin != null) {
+                user.setLastLogin(lastLogin.toLocalDateTime());
+            }
+        } catch (SQLException e) {
+            // Last login is optional
         }
         
         return user;
