@@ -120,7 +120,7 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
         
         // Position floating button
         addNoteButton.setBounds(0, 0, 60, 60);
-        layeredPane.add(addNoteButton, JLayeredPane.PALETTE_LAYER);
+        layeredPane.add(addNoteButton, Integer.valueOf(JLayeredPane.PALETTE_LAYER));
         
         // Layout main frame
         setLayout(new BorderLayout());
