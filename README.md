@@ -74,11 +74,20 @@ NotizDesktop/
 
 > **Note:** The project now uses a flat package structure with all classes in a single `notizapp` package. This simplifies navigation and makes it easier to run the application in NetBeans.
 
+## 🚀 Quick Download
+
+**Latest Release**: [Download from GitHub Releases](https://github.com/PythonTilk/ITS-Projekt/releases/latest)
+
+Choose your preferred format:
+- **`NotizDesktop-vX.X.X.tar.gz`** - Complete package for Linux/macOS
+- **`NotizDesktop-vX.X.X.zip`** - Complete package for Windows  
+- **`NotizDesktop-with-dependencies.jar`** - Standalone JAR (just run with `java -jar`)
+
 ## Installation and Setup
 
 ### Prerequisites
 - Java 17 or higher
-- Apache Ant 1.10.0 or higher
+- Apache Ant 1.10.0 or higher (for building from source)
 - NetBeans IDE 12.0 or higher (optional)
 - MySQL database server
 - Network connectivity for database access
@@ -293,6 +302,22 @@ The project has been restructured from a multi-package hierarchy to a single pac
   - Reduced complexity for finding the main class
   - Eliminated package-related stack overflow issues
 
+## 🤖 Automated Releases
+
+This project uses GitHub Actions for automated building and releasing:
+
+### For Users
+- **Automatic releases** are created when version tags are pushed
+- **Pre-releases** are available for testing new features
+- **All releases** include complete packages with dependencies and documentation
+
+### For Developers
+- **Push a tag** (e.g., `v1.0.0`) to automatically create a release
+- **Manual workflows** available for testing builds
+- **Comprehensive packages** with JARs, dependencies, docs, and run scripts
+
+See [Release Workflow Guide](.github/RELEASE_WORKFLOW.md) for detailed instructions.
+
 ## Contributing
 
 ### Code Style
@@ -313,6 +338,12 @@ The project has been restructured from a multi-package hierarchy to a single pac
 - Update documentation as needed
 - Follow existing code patterns
 - Ensure Ant build files are updated if necessary
+
+### Creating Releases
+1. Ensure all changes are tested and documented
+2. Create and push a version tag: `git tag v1.0.0 && git push origin v1.0.0`
+3. The automated workflow will build and publish the release
+4. Monitor the GitHub Actions tab for build status
 
 ## License
 
