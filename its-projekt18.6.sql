@@ -19,6 +19,11 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
+-- Create user notizuser with password notizpassword
+CREATE USER IF NOT EXISTS 'notizuser'@'%' IDENTIFIED BY 'notizpassword';
+GRANT ALL PRIVILEGES ON *.* TO 'notizuser'@'%';
+FLUSH PRIVILEGES;
+
 --
 -- Create Database and Application User
 --
@@ -35,6 +40,10 @@ GRANT ALL PRIVILEGES ON `notizprojekt`.* TO 'notizuser'@'%';
 FLUSH PRIVILEGES;
 
 USE `notizprojekt`;
+
+-- Grant specific privileges on the notizprojekt database
+GRANT ALL PRIVILEGES ON `notizprojekt`.* TO 'notizuser'@'%';
+FLUSH PRIVILEGES;
 
 -- --------------------------------------------------------
 

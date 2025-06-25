@@ -1,0 +1,7 @@
+{
+    "java.debug.settings.onBuildFailureProceed": true,
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "/home/tilk/Downloads/mysql-connector-java-8.0.23.jar"
+    ]
+}
