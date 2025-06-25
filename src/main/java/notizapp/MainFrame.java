@@ -331,17 +331,17 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
         button.setContentAreaFilled(true);
         button.setOpaque(true);
         
-        // Set colors - standard blue
-        button.setBackground(new Color(0, 102, 204));
-        button.setForeground(Color.WHITE);
+        // Set colors - WHITE with BLACK text
+        button.setBackground(Color.WHITE);
+        button.setForeground(Color.BLACK);
         
         return button;
     }
     
     private JButton createThemeToggleButton() {
-        JButton button = new JButton("Theme");
-        button.setPreferredSize(new Dimension(80, 30));
-        button.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        JButton button = new JButton();
+        button.setPreferredSize(new Dimension(40, 40));
+        button.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         button.setFocusPainted(false);
         button.setToolTipText("Toggle dark mode");
         
@@ -349,17 +349,20 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
         button.setContentAreaFilled(true);
         button.setOpaque(true);
         
-        // Set colors
-        button.setBackground(new Color(0, 102, 204)); // Standard blue
-        button.setForeground(Color.WHITE);
-        button.setFont(new Font("Arial", Font.BOLD, 12));
+        // Set colors - WHITE with BLACK text
+        button.setBackground(Color.WHITE);
+        button.setForeground(Color.BLACK);
+        
+        updateThemeToggleIcon(button);
         
         return button;
     }
     
     private void updateThemeToggleIcon(JButton button) {
-        // Just keep the text as "Theme"
-        button.setText("Theme");
+        // Create simple sun/moon icon
+        String iconText = ThemeManager.isDarkMode() ? "☀" : "🌙";
+        button.setText(iconText);
+        button.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
     }
     
     private JLabel createUserAvatar() {
@@ -396,8 +399,9 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
             BorderFactory.createEmptyBorder(8, 12, 8, 12)
         ));
         
-        // Standard blue color for all buttons
-        Color buttonBg = new Color(0, 102, 204);
+        // WHITE buttons with BLACK text
+        Color buttonBg = Color.WHITE;
+        Color textColor = Color.BLACK;
         
         // Make sure buttons show their background color
         profileButton.setContentAreaFilled(true);
@@ -411,30 +415,30 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
         
         // Apply consistent styling to all buttons
         profileButton.setBackground(buttonBg);
-        profileButton.setForeground(Color.WHITE);
+        profileButton.setForeground(textColor);
         profileButton.setFont(new Font("Arial", Font.BOLD, 14));
         profileButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         
         logoutButton.setBackground(buttonBg);
-        logoutButton.setForeground(Color.WHITE);
+        logoutButton.setForeground(textColor);
         logoutButton.setFont(new Font("Arial", Font.BOLD, 14));
         logoutButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         
         // Floating button
         addNoteButton.setBackground(buttonBg);
-        addNoteButton.setForeground(Color.WHITE);
+        addNoteButton.setForeground(textColor);
         addNoteButton.setFont(new Font("Arial", Font.BOLD, 14));
         addNoteButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         
         // Theme toggle
         themeToggleButton.setBackground(buttonBg);
-        themeToggleButton.setForeground(Color.WHITE);
-        themeToggleButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        themeToggleButton.setForeground(textColor);
+        themeToggleButton.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         updateThemeToggleIcon(themeToggleButton);
         
-        // User avatar
+        // User avatar - keep this blue with white text for contrast
         JLabel avatar = (JLabel) ((JPanel) headerPanel.getComponent(2)).getComponent(0);
-        avatar.setBackground(buttonBg);
+        avatar.setBackground(new Color(0, 102, 204));
         avatar.setForeground(Color.WHITE);
         avatar.setFont(new Font("Arial", Font.BOLD, 14));
         avatar.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));

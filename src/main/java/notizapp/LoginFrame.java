@@ -248,8 +248,8 @@ public class LoginFrame extends JFrame implements ThemeManager.ThemeChangeListen
         JButton button = new JButton(text);
         button.setPreferredSize(new Dimension(0, 44));
         button.setFont(new Font("Arial", Font.BOLD, 16));
-        button.setBackground(new Color(0, 102, 204)); // Standard blue
-        button.setForeground(Color.WHITE);
+        button.setBackground(Color.WHITE); // WHITE BACKGROUND
+        button.setForeground(Color.BLACK); // BLACK TEXT
         
         // Simple border
         button.setBorder(BorderFactory.createEmptyBorder(10, 24, 10, 24));
@@ -264,9 +264,9 @@ public class LoginFrame extends JFrame implements ThemeManager.ThemeChangeListen
     }
     
     private JButton createThemeToggleButton() {
-        JButton button = new JButton("Theme");
-        button.setPreferredSize(new Dimension(80, 30));
-        button.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        JButton button = new JButton();
+        button.setPreferredSize(new Dimension(40, 40));
+        button.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         button.setFocusPainted(false);
         button.setToolTipText("Toggle dark mode");
         
@@ -275,9 +275,10 @@ public class LoginFrame extends JFrame implements ThemeManager.ThemeChangeListen
         button.setOpaque(true);
         
         // Set colors
-        button.setBackground(new Color(0, 102, 204)); // Standard blue
-        button.setForeground(Color.WHITE);
-        button.setFont(new Font("Arial", Font.BOLD, 12));
+        button.setBackground(Color.WHITE);
+        button.setForeground(Color.BLACK);
+        
+        updateThemeToggleIcon(button);
         
         button.addActionListener(e -> {
             ThemeManager.toggleTheme();
@@ -287,8 +288,10 @@ public class LoginFrame extends JFrame implements ThemeManager.ThemeChangeListen
     }
     
     private void updateThemeToggleIcon(JButton button) {
-        // Just update the text
-        button.setText("Theme");
+        // Create simple sun/moon icon
+        String iconText = ThemeManager.isDarkMode() ? "☀" : "🌙";
+        button.setText(iconText);
+        button.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
     }
     
     private void applyTheme() {
@@ -315,16 +318,16 @@ public class LoginFrame extends JFrame implements ThemeManager.ThemeChangeListen
             BorderFactory.createEmptyBorder(8, 12, 8, 12)
         ));
         
-        // Buttons - all blue
-        loginButton.setBackground(new Color(0, 102, 204));
-        loginButton.setForeground(Color.WHITE);
+        // Buttons - all WHITE with BLACK text
+        loginButton.setBackground(Color.WHITE);
+        loginButton.setForeground(Color.BLACK);
         
-        registerButton.setBackground(new Color(0, 102, 204));
-        registerButton.setForeground(Color.WHITE);
+        registerButton.setBackground(Color.WHITE);
+        registerButton.setForeground(Color.BLACK);
         
         // Theme toggle
-        themeToggleButton.setBackground(new Color(0, 102, 204));
-        themeToggleButton.setForeground(Color.WHITE);
+        themeToggleButton.setBackground(Color.WHITE);
+        themeToggleButton.setForeground(Color.BLACK);
         
         repaint();
     }
