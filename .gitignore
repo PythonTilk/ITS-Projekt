@@ -11,14 +11,74 @@
 .mtj.tmp/
 
 # Package Files #
-*.jar
+# Allow JARs in lib directory
+/dist/**/*.jar
 *.war
 *.nar
 *.ear
 *.zip
 *.tar.gz
 *.rar
+# But keep the lib directory JARs
+!/lib/**/*.jar
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Build directories
+target/
+out/
+build/
+dist/
+nbproject/private/
+nbbuild/
+nbdist/
+
+# IDE files
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+.settings/
+.project
+.classpath
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Test files (unless specifically needed)
+test_*.py
+test_*.html
+cookies.txt
+
+# Deployment scripts (keep in separate deployment repo)
+setup_*.sh
+deploy_*.sh
+download_*.sh
+
+# Application logs
+app.log
+application.log
+
+# Maven wrapper (removed - using Ant now)
+.mvn/
+mvnw
+mvnw.cmd
+
+# Ant specific
+build.number

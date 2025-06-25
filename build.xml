@@ -1,73 +1,164 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- You may freely edit this file. See commented blocks below for -->
-<!-- some examples of how to customize the build. -->
-<!-- (If you delete it and reopen the project it will be recreated.) -->
-<!-- By default, only the Clean and Build commands use this build script. -->
-<!-- Commands such as Run, Debug, and Test only use this build script if -->
-<!-- the Compile on Save feature is turned off for the project. -->
-<!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
-<!-- in the project's Project Properties dialog box.-->
-<project name="NotizProjekt" default="default" basedir=".">
-    <description>Builds, tests, and runs the project NotizProjekt.</description>
-    <import file="nbproject/build-impl.xml"/>
-    <!--
-
-    There exist several targets which are by default empty and which can be 
-    used for execution of your tasks. These targets are usually executed 
-    before and after some main targets. They are: 
-
-      -pre-init:                 called before initialization of project properties
-      -post-init:                called after initialization of project properties
-      -pre-compile:              called before javac compilation
-      -post-compile:             called after javac compilation
-      -pre-compile-single:       called before javac compilation of single file
-      -post-compile-single:      called after javac compilation of single file
-      -pre-compile-test:         called before javac compilation of JUnit tests
-      -post-compile-test:        called after javac compilation of JUnit tests
-      -pre-compile-test-single:  called before javac compilation of single JUnit test
-      -post-compile-test-single: called after javac compilation of single JUunit test
-      -pre-jar:                  called before JAR building
-      -post-jar:                 called after JAR building
-      -post-clean:               called after cleaning build products
-
-    (Targets beginning with '-' are not intended to be called on their own.)
-
-    Example of inserting an obfuscator after compilation could look like this:
-
-        <target name="-post-compile">
-            <obfuscate>
-                <fileset dir="${build.classes.dir}"/>
-            </obfuscate>
-        </target>
-
-    For list of available properties check the imported 
-    nbproject/build-impl.xml file. 
-
-
-    Another way to customize the build is by overriding existing main targets.
-    The targets of interest are: 
-
-      -init-macrodef-javac:     defines macro for javac compilation
-      -init-macrodef-junit:     defines macro for junit execution
-      -init-macrodef-debug:     defines macro for class debugging
-      -init-macrodef-java:      defines macro for class execution
-      -do-jar:                  JAR building
-      run:                      execution of project 
-      -javadoc-build:           Javadoc generation
-      test-report:              JUnit report generation
-
-    An example of overriding the target for project execution could look like this:
-
-        <target name="run" depends="NotizProjekt-impl.jar">
-            <exec dir="bin" executable="launcher.exe">
-                <arg file="${dist.jar}"/>
-            </exec>
-        </target>
-
-    Notice that the overridden target depends on the jar target and not only on 
-    the compile target as the regular run target does. Again, for a list of available 
-    properties which you can use, check the target you are overriding in the
-    nbproject/build-impl.xml file. 
-
-    -->
+<!-- Ant build file for ITS-Projekt -->
+<project name="NotizDesktop" default="jar" basedir=".">
+    <description>
+        Ant build file for NotizDesktop application
+    </description>
+    
+    <!-- Global properties -->
+    <property name="src.dir" location="src/main/java"/>
+    <property name="resources.dir" location="src/main/resources"/>
+    <property name="build.dir" location="build"/>
+    <property name="dist.dir" location="dist"/>
+    <property name="lib.dir" location="lib"/>
+    <property name="test.src.dir" location="src/test/java"/>
+    <property name="test.build.dir" location="build/test"/>
+    <property name="test.reports.dir" location="test-reports"/>
+    <property name="javadoc.dir" location="javadoc"/>
+    
+    <!-- Classpath for compilation -->
+    <path id="compile.classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+    
+    <!-- Classpath for testing -->
+    <path id="test.classpath">
+        <path refid="compile.classpath"/>
+        <pathelement location="${build.dir}"/>
+        <pathelement location="${test.build.dir}"/>
+    </path>
+    
+    <!-- Initialize target -->
+    <target name="init">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+        <mkdir dir="${lib.dir}"/>
+        <mkdir dir="${test.build.dir}"/>
+        <mkdir dir="${test.reports.dir}"/>
+        <mkdir dir="${javadoc.dir}"/>
+        
+        <!-- MySQL connector already in lib directory -->
+        <!-- <copy file="/workspace/mysql-connector-java-8.0.23.jar" todir="${lib.dir}" failonerror="false"/> -->
+        
+        <!-- Copy other dependencies from Maven to lib directory -->
+        <copy todir="${lib.dir}" failonerror="false">
+            <fileset dir="${user.home}/.m2/repository/org/springframework/security/spring-security-crypto/5.7.2/">
+                <include name="**/*.jar"/>
+            </fileset>
+            <fileset dir="${user.home}/.m2/repository/org/slf4j/slf4j-api/1.7.36/">
+                <include name="**/*.jar"/>
+            </fileset>
+            <fileset dir="${user.home}/.m2/repository/ch/qos/logback/logback-classic/1.2.12/">
+                <include name="**/*.jar"/>
+            </fileset>
+            <fileset dir="${user.home}/.m2/repository/ch/qos/logback/logback-core/1.2.12/">
+                <include name="**/*.jar"/>
+            </fileset>
+        </copy>
+    </target>
+    
+    <!-- Clean target -->
+    <target name="clean" description="Clean up build and distribution directories">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+        <delete dir="${test.reports.dir}"/>
+        <delete dir="${javadoc.dir}"/>
+    </target>
+    
+    <!-- Compile target -->
+    <target name="compile" depends="init" description="Compile the source code">
+        <javac srcdir="${src.dir}" destdir="${build.dir}" includeantruntime="false" debug="true" encoding="UTF-8">
+            <classpath refid="compile.classpath"/>
+        </javac>
+        
+        <!-- Copy resources if they exist -->
+        <copy todir="${build.dir}" failonerror="false">
+            <fileset dir="${resources.dir}"/>
+        </copy>
+    </target>
+    
+    <!-- Compile tests target -->
+    <target name="compile-tests" depends="compile" description="Compile the test source code">
+        <javac srcdir="${test.src.dir}" destdir="${test.build.dir}" includeantruntime="false" debug="true" encoding="UTF-8">
+            <classpath refid="test.classpath"/>
+        </javac>
+    </target>
+    
+    <!-- Run tests target -->
+    <target name="test" depends="compile-tests" description="Run the tests">
+        <junit printsummary="yes" haltonfailure="no" fork="true">
+            <classpath refid="test.classpath"/>
+            <formatter type="plain"/>
+            <formatter type="xml"/>
+            <batchtest todir="${test.reports.dir}">
+                <fileset dir="${test.src.dir}">
+                    <include name="**/*Test.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+    
+    <!-- Create JAR target -->
+    <target name="jar" depends="compile" description="Create the JAR file">
+        <!-- Create the manifest classpath -->
+        <pathconvert property="manifest.classpath" pathsep=" ">
+            <path>
+                <fileset dir="${lib.dir}" includes="*.jar"/>
+            </path>
+            <mapper>
+                <chainedmapper>
+                    <flattenmapper/>
+                    <globmapper from="*" to="lib/*"/>
+                </chainedmapper>
+            </mapper>
+        </pathconvert>
+        
+        <jar destfile="${dist.dir}/NotizDesktop.jar" basedir="${build.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="notizapp.NotizDesktopApplication"/>
+                <attribute name="Class-Path" value="${manifest.classpath}"/>
+            </manifest>
+        </jar>
+        
+        <!-- Copy dependencies to dist/lib -->
+        <mkdir dir="${dist.dir}/lib"/>
+        <copy todir="${dist.dir}/lib">
+            <fileset dir="${lib.dir}"/>
+        </copy>
+    </target>
+    
+    <!-- Create executable JAR with dependencies -->
+    <target name="fatjar" depends="compile" description="Create a single JAR with all dependencies">
+        <jar destfile="${dist.dir}/NotizDesktop-with-dependencies.jar">
+            <manifest>
+                <attribute name="Main-Class" value="notizapp.NotizDesktopApplication"/>
+            </manifest>
+            <fileset dir="${build.dir}"/>
+            <zipgroupfileset dir="${lib.dir}" includes="**/*.jar"/>
+        </jar>
+    </target>
+    
+    <!-- Generate JavaDoc -->
+    <target name="javadoc" depends="compile" description="Generate JavaDoc">
+        <javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" classpathref="compile.classpath" encoding="UTF-8">
+            <doctitle><![CDATA[<h1>NotizDesktop API Documentation</h1>]]></doctitle>
+            <bottom><![CDATA[<i>Copyright &#169; 2025 ITS-Projekt. All Rights Reserved.</i>]]></bottom>
+        </javadoc>
+    </target>
+    
+    <!-- Run the application -->
+    <target name="run" depends="jar" description="Run the application">
+        <java classname="notizapp.NotizDesktopApplication" fork="true">
+            <classpath>
+                <path refid="compile.classpath"/>
+                <pathelement location="${build.dir}"/>
+                <pathelement location="${dist.dir}/NotizDesktop.jar"/>
+            </classpath>
+        </java>
+    </target>
+    
+    <!-- Build everything -->
+    <target name="all" depends="clean, jar, test, javadoc" description="Clean, build, test, and generate documentation"/>
 </project>
