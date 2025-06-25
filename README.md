@@ -137,9 +137,32 @@ If you encounter errors about missing libraries:
 
 1. **MySQL JDBC Driver**: Make sure `mysql-connector-java-8.0.23.jar` is in the `lib` directory
 2. **Spring Security**: Make sure `spring-security-crypto-5.7.2.jar` is in the `lib` directory
-3. **Logging Libraries**: Make sure `slf4j-api-1.7.36.jar`, `logback-classic-1.2.12.jar`, and `logback-core-1.2.12.jar` are in the `lib` directory
+3. **Apache Commons Logging**: Make sure `commons-logging-1.2.jar` is in the `lib` directory (required by Spring Security)
+4. **Logging Libraries**: Make sure `slf4j-api-1.7.36.jar`, `logback-classic-1.2.12.jar`, and `logback-core-1.2.12.jar` are in the `lib` directory
 
-If any libraries are missing, download them and place them in the `lib` directory, then rebuild the application.
+If any libraries are missing, you can download them from Maven Central Repository:
+
+```bash
+# MySQL Connector
+wget https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.23/mysql-connector-java-8.0.23.jar -P lib/
+
+# Spring Security Crypto
+wget https://repo1.maven.org/maven2/org/springframework/security/spring-security-crypto/5.7.2/spring-security-crypto-5.7.2.jar -P lib/
+
+# Apache Commons Logging
+wget https://repo1.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar -P lib/
+
+# SLF4J API
+wget https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar -P lib/
+
+# Logback Classic
+wget https://repo1.maven.org/maven2/ch/qos/logback/logback-classic/1.2.12/logback-classic-1.2.12.jar -P lib/
+
+# Logback Core
+wget https://repo1.maven.org/maven2/ch/qos/logback/logback-core/1.2.12/logback-core-1.2.12.jar -P lib/
+```
+
+After downloading the missing libraries, rebuild the application with `ant clean jar`.
 
 ### Configuration
 Update the database connection settings in `src/main/resources/application.properties`:
