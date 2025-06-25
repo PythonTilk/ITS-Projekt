@@ -19,35 +19,35 @@ public class ThemeManager {
     private static final List<ThemeChangeListener> listeners = new ArrayList<>();
     private static final Preferences prefs = Preferences.userNodeForPackage(ThemeManager.class);
     
-    // Light theme colors (matching CSS variables)
-    public static final Color LIGHT_BG_COLOR = new Color(248, 250, 252);
-    public static final Color LIGHT_TEXT_COLOR = new Color(30, 41, 59);
+    // Light theme colors with improved contrast
+    public static final Color LIGHT_BG_COLOR = new Color(245, 247, 250);
+    public static final Color LIGHT_TEXT_COLOR = new Color(10, 20, 30);
     public static final Color LIGHT_CARD_BG = Color.WHITE;
-    public static final Color LIGHT_BORDER_COLOR = new Color(226, 232, 240);
-    public static final Color LIGHT_PRIMARY_COLOR = new Color(59, 130, 246);
-    public static final Color LIGHT_SECONDARY_COLOR = new Color(139, 92, 246);
-    public static final Color LIGHT_ACCENT_COLOR = new Color(6, 182, 212);
-    public static final Color LIGHT_SUCCESS_COLOR = new Color(16, 185, 129);
-    public static final Color LIGHT_WARNING_COLOR = new Color(245, 158, 11);
-    public static final Color LIGHT_DANGER_COLOR = new Color(239, 68, 68);
-    public static final Color LIGHT_NOTE_BG = new Color(254, 243, 199);
+    public static final Color LIGHT_BORDER_COLOR = new Color(200, 210, 220);
+    public static final Color LIGHT_PRIMARY_COLOR = new Color(25, 100, 230);
+    public static final Color LIGHT_SECONDARY_COLOR = new Color(120, 70, 230);
+    public static final Color LIGHT_ACCENT_COLOR = new Color(0, 160, 200);
+    public static final Color LIGHT_SUCCESS_COLOR = new Color(0, 160, 100);
+    public static final Color LIGHT_WARNING_COLOR = new Color(230, 140, 0);
+    public static final Color LIGHT_DANGER_COLOR = new Color(220, 40, 40);
+    public static final Color LIGHT_NOTE_BG = new Color(255, 245, 200);
     public static final Color LIGHT_INPUT_BG = Color.WHITE;
-    public static final Color LIGHT_BUTTON_HOVER = new Color(241, 245, 249);
+    public static final Color LIGHT_BUTTON_HOVER = new Color(230, 240, 250);
     
-    // Dark theme colors (matching CSS variables)
-    public static final Color DARK_BG_COLOR = new Color(15, 23, 42);
-    public static final Color DARK_TEXT_COLOR = new Color(248, 250, 252);
-    public static final Color DARK_CARD_BG = new Color(30, 41, 59);
-    public static final Color DARK_BORDER_COLOR = new Color(71, 85, 105);
-    public static final Color DARK_PRIMARY_COLOR = new Color(96, 165, 250);
-    public static final Color DARK_SECONDARY_COLOR = new Color(167, 139, 250);
-    public static final Color DARK_ACCENT_COLOR = new Color(34, 211, 238);
-    public static final Color DARK_SUCCESS_COLOR = new Color(52, 211, 153);
-    public static final Color DARK_WARNING_COLOR = new Color(251, 191, 36);
-    public static final Color DARK_DANGER_COLOR = new Color(248, 113, 113);
-    public static final Color DARK_NOTE_BG = new Color(71, 85, 105);
-    public static final Color DARK_INPUT_BG = new Color(51, 65, 85);
-    public static final Color DARK_BUTTON_HOVER = new Color(51, 65, 85);
+    // Dark theme colors with improved contrast
+    public static final Color DARK_BG_COLOR = new Color(20, 25, 40);
+    public static final Color DARK_TEXT_COLOR = new Color(255, 255, 255);
+    public static final Color DARK_CARD_BG = new Color(40, 50, 70);
+    public static final Color DARK_BORDER_COLOR = new Color(100, 110, 130);
+    public static final Color DARK_PRIMARY_COLOR = new Color(100, 170, 255);
+    public static final Color DARK_SECONDARY_COLOR = new Color(180, 150, 255);
+    public static final Color DARK_ACCENT_COLOR = new Color(50, 220, 250);
+    public static final Color DARK_SUCCESS_COLOR = new Color(70, 230, 170);
+    public static final Color DARK_WARNING_COLOR = new Color(255, 200, 50);
+    public static final Color DARK_DANGER_COLOR = new Color(255, 120, 120);
+    public static final Color DARK_NOTE_BG = new Color(90, 100, 120);
+    public static final Color DARK_INPUT_BG = new Color(60, 70, 90);
+    public static final Color DARK_BUTTON_HOVER = new Color(70, 80, 100);
     
     public interface ThemeChangeListener {
         void onThemeChanged(boolean isDarkMode);
