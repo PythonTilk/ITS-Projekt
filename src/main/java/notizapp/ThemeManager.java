@@ -19,35 +19,35 @@ public class ThemeManager {
     private static final List<ThemeChangeListener> listeners = new ArrayList<>();
     private static final Preferences prefs = Preferences.userNodeForPackage(ThemeManager.class);
     
-    // Light theme colors - completely redesigned for maximum visibility
+    // Simple theme with standard blue buttons
     public static final Color LIGHT_BG_COLOR = new Color(240, 240, 245);
     public static final Color LIGHT_TEXT_COLOR = new Color(0, 0, 0);
     public static final Color LIGHT_CARD_BG = Color.WHITE;
     public static final Color LIGHT_BORDER_COLOR = new Color(0, 0, 0);
-    public static final Color LIGHT_PRIMARY_COLOR = new Color(0, 100, 200);  // Bright blue
-    public static final Color LIGHT_SECONDARY_COLOR = new Color(220, 53, 69); // Red
-    public static final Color LIGHT_ACCENT_COLOR = new Color(40, 167, 69);   // Green
-    public static final Color LIGHT_SUCCESS_COLOR = new Color(40, 167, 69);  // Green
-    public static final Color LIGHT_WARNING_COLOR = new Color(255, 193, 7);  // Yellow
-    public static final Color LIGHT_DANGER_COLOR = new Color(220, 53, 69);   // Red
-    public static final Color LIGHT_NOTE_BG = new Color(255, 255, 225);      // Light yellow
+    public static final Color LIGHT_PRIMARY_COLOR = new Color(0, 102, 204);  // Standard blue
+    public static final Color LIGHT_SECONDARY_COLOR = new Color(0, 102, 204); // Same blue
+    public static final Color LIGHT_ACCENT_COLOR = new Color(0, 102, 204);   // Same blue
+    public static final Color LIGHT_SUCCESS_COLOR = new Color(0, 102, 204);  // Same blue
+    public static final Color LIGHT_WARNING_COLOR = new Color(0, 102, 204);  // Same blue
+    public static final Color LIGHT_DANGER_COLOR = new Color(0, 102, 204);   // Same blue
+    public static final Color LIGHT_NOTE_BG = new Color(255, 255, 255);      // White
     public static final Color LIGHT_INPUT_BG = Color.WHITE;
-    public static final Color LIGHT_BUTTON_HOVER = new Color(0, 123, 255);   // Hover blue
+    public static final Color LIGHT_BUTTON_HOVER = new Color(0, 102, 204);   // Same blue
     
-    // Dark theme colors - completely redesigned for maximum visibility
+    // Dark theme with same blue buttons
     public static final Color DARK_BG_COLOR = new Color(33, 37, 41);         // Dark gray
     public static final Color DARK_TEXT_COLOR = new Color(255, 255, 255);    // White
     public static final Color DARK_CARD_BG = new Color(52, 58, 64);          // Medium gray
     public static final Color DARK_BORDER_COLOR = new Color(255, 255, 255);  // White border
-    public static final Color DARK_PRIMARY_COLOR = new Color(0, 123, 255);   // Bright blue
-    public static final Color DARK_SECONDARY_COLOR = new Color(220, 53, 69); // Red
-    public static final Color DARK_ACCENT_COLOR = new Color(40, 167, 69);    // Green
-    public static final Color DARK_SUCCESS_COLOR = new Color(40, 167, 69);   // Green
-    public static final Color DARK_WARNING_COLOR = new Color(255, 193, 7);   // Yellow
-    public static final Color DARK_DANGER_COLOR = new Color(220, 53, 69);    // Red
+    public static final Color DARK_PRIMARY_COLOR = new Color(0, 102, 204);   // Standard blue
+    public static final Color DARK_SECONDARY_COLOR = new Color(0, 102, 204); // Same blue
+    public static final Color DARK_ACCENT_COLOR = new Color(0, 102, 204);    // Same blue
+    public static final Color DARK_SUCCESS_COLOR = new Color(0, 102, 204);   // Same blue
+    public static final Color DARK_WARNING_COLOR = new Color(0, 102, 204);   // Same blue
+    public static final Color DARK_DANGER_COLOR = new Color(0, 102, 204);    // Same blue
     public static final Color DARK_NOTE_BG = new Color(52, 58, 64);          // Medium gray
     public static final Color DARK_INPUT_BG = new Color(73, 80, 87);         // Light gray
-    public static final Color DARK_BUTTON_HOVER = new Color(0, 86, 179);     // Darker blue
+    public static final Color DARK_BUTTON_HOVER = new Color(0, 102, 204);    // Same blue
     
     public interface ThemeChangeListener {
         void onThemeChanged(boolean isDarkMode);
