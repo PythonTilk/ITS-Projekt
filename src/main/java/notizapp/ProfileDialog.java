@@ -40,7 +40,7 @@ public class ProfileDialog extends JDialog implements ThemeManager.ThemeChangeLi
         
         ThemeManager.addThemeChangeListener(this);
         
-        setSize(450, 500);
+        setSize(550, 600);
         setLocationRelativeTo(parent);
         setResizable(false);
     }
@@ -248,11 +248,24 @@ public class ProfileDialog extends JDialog implements ThemeManager.ThemeChangeLi
         JButton button = new JButton(text);
         button.setPreferredSize(new Dimension(120, 36));
         button.setFont(new Font("Inter", Font.PLAIN, 14));
-        button.setBackground(backgroundColor);
-        button.setForeground(Color.WHITE);
+        button.setBackground(Color.WHITE);
+        button.setForeground(Color.BLACK);
         button.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        // Hover effect
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(Color.LIGHT_GRAY);
+            }
+            
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(Color.WHITE);
+            }
+        });
         
         return button;
     }
@@ -282,7 +295,31 @@ public class ProfileDialog extends JDialog implements ThemeManager.ThemeChangeLi
         confirmPasswordField.setBackground(ThemeManager.getInputBackground());
         confirmPasswordField.setForeground(ThemeManager.getTextColor());
         
+        // Update buttons to have black text
+        saveButton.setBackground(Color.WHITE);
+        saveButton.setForeground(Color.BLACK);
+        cancelButton.setBackground(Color.WHITE);
+        cancelButton.setForeground(Color.BLACK);
+        
+        // Update all labels to have theme text color
+        for (Component comp : getAllComponents(getContentPane())) {
+            if (comp instanceof JLabel) {
+                comp.setForeground(ThemeManager.getTextColor());
+            }
+        }
+        
         repaint();
+    }
+    
+    private java.util.List<Component> getAllComponents(Container container) {
+        java.util.List<Component> components = new java.util.ArrayList<>();
+        for (Component comp : container.getComponents()) {
+            components.add(comp);
+            if (comp instanceof Container) {
+                components.addAll(getAllComponents((Container) comp));
+            }
+        }
+        return components;
     }
     
     @Override
