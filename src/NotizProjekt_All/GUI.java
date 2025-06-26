@@ -452,7 +452,8 @@ public class GUI extends JFrame {
             new Object [][] {},
             new String [] {"Titel", "Tag", "Typ", "Ersteller"}
         ));
-        notizTabelle.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        notizTabelle.setFont(new Font("SansSerif", Font.BOLD, 16));
+        notizTabelle.setForeground(Color.BLACK);
         notizTabelle.setRowHeight(30);
         notizTabelle.setBackground(Color.WHITE);
         notizTabelle.setSelectionBackground(new Color(52, 152, 219));
