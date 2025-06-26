@@ -288,7 +288,7 @@ public class NoteBoardPanel extends JPanel implements ThemeManager.ThemeChangeLi
         private void editNote() {
             Window window = SwingUtilities.getWindowAncestor(this);
             if (window instanceof MainFrame) {
-                NoteEditDialog dialog = new NoteEditDialog((MainFrame) window, currentUser, note);
+                NoteDialog dialog = new NoteDialog((MainFrame) window, note, currentUser);
                 dialog.setVisible(true);
                 
                 if (dialog.isNoteSaved()) {
@@ -300,7 +300,8 @@ public class NoteBoardPanel extends JPanel implements ThemeManager.ThemeChangeLi
         private void viewNote() {
             Window window = SwingUtilities.getWindowAncestor(this);
             if (window instanceof MainFrame) {
-                NoteViewDialog dialog = new NoteViewDialog((MainFrame) window, note);
+                NoteDialog dialog = new NoteDialog((MainFrame) window, note, currentUser);
+                dialog.setReadOnly(true);
                 dialog.setVisible(true);
             }
         }
@@ -311,7 +312,7 @@ public class NoteBoardPanel extends JPanel implements ThemeManager.ThemeChangeLi
                 "Delete Note", JOptionPane.YES_NO_OPTION);
             
             if (result == JOptionPane.YES_OPTION) {
-                boolean success = noteService.deleteNote(note.getId(), currentUser.getId());
+                boolean success = Note.deleteNote(note.getId(), currentUser.getId());
                 if (success) {
                     Window window = SwingUtilities.getWindowAncestor(this);
                     if (window instanceof MainFrame) {

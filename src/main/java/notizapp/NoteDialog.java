@@ -18,6 +18,7 @@ public class NoteDialog extends JDialog implements ThemeManager.ThemeChangeListe
     private final Note note;
     private boolean isEditMode;
     private boolean noteSaved = false;
+    private boolean isReadOnly = false;
     
     // UI Components
     private JPanel mainPanel;
@@ -458,7 +459,9 @@ public class NoteDialog extends JDialog implements ThemeManager.ThemeChangeListe
                 @Override
                 public void mouseClicked(java.awt.event.MouseEvent evt) {
                     for (Component comp : colorPickerPanel.getComponents()) {
-                        comp.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                        if (comp instanceof JPanel) {
+                            ((JPanel) comp).setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                        }
                     }
                     colorOption.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
                 }
@@ -472,7 +475,8 @@ public class NoteDialog extends JDialog implements ThemeManager.ThemeChangeListe
         
         if (result == JOptionPane.OK_OPTION) {
             for (Component comp : colorPickerPanel.getComponents()) {
-                if (comp.getBorder().getBorderInsets(comp).top == 3) {
+                if (comp instanceof JPanel && ((JPanel) comp).getBorder() != null && 
+                    ((JPanel) comp).getBorder().getBorderInsets(comp).top == 3) {
                     return ((JPanel) comp).getToolTipText();
                 }
             }
@@ -642,6 +646,15 @@ public class NoteDialog extends JDialog implements ThemeManager.ThemeChangeListe
      */
     public boolean isNoteSaved() {
         return noteSaved;
+    }
+    
+    public void setReadOnly(boolean readOnly) {
+        this.isReadOnly = readOnly;
+        titleField.setEditable(!readOnly);
+        contentArea.setEditable(!readOnly);
+        tagField.setEditable(!readOnly);
+        saveButton.setEnabled(!readOnly);
+        colorButton.setEnabled(!readOnly);
     }
     
     /**

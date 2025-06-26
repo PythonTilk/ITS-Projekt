@@ -185,7 +185,8 @@ public class LoginFrame extends JFrame implements ThemeManager.ThemeChangeListen
                         showStatus("Login successful!", ThemeManager.getSuccessColor());
                         // Open main application window
                         SwingUtilities.invokeLater(() -> {
-                            new MainFrame(user).setVisible(true);
+                            User newUser = new User(user.getId(), user.getUsername(), user.getEmail(), user.getPassword());
+                            new MainFrame(newUser).setVisible(true);
                             dispose();
                         });
                     } else {

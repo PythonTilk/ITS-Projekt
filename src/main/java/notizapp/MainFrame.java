@@ -61,7 +61,7 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
         themeToggleButton = createThemeToggleButton();
         
         // Main components
-        noteBoardPanel = new NoteBoardPanel(currentUser, noteService);
+        noteBoardPanel = new NoteBoardPanel(currentUser);
         
         // Panels
         headerPanel = new JPanel(new BorderLayout());

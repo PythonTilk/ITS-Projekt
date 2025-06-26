@@ -41,6 +41,15 @@ public class User {
         this.displayName = username; // Default display name
     }
     
+    public User(Integer id, String username, String email, String password) {
+        this();
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.displayName = username; // Default display name
+    }
+    
     // Getters and Setters
     public Integer getId() {
         return id;

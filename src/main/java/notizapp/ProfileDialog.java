@@ -1,9 +1,5 @@
 package notizapp;
 
-import notizapp.DesktopUser;
-import notizapp.UserService;
-import notizapp.ThemeManager;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -13,8 +9,7 @@ import java.awt.*;
  */
 public class ProfileDialog extends JDialog implements ThemeManager.ThemeChangeListener {
     
-    private final DesktopUser currentUser;
-    private final UserService userService;
+    private final User currentUser;
     
     private JTextField usernameField;
     private JTextField emailField;
@@ -26,11 +21,10 @@ public class ProfileDialog extends JDialog implements ThemeManager.ThemeChangeLi
     private JButton cancelButton;
     private JLabel avatarLabel;
     
-    public ProfileDialog(Frame parent, DesktopUser currentUser) {
+    public ProfileDialog(Frame parent, User currentUser) {
         super(parent, "User Profile", true);
         
         this.currentUser = currentUser;
-        this.userService = new UserService();
         
         initializeComponents();
         setupLayout();
@@ -179,9 +173,9 @@ public class ProfileDialog extends JDialog implements ThemeManager.ThemeChangeLi
             @Override
             protected Boolean doInBackground() throws Exception {
                 if (changePassword) {
-                    return userService.updateUserProfile(currentUser, currentPassword, newPassword);
+                    return currentUser.updateProfileWithPassword(currentPassword, newPassword);
                 } else {
-                    return userService.updateUserProfile(currentUser);
+                    return currentUser.updateProfile();
                 }
             }
             
