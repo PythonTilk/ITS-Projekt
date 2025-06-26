@@ -450,7 +450,7 @@ public class GUI extends JFrame {
         notizTabelle = new JTable();
         notizTabelle.setModel(new DefaultTableModel(
             new Object [][] {},
-            new String [] {"Titel", "Tag"}
+            new String [] {"Titel", "Tag", "Typ", "Ersteller"}
         ));
         notizTabelle.setFont(new Font("SansSerif", Font.PLAIN, 16));
         notizTabelle.setRowHeight(30);
@@ -622,7 +622,9 @@ public class GUI extends JFrame {
             
             String query;
             if (typExists) {
-                query = "SELECT N_id, Titel, Tag, Inhalt, Typ FROM notiz WHERE B_id = " + nutzerID;
+                // Lade private Notizen des Benutzers und alle öffentlichen Notizen
+                query = "SELECT N_id, Titel, Tag, Inhalt, Typ, B_id FROM notiz WHERE " +
+                        "(B_id = " + nutzerID + " AND Typ = 'PRIVAT') OR Typ = 'OEFFENTLICH'";
             } else {
                 query = "SELECT N_id, Titel, Tag, Inhalt FROM notiz WHERE B_id = " + nutzerID;
             }
@@ -634,7 +636,26 @@ public class GUI extends JFrame {
                 String titel = rs.getString("Titel");
                 String tag = rs.getString("Tag");
                 
-                model.addRow(new Object[]{titel, tag});
+                if (typExists) {
+                    String typ = rs.getString("Typ");
+                    int erstellerId = rs.getInt("B_id");
+                    
+                    // Benutzername des Erstellers laden
+                    String ersteller = "Unbekannt";
+                    try {
+                        ResultSet userRs = konnektor.fuehreAbfrageAus("SELECT benutzername FROM nutzer WHERE id = " + erstellerId);
+                        if (userRs.next()) {
+                            ersteller = userRs.getString("benutzername");
+                        }
+                    } catch (SQLException e) {
+                        System.err.println("Fehler beim Laden des Benutzernamens: " + e.getMessage());
+                    }
+                    
+                    String typAnzeige = typ.equals("PRIVAT") ? "Privat" : "Öffentlich";
+                    model.addRow(new Object[]{titel, tag, typAnzeige, ersteller});
+                } else {
+                    model.addRow(new Object[]{titel, tag, "Privat", "Sie"});
+                }
                 notizIDs.add(notizID);
             }
         } catch (SQLException ex) {
@@ -664,8 +685,10 @@ public class GUI extends JFrame {
             
             String query;
             if (typExists) {
-                query = "SELECT N_id, Titel, Tag, Inhalt, Typ FROM notiz WHERE B_id = " + nutzerID + 
-                        " AND (Titel LIKE '%" + searchText + "%' OR Tag LIKE '%" + searchText + 
+                // Suche in privaten Notizen des Benutzers und allen öffentlichen Notizen
+                query = "SELECT N_id, Titel, Tag, Inhalt, Typ, B_id FROM notiz WHERE " +
+                        "((B_id = " + nutzerID + " AND Typ = 'PRIVAT') OR Typ = 'OEFFENTLICH') " +
+                        "AND (Titel LIKE '%" + searchText + "%' OR Tag LIKE '%" + searchText + 
                         "%' OR Inhalt LIKE '%" + searchText + "%')";
             } else {
                 query = "SELECT N_id, Titel, Tag, Inhalt FROM notiz WHERE B_id = " + nutzerID + 
@@ -680,7 +703,26 @@ public class GUI extends JFrame {
                 String titel = rs.getString("Titel");
                 String tag = rs.getString("Tag");
                 
-                model.addRow(new Object[]{titel, tag});
+                if (typExists) {
+                    String typ = rs.getString("Typ");
+                    int erstellerId = rs.getInt("B_id");
+                    
+                    // Benutzername des Erstellers laden
+                    String ersteller = "Unbekannt";
+                    try {
+                        ResultSet userRs = konnektor.fuehreAbfrageAus("SELECT benutzername FROM nutzer WHERE id = " + erstellerId);
+                        if (userRs.next()) {
+                            ersteller = userRs.getString("benutzername");
+                        }
+                    } catch (SQLException e) {
+                        System.err.println("Fehler beim Laden des Benutzernamens: " + e.getMessage());
+                    }
+                    
+                    String typAnzeige = typ.equals("PRIVAT") ? "Privat" : "Öffentlich";
+                    model.addRow(new Object[]{titel, tag, typAnzeige, ersteller});
+                } else {
+                    model.addRow(new Object[]{titel, tag, "Privat", "Sie"});
+                }
                 notizIDs.add(notizID);
             }
         } catch (SQLException ex) {
@@ -764,7 +806,7 @@ public class GUI extends JFrame {
         gbc.gridwidth = 1;
         centerPanel.add(typLabel, gbc);
         
-        typComboBox = new JComboBox<>(new String[]{"Privat", "Öffentlich", "Geteilt"});
+        typComboBox = new JComboBox<>(new String[]{"Privat", "Öffentlich"});
         typComboBox.setFont(new Font("SansSerif", Font.PLAIN, 18));
         typComboBox.setPreferredSize(new Dimension(400, 40));
         gbc.gridx = 1;
@@ -892,9 +934,9 @@ public class GUI extends JFrame {
             
             String query;
             if (typExists) {
-                query = "SELECT Titel, Tag, Inhalt, Typ FROM notiz WHERE N_id = " + notizID;
+                query = "SELECT Titel, Tag, Inhalt, Typ, B_id FROM notiz WHERE N_id = " + notizID;
             } else {
-                query = "SELECT Titel, Tag, Inhalt FROM notiz WHERE N_id = " + notizID;
+                query = "SELECT Titel, Tag, Inhalt, B_id FROM notiz WHERE N_id = " + notizID;
                 
                 // Versuchen, die Spalte Typ hinzuzufügen
                 try {
@@ -912,6 +954,7 @@ public class GUI extends JFrame {
                 String titel = rs.getString("Titel");
                 String tag = rs.getString("Tag");
                 String inhalt = rs.getString("Inhalt");
+                int originalUserId = rs.getInt("B_id");
                 
                 Notiz.NotizTyp typ = Notiz.NotizTyp.PRIVAT; // Default
                 
@@ -926,7 +969,16 @@ public class GUI extends JFrame {
                     }
                 }
                 
-                aktuelleNotiz = new Notiz(notizID, titel, tag, inhalt, nutzerID);
+                // Prüfen, ob der Benutzer berechtigt ist, die Notiz zu bearbeiten
+                // Private Notizen: nur der Ersteller
+                // Öffentliche Notizen: alle Benutzer
+                if (typ == Notiz.NotizTyp.PRIVAT && originalUserId != nutzerID) {
+                    JOptionPane.showMessageDialog(this, "Sie haben keine Berechtigung, diese private Notiz zu bearbeiten.");
+                    this.dispose();
+                    return;
+                }
+                
+                aktuelleNotiz = new Notiz(notizID, titel, tag, inhalt, originalUserId);
                 aktuelleNotiz.setTyp(typ);
             }
         } catch (SQLException ex) {
@@ -1017,7 +1069,7 @@ public class GUI extends JFrame {
         gbc.gridwidth = 1;
         centerPanel.add(typLabel, gbc);
         
-        typComboBox = new JComboBox<>(new String[]{"Privat", "Öffentlich", "Geteilt"});
+        typComboBox = new JComboBox<>(new String[]{"Privat", "Öffentlich"});
         typComboBox.setSelectedIndex(aktuelleNotiz.getTyp().ordinal());
         typComboBox.setFont(new Font("SansSerif", Font.PLAIN, 18));
         typComboBox.setPreferredSize(new Dimension(400, 40));

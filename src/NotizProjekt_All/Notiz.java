@@ -21,8 +21,7 @@ public class Notiz {
     // Type of note
     public enum NotizTyp {
         PRIVAT,     // Private note
-        OEFFENTLICH, // Public note
-        GETEILT      // Shared note
+        OEFFENTLICH // Public note
     }
     
     private NotizTyp typ;
@@ -60,29 +59,21 @@ public class Notiz {
     }
     
     /**
-     * Constructor for shared notes
+     * Constructor for public notes with user ID
      * @param id The note ID
      * @param titel The title of the note
-     * @param inhalt The content of the note
      * @param tag The tag of the note
-     * @param datum The date when the note was shared
-     * @param uhrzeit The time when the note was shared
-     * @param ort The location where the note was shared
-     * @param mitbenutzer The username of the user who shared the note
-     * @param userId The ID of the user with whom the note is shared
+     * @param inhalt The content of the note
+     * @param userId The user ID who created the note
+     * @param typ The type of the note (PRIVAT or OEFFENTLICH)
      */
-    public Notiz(int id, String titel, String inhalt, String tag, 
-                String datum, String uhrzeit, String ort, String mitbenutzer, int userId) {
+    public Notiz(int id, String titel, String tag, String inhalt, int userId, NotizTyp typ) {
         this.id = id;
         this.titel = titel;
-        this.inhalt = inhalt;
         this.tag = tag;
-        this.datum = datum;
-        this.uhrzeit = uhrzeit;
-        this.ort = ort;
-        this.mitbenutzer = mitbenutzer;
+        this.inhalt = inhalt;
         this.userId = userId;
-        this.typ = NotizTyp.GETEILT;
+        this.typ = typ;
     }
     
     // Legacy constructor for backward compatibility
