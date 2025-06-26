@@ -23,6 +23,7 @@ public class RegisterDialog extends JDialog implements ThemeManager.ThemeChangeL
     private JTextField displayNameField;
     private JButton registerButton;
     private JButton cancelButton;
+    private JButton themeToggleButton;
     private JLabel statusLabel;
     
     private boolean registrationSuccessful = false;
@@ -38,7 +39,7 @@ public class RegisterDialog extends JDialog implements ThemeManager.ThemeChangeL
         
         ThemeManager.addThemeChangeListener(this);
         
-        setSize(400, 500);
+        setSize(500, 600);
         setLocationRelativeTo(parent);
         setResizable(false);
     }
@@ -47,6 +48,9 @@ public class RegisterDialog extends JDialog implements ThemeManager.ThemeChangeL
         mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
         mainPanel.setBorder(new EmptyBorder(30, 30, 30, 30));
+        
+        // Theme toggle button
+        themeToggleButton = createThemeToggleButton();
         
         // Form fields
         usernameField = createStyledTextField();
@@ -63,7 +67,39 @@ public class RegisterDialog extends JDialog implements ThemeManager.ThemeChangeL
         statusLabel.setFont(new Font("Inter", Font.PLAIN, 12));
     }
     
+    private JButton createThemeToggleButton() {
+        JButton button = new JButton();
+        button.setPreferredSize(new Dimension(40, 40));
+        button.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        button.setFocusPainted(false);
+        button.setToolTipText("Toggle dark mode");
+        
+        // Make sure button shows its background color
+        button.setContentAreaFilled(true);
+        button.setOpaque(true);
+        
+        // Set colors
+        button.setBackground(Color.WHITE);
+        button.setForeground(Color.BLACK);
+        
+        updateThemeToggleIcon(button);
+        
+        return button;
+    }
+    
+    private void updateThemeToggleIcon(JButton button) {
+        // Create simple sun/moon icon
+        String iconText = ThemeManager.isDarkMode() ? "☀" : "🌙";
+        button.setText(iconText);
+        button.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
+    }
+    
     private void setupLayout() {
+        // Header panel with theme toggle
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setOpaque(false);
+        headerPanel.add(themeToggleButton, BorderLayout.EAST);
+        
         // Title
         JLabel titleLabel = new JLabel("Create Account", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Inter", Font.BOLD, 24));
@@ -108,7 +144,13 @@ public class RegisterDialog extends JDialog implements ThemeManager.ThemeChangeL
         formPanel.add(Box.createVerticalStrut(16));
         formPanel.add(statusLabel);
         
-        mainPanel.add(titleLabel, BorderLayout.NORTH);
+        // Add header panel to the top
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setOpaque(false);
+        topPanel.add(headerPanel, BorderLayout.NORTH);
+        topPanel.add(titleLabel, BorderLayout.CENTER);
+        
+        mainPanel.add(topPanel, BorderLayout.NORTH);
         mainPanel.add(formPanel, BorderLayout.CENTER);
         
         add(mainPanel);
@@ -117,6 +159,10 @@ public class RegisterDialog extends JDialog implements ThemeManager.ThemeChangeL
     private void setupEventHandlers() {
         registerButton.addActionListener(e -> performRegistration());
         cancelButton.addActionListener(e -> dispose());
+        themeToggleButton.addActionListener(e -> {
+            ThemeManager.toggleTheme();
+            updateThemeToggleIcon(themeToggleButton);
+        });
         
         // Enter key handling
         KeyAdapter enterKeyListener = new KeyAdapter() {
@@ -248,8 +294,8 @@ public class RegisterDialog extends JDialog implements ThemeManager.ThemeChangeL
         JButton button = new JButton(text);
         button.setPreferredSize(new Dimension(0, 40));
         button.setFont(new Font("Inter", Font.PLAIN, 14));
-        button.setBackground(backgroundColor);
-        button.setForeground(Color.WHITE);
+        button.setBackground(Color.WHITE);
+        button.setForeground(Color.BLACK);
         button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -258,12 +304,12 @@ public class RegisterDialog extends JDialog implements ThemeManager.ThemeChangeL
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(backgroundColor.darker());
+                button.setBackground(Color.LIGHT_GRAY);
             }
             
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(backgroundColor);
+                button.setBackground(Color.WHITE);
             }
         });
         
@@ -272,6 +318,11 @@ public class RegisterDialog extends JDialog implements ThemeManager.ThemeChangeL
     
     private void applyTheme() {
         mainPanel.setBackground(ThemeManager.getCardBackground());
+        
+        // Update theme toggle button
+        updateThemeToggleIcon(themeToggleButton);
+        themeToggleButton.setBackground(Color.WHITE);
+        themeToggleButton.setForeground(Color.BLACK);
         
         // Update all labels
         for (Component comp : getAllComponents(mainPanel)) {
@@ -284,6 +335,10 @@ public class RegisterDialog extends JDialog implements ThemeManager.ThemeChangeL
                     BorderFactory.createLineBorder(ThemeManager.getBorderColor(), 1),
                     BorderFactory.createEmptyBorder(8, 12, 8, 12)
                 ));
+            } else if (comp instanceof JButton && comp != themeToggleButton) {
+                // Make all buttons have black text
+                ((JButton) comp).setForeground(Color.BLACK);
+                ((JButton) comp).setBackground(Color.WHITE);
             }
         }
         

@@ -1,10 +1,5 @@
 package notizapp;
 
-import notizapp.DesktopNote;
-import notizapp.DesktopUser;
-import notizapp.NoteService;
-import notizapp.ThemeManager;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -20,8 +15,7 @@ import java.util.List;
  */
 public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListener {
     
-    private final DesktopUser currentUser;
-    private final NoteService noteService = new NoteService();
+    private final User currentUser;
     
     private JPanel headerPanel;
     private JPanel mainPanel;
@@ -34,7 +28,7 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
     private JLabel userLabel;
     private JLabel titleLabel;
     
-    public MainFrame(DesktopUser user) {
+    public MainFrame(User user) {
         this.currentUser = user;
         
         initializeComponents();
@@ -67,7 +61,7 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
         themeToggleButton = createThemeToggleButton();
         
         // Main components
-        noteBoardPanel = new NoteBoardPanel(currentUser, noteService);
+        noteBoardPanel = new NoteBoardPanel(currentUser);
         
         // Panels
         headerPanel = new JPanel(new BorderLayout());
@@ -173,16 +167,16 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
     }
     
     private void loadNotes() {
-        SwingWorker<List<DesktopNote>, Void> worker = new SwingWorker<List<DesktopNote>, Void>() {
+        SwingWorker<List<Note>, Void> worker = new SwingWorker<List<Note>, Void>() {
             @Override
-            protected List<DesktopNote> doInBackground() throws Exception {
-                return noteService.getAllNotesForUser(currentUser.getId());
+            protected List<Note> doInBackground() throws Exception {
+                return Note.getAllNotesForUser(currentUser.getId());
             }
             
             @Override
             protected void done() {
                 try {
-                    List<DesktopNote> notes = get();
+                    List<Note> notes = get();
                     noteBoardPanel.setNotes(notes);
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(MainFrame.this,
@@ -201,16 +195,16 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
             return;
         }
         
-        SwingWorker<List<DesktopNote>, Void> worker = new SwingWorker<List<DesktopNote>, Void>() {
+        SwingWorker<List<Note>, Void> worker = new SwingWorker<List<Note>, Void>() {
             @Override
-            protected List<DesktopNote> doInBackground() throws Exception {
-                return noteService.searchNotes(currentUser.getId(), searchTerm);
+            protected List<Note> doInBackground() throws Exception {
+                return Note.searchNotes(currentUser.getId(), searchTerm);
             }
             
             @Override
             protected void done() {
                 try {
-                    List<DesktopNote> notes = get();
+                    List<Note> notes = get();
                     noteBoardPanel.setNotes(notes);
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(MainFrame.this,
@@ -222,8 +216,8 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
         worker.execute();
     }
     
-    private void showNoteDialog(DesktopNote note) {
-        NoteEditDialog dialog = new NoteEditDialog(this, currentUser, note);
+    private void showNoteDialog(Note note) {
+        NoteDialog dialog = new NoteDialog(this, note, currentUser);
         dialog.setVisible(true);
         
         if (dialog.isNoteSaved()) {
@@ -243,7 +237,7 @@ public class MainFrame extends JFrame implements ThemeManager.ThemeChangeListene
         
         if (result == JOptionPane.YES_OPTION) {
             dispose();
-            new LoginFrame().setVisible(true);
+            new AuthFrame().setVisible(true);
         }
     }
     

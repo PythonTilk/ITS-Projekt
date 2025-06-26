@@ -19,6 +19,20 @@ public class ThemeManager {
     private static final List<ThemeChangeListener> listeners = new ArrayList<>();
     private static final Preferences prefs = Preferences.userNodeForPackage(ThemeManager.class);
     
+    private static final ThemeManager instance = new ThemeManager();
+    
+    private ThemeManager() {
+        // Private constructor to enforce singleton pattern
+    }
+    
+    public static ThemeManager getInstance() {
+        return instance;
+    }
+    
+    public boolean isDarkTheme() {
+        return isDarkMode;
+    }
+    
     // Simple theme with standard blue buttons
     public static final Color LIGHT_BG_COLOR = new Color(240, 240, 245);
     public static final Color LIGHT_TEXT_COLOR = new Color(0, 0, 0);

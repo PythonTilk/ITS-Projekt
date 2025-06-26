@@ -151,7 +151,10 @@ public class LoginFrame extends JFrame implements ThemeManager.ThemeChangeListen
         usernameField.addKeyListener(enterKeyListener);
         passwordField.addKeyListener(enterKeyListener);
         
-        themeToggleButton.addActionListener(e -> ThemeManager.toggleTheme());
+        themeToggleButton.addActionListener(e -> {
+            ThemeManager.toggleTheme();
+            updateThemeToggleIcon(themeToggleButton);
+        });
     }
     
     private void performLogin() {
@@ -182,7 +185,8 @@ public class LoginFrame extends JFrame implements ThemeManager.ThemeChangeListen
                         showStatus("Login successful!", ThemeManager.getSuccessColor());
                         // Open main application window
                         SwingUtilities.invokeLater(() -> {
-                            new MainFrame(user).setVisible(true);
+                            User newUser = new User(user.getId(), user.getUsername(), user.getEmail(), user.getPassword());
+                            new MainFrame(newUser).setVisible(true);
                             dispose();
                         });
                     } else {
@@ -326,6 +330,7 @@ public class LoginFrame extends JFrame implements ThemeManager.ThemeChangeListen
         registerButton.setForeground(Color.BLACK);
         
         // Theme toggle
+        updateThemeToggleIcon(themeToggleButton);
         themeToggleButton.setBackground(Color.WHITE);
         themeToggleButton.setForeground(Color.BLACK);
         

@@ -44,16 +44,12 @@ NotizDesktop/
 │   │   ├── java/notizapp/     # Single package structure
 │   │   │   ├── NotizDesktopApplication.java    # Main application entry point
 │   │   │   ├── DatabaseConfig.java            # Database connection configuration
-│   │   │   ├── DesktopNote.java               # Note data model
-│   │   │   ├── DesktopUser.java               # User data model
-│   │   │   ├── NoteService.java               # Note business logic
-│   │   │   ├── UserService.java               # User business logic
-│   │   │   ├── LoginFrame.java                # Login window
-│   │   │   ├── RegisterDialog.java            # User registration dialog
+│   │   │   ├── Note.java                      # Combined Note model and service
+│   │   │   ├── User.java                      # Combined User model and service
+│   │   │   ├── AuthFrame.java                 # Combined login and registration
 │   │   │   ├── MainFrame.java                 # Main application window
 │   │   │   ├── NoteBoardPanel.java            # Note board with drag-and-drop
-│   │   │   ├── NoteEditDialog.java            # Note creation/editing dialog
-│   │   │   ├── NoteViewDialog.java            # Read-only note viewer
+│   │   │   ├── NoteDialog.java                # Combined note editing/viewing
 │   │   │   ├── ProfileDialog.java             # User profile management
 │   │   │   └── ThemeManager.java              # Theme management system
 │   │   └── resources/         # Resource files (properties, etc.)
@@ -72,7 +68,7 @@ NotizDesktop/
 └── dist/                      # Distribution JARs (generated)
 ```
 
-> **Note:** The project now uses a flat package structure with all classes in a single `notizapp` package. This simplifies navigation and makes it easier to run the application in NetBeans.
+> **Note:** The project uses a flat package structure with all classes in a single `notizapp` package. Classes have been combined to reduce complexity - models and services are now unified, and UI components with similar functionality have been merged.
 
 ## 🚀 Quick Download
 
@@ -291,16 +287,19 @@ private static final String PASSWORD = "your_password";
 ### Stack Overflow Fix
 The project previously had a stack overflow issue in `DatabaseConfig.java` where the `testDatabaseConnection()` method was calling itself recursively. This has been fixed by modifying the method to use `createDirectConnection()` instead of calling itself.
 
-### Package Structure Simplification
-The project has been restructured from a multi-package hierarchy to a single package structure:
+### Package and Class Structure Simplification
+The project has been restructured for improved maintainability:
 
-- **Original Structure**: Used nested packages (`notizdesktop.config`, `notizdesktop.model`, etc.)
-- **New Structure**: All classes are in a single `notizapp` package
+- **Package Structure**: All classes are in a single `notizapp` package
+- **Class Reduction**: Combined related classes to reduce complexity
+  - Model and service classes are now unified (e.g., `Note` combines `DesktopNote` and `NoteService`)
+  - UI components with similar functionality are merged (e.g., `NoteDialog` combines editing and viewing)
 - **Benefits**: 
   - Easier to navigate in NetBeans
   - Simplified import statements
   - Reduced complexity for finding the main class
   - Eliminated package-related stack overflow issues
+  - Fewer classes to maintain and understand
 
 ## 🤖 Automated Releases
 
