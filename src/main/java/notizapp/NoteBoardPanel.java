@@ -1,10 +1,5 @@
 package notizapp;
 
-import notizapp.DesktopNote;
-import notizapp.DesktopUser;
-import notizapp.NoteService;
-import notizapp.ThemeManager;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -21,17 +16,15 @@ import java.util.Map;
  */
 public class NoteBoardPanel extends JPanel implements ThemeManager.ThemeChangeListener {
     
-    private final DesktopUser currentUser;
-    private final NoteService noteService;
+    private final User currentUser;
     private final Map<Integer, NoteComponent> noteComponents = new HashMap<>();
     
-    private List<DesktopNote> notes = new ArrayList<>();
+    private List<Note> notes = new ArrayList<>();
     private NoteComponent draggedNote = null;
     private Point dragOffset = null;
     
-    public NoteBoardPanel(DesktopUser currentUser, NoteService noteService) {
+    public NoteBoardPanel(User currentUser) {
         this.currentUser = currentUser;
-        this.noteService = noteService;
         
         setLayout(null); // Absolute positioning for drag-and-drop
         setPreferredSize(new Dimension(2000, 1500)); // Large canvas
@@ -40,7 +33,7 @@ public class NoteBoardPanel extends JPanel implements ThemeManager.ThemeChangeLi
         applyTheme();
     }
     
-    public void setNotes(List<DesktopNote> notes) {
+    public void setNotes(List<Note> notes) {
         this.notes = notes;
         refreshNoteComponents();
     }
@@ -51,8 +44,8 @@ public class NoteBoardPanel extends JPanel implements ThemeManager.ThemeChangeLi
         noteComponents.clear();
         
         // Create components for each note
-        for (DesktopNote note : notes) {
-            NoteComponent noteComp = new NoteComponent(note, currentUser, noteService);
+        for (Note note : notes) {
+            NoteComponent noteComp = new NoteComponent(note, currentUser);
             noteComponents.put(note.getId(), noteComp);
             
             // Position the note
@@ -109,9 +102,11 @@ public class NoteBoardPanel extends JPanel implements ThemeManager.ThemeChangeLi
      * Individual note component that can be dragged around
      */
     private class NoteComponent extends JPanel {
-        private final DesktopNote note;
-        private final DesktopUser currentUser;
-        private final NoteService noteService;
+        public static final int NOTE_WIDTH = 280;
+        public static final int NOTE_HEIGHT = 200;
+        
+        private final Note note;
+        private final User currentUser;
         
         private JLabel titleLabel;
         private JLabel tagLabel;
@@ -120,10 +115,9 @@ public class NoteBoardPanel extends JPanel implements ThemeManager.ThemeChangeLi
         private JPanel footerPanel;
         private boolean isDragging = false;
         
-        public NoteComponent(DesktopNote note, DesktopUser currentUser, NoteService noteService) {
+        public NoteComponent(Note note, User currentUser) {
             this.note = note;
             this.currentUser = currentUser;
-            this.noteService = noteService;
             
             initializeComponents();
             setupLayout();
@@ -249,9 +243,7 @@ public class NoteBoardPanel extends JPanel implements ThemeManager.ThemeChangeLi
                     if (isDragging && draggedNote == NoteComponent.this) {
                         // Save new position
                         Point location = getLocation();
-                        noteService.updateNotePosition(note.getId(), location.x, location.y);
-                        note.setPositionX(location.x);
-                        note.setPositionY(location.y);
+                        note.updatePosition(location.x, location.y);
                     }
                     draggedNote = null;
                     dragOffset = null;

@@ -1,9 +1,5 @@
 package notizapp;
 
-import notizapp.DatabaseConfig;
-import notizapp.LoginFrame;
-import notizapp.ThemeManager;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -31,8 +27,9 @@ public class NotizDesktopApplication {
                 // Initialize the application
                 initializeApplication();
                 
-                // Show login window
-                new LoginFrame().setVisible(true);
+                // Show authentication window
+                AuthFrame authFrame = new AuthFrame();
+                authFrame.setVisible(true);
                 
             } catch (Exception e) {
                 e.printStackTrace();
