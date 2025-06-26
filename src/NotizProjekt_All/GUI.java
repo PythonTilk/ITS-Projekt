@@ -452,15 +452,14 @@ public class GUI extends JFrame {
             new Object [][] {},
             new String [] {"Titel", "Tag", "Typ", "Ersteller"}
         ));
-        notizTabelle.setFont(new Font("SansSerif", Font.BOLD, 16));
-        notizTabelle.setForeground(Color.BLACK);
+        notizTabelle.setFont(new Font("SansSerif", Font.PLAIN, 16));
         notizTabelle.setRowHeight(30);
         notizTabelle.setBackground(Color.WHITE);
         notizTabelle.setSelectionBackground(new Color(52, 152, 219));
         notizTabelle.setSelectionForeground(Color.WHITE);
-        notizTabelle.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 16));
+        notizTabelle.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 18));
         notizTabelle.getTableHeader().setBackground(new Color(70, 70, 70));
-        notizTabelle.getTableHeader().setForeground(Color.WHITE);
+        notizTabelle.getTableHeader().setForeground(Color.BLACK);
         
         JScrollPane scrollPane = new JScrollPane(notizTabelle);
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
