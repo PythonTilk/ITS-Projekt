@@ -1,3 +1,5 @@
+#Mirgrated to Notevault-svelte
+
 # Notiz Desktop Application
 
 A Java Swing desktop application for note-taking with drag-and-drop functionality, rich text editing, and comprehensive note management features. Built with Apache Ant and compatible with NetBeans IDE.
